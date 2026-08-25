@@ -14,6 +14,12 @@ pub enum MigrateError {
         first_step_id: &'static str,
         second_step_id: &'static str,
     },
+    #[error("retired migration version {version} must be positive")]
+    InvalidRetiredMigration { version: i64 },
+    #[error("retired migration version {version} is still active")]
+    RetiredMigrationStillActive { version: i64 },
+    #[error("retired migration version {version} is declared more than once")]
+    DuplicateRetiredMigration { version: i64 },
     #[error("cloudsync alter step {step_id} targets non-synced table {table_name}")]
     InvalidCloudsyncStep {
         step_id: &'static str,

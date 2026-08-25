@@ -3,7 +3,7 @@ import test from "node:test";
 
 import { isWorkspaceShareHostname } from "./workspace-share-host.ts";
 
-test("accepts one valid enterprise workspace subdomain", () => {
+test("accepts one valid workspace subdomain", () => {
   assert.equal(isWorkspaceShareHostname("fastrepl.anarlog.so"), true);
   assert.equal(isWorkspaceShareHostname("fastrepl-hq.anarlog.so"), true);
 });

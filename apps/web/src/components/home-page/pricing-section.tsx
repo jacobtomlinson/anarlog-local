@@ -7,8 +7,6 @@ import {
 } from "@anlg/pricing";
 import { cn } from "@anlg/utils";
 
-import { EnterpriseCallout } from "@/components/enterprise-callout";
-
 export function PricingSection({
   compareLink = false,
 }: {
@@ -30,10 +28,6 @@ export function PricingSection({
         {MARKETING_PLAN_TIERS.map((plan) => (
           <PricingCard key={plan.id} plan={plan} />
         ))}
-      </div>
-
-      <div className="relative left-1/2 mt-6 w-screen max-w-[760px] -translate-x-1/2 px-5 md:px-8">
-        <EnterpriseCallout />
       </div>
 
       {compareLink ? (

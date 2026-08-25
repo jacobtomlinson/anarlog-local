@@ -1,4 +1,4 @@
--- Additive workspace branding for enterprise sharing links.
+-- Additive workspace branding for sharing links.
 
 ALTER TABLE public.workspaces
 ADD COLUMN share_slug text;

@@ -20,7 +20,6 @@ import { Route as ViewRouteRouteImport } from './routes/_view/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as YcIndexRouteImport } from './routes/yc/index'
 import { Route as PricingIndexRouteImport } from './routes/pricing/index'
-import { Route as EnterpriseIndexRouteImport } from './routes/enterprise/index'
 import { Route as ChangelogIndexRouteImport } from './routes/changelog/index'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as TLinkIdRouteImport } from './routes/t/$linkId'
@@ -134,11 +133,6 @@ const YcIndexRoute = YcIndexRouteImport.update({
 const PricingIndexRoute = PricingIndexRouteImport.update({
   id: '/pricing/',
   path: '/pricing/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EnterpriseIndexRoute = EnterpriseIndexRouteImport.update({
-  id: '/enterprise/',
-  path: '/enterprise/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChangelogIndexRoute = ChangelogIndexRouteImport.update({
@@ -470,7 +464,6 @@ export interface FileRoutesByFullPath {
   '/t/$linkId': typeof TLinkIdRoute
   '/blog/': typeof BlogIndexRoute
   '/changelog/': typeof ChangelogIndexRoute
-  '/enterprise/': typeof EnterpriseIndexRoute
   '/pricing/': typeof PricingIndexRoute
   '/yc/': typeof YcIndexRoute
   '/app/account': typeof ViewAppAccountRoute
@@ -542,7 +535,6 @@ export interface FileRoutesByTo {
   '/t/$linkId': typeof TLinkIdRoute
   '/blog': typeof BlogIndexRoute
   '/changelog': typeof ChangelogIndexRoute
-  '/enterprise': typeof EnterpriseIndexRoute
   '/pricing': typeof PricingIndexRoute
   '/yc': typeof YcIndexRoute
   '/app/account': typeof ViewAppAccountRoute
@@ -617,7 +609,6 @@ export interface FileRoutesById {
   '/t/$linkId': typeof TLinkIdRoute
   '/blog/': typeof BlogIndexRoute
   '/changelog/': typeof ChangelogIndexRoute
-  '/enterprise/': typeof EnterpriseIndexRoute
   '/pricing/': typeof PricingIndexRoute
   '/yc/': typeof YcIndexRoute
   '/_view/app/account': typeof ViewAppAccountRoute
@@ -692,7 +683,6 @@ export interface FileRouteTypes {
     | '/t/$linkId'
     | '/blog/'
     | '/changelog/'
-    | '/enterprise/'
     | '/pricing/'
     | '/yc/'
     | '/app/account'
@@ -764,7 +754,6 @@ export interface FileRouteTypes {
     | '/t/$linkId'
     | '/blog'
     | '/changelog'
-    | '/enterprise'
     | '/pricing'
     | '/yc'
     | '/app/account'
@@ -838,7 +827,6 @@ export interface FileRouteTypes {
     | '/t/$linkId'
     | '/blog/'
     | '/changelog/'
-    | '/enterprise/'
     | '/pricing/'
     | '/yc/'
     | '/_view/app/account'
@@ -912,7 +900,6 @@ export interface RootRouteChildren {
   TLinkIdRoute: typeof TLinkIdRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ChangelogIndexRoute: typeof ChangelogIndexRoute
-  EnterpriseIndexRoute: typeof EnterpriseIndexRoute
   PricingIndexRoute: typeof PricingIndexRoute
   YcIndexRoute: typeof YcIndexRoute
   ApiAssetsSplatRoute: typeof ApiAssetsSplatRoute
@@ -1029,13 +1016,6 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing/'
       preLoaderRoute: typeof PricingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/enterprise/': {
-      id: '/enterprise/'
-      path: '/enterprise'
-      fullPath: '/enterprise/'
-      preLoaderRoute: typeof EnterpriseIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/changelog/': {
@@ -1531,7 +1511,6 @@ const rootRouteChildren: RootRouteChildren = {
   TLinkIdRoute: TLinkIdRoute,
   BlogIndexRoute: BlogIndexRoute,
   ChangelogIndexRoute: ChangelogIndexRoute,
-  EnterpriseIndexRoute: EnterpriseIndexRoute,
   PricingIndexRoute: PricingIndexRoute,
   YcIndexRoute: YcIndexRoute,
   ApiAssetsSplatRoute: ApiAssetsSplatRoute,

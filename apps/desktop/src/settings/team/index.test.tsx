@@ -80,10 +80,6 @@ vi.mock("~/auth/billing-context", () => ({
   useBillingAccess: () => mocks.billing,
 }));
 
-vi.mock("~/env", () => ({
-  env: { VITE_ENTERPRISE_API_URL: undefined },
-}));
-
 vi.mock("./mirror", () => ({
   MY_WORKSPACES_QUERY_KEY: "team-workspaces",
   useMyWorkspacesWithMirror: () => mocks.workspaces,

@@ -5,7 +5,7 @@ mod migrate;
 mod schema;
 
 pub use error::MigrateError;
-pub use schema::{DbSchema, MigrationScope, MigrationStep};
+pub use schema::{DbSchema, MigrationScope, MigrationStep, RetiredMigration};
 
 use anlg_db_core::Db;
 
@@ -24,7 +24,24 @@ pub async fn migrate_with_progress(
     schema: DbSchema,
     on_progress: impl FnMut(MigrationProgress) + Send,
 ) -> Result<(), MigrateError> {
-    migrate::run_migrations(db, schema, on_progress).await
+    migrate::run_migrations(db, schema, &[], on_progress).await
+}
+
+pub async fn migrate_with_retired_migrations_with_progress(
+    db: &Db,
+    schema: DbSchema,
+    retired_migrations: &'static [RetiredMigration],
+    on_progress: impl FnMut(MigrationProgress) + Send,
+) -> Result<(), MigrateError> {
+    migrate::run_migrations(db, schema, retired_migrations, on_progress).await
+}
+
+pub async fn migrate_with_retired_migrations(
+    db: &Db,
+    schema: DbSchema,
+    retired_migrations: &'static [RetiredMigration],
+) -> Result<(), MigrateError> {
+    migrate_with_retired_migrations_with_progress(db, schema, retired_migrations, |_| {}).await
 }
 
 #[cfg(test)]
@@ -78,6 +95,15 @@ mod tests {
         scope: MigrationScope::Plain,
         sql: "CREATE TABLE t_three (id INTEGER PRIMARY KEY);",
     };
+    const RETIRED_STEP_TWO: &[RetiredMigration] = &[RetiredMigration {
+        version: 20,
+        checksum: &[
+            0x4b, 0x75, 0x94, 0x27, 0x93, 0x1b, 0xd0, 0xa5, 0xf8, 0x25, 0x8c, 0x74, 0x6b, 0xd9,
+            0xd6, 0xd3, 0x98, 0xd6, 0x43, 0x33, 0xf6, 0x17, 0xab, 0x48, 0x42, 0x15, 0x11, 0x99,
+            0x24, 0x92, 0xbe, 0x95, 0xfa, 0x21, 0xf7, 0x0f, 0x36, 0xa1, 0x57, 0x48, 0xba, 0x41,
+            0x92, 0x42, 0x73, 0x57, 0x75, 0xee,
+        ],
+    }];
 
     #[tokio::test]
     async fn older_build_tolerates_newer_additive_migrations() {
@@ -94,6 +120,39 @@ mod tests {
                 .await
                 .unwrap();
         assert_eq!(recorded, vec![10, 20]);
+    }
+
+    #[tokio::test]
+    async fn retired_migrations_keep_existing_databases_open_without_running_again() {
+        let db = open_memory_db().await;
+        migrate(&db, schema_of(&[STEP_ONE, STEP_TWO_ADDITIVE]))
+            .await
+            .unwrap();
+
+        migrate_with_retired_migrations(
+            &db,
+            schema_of(&[STEP_ONE, STEP_THREE_ADDITIVE]),
+            RETIRED_STEP_TWO,
+        )
+        .await
+        .unwrap();
+
+        let fresh_db = open_memory_db().await;
+        migrate_with_retired_migrations(
+            &fresh_db,
+            schema_of(&[STEP_ONE, STEP_THREE_ADDITIVE]),
+            RETIRED_STEP_TWO,
+        )
+        .await
+        .unwrap();
+
+        let table_count: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 't_two'",
+        )
+        .fetch_one(fresh_db.pool())
+        .await
+        .unwrap();
+        assert_eq!(table_count, 0);
     }
 
     #[tokio::test]

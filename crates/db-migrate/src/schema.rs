@@ -11,6 +11,12 @@ pub struct MigrationStep {
     pub sql: &'static str,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct RetiredMigration {
+    pub version: i64,
+    pub checksum: &'static [u8],
+}
+
 #[derive(Clone, Copy)]
 pub struct DbSchema {
     pub steps: &'static [MigrationStep],

@@ -1,7 +1,6 @@
 import { Trans, useLingui } from "@lingui/react/macro";
 import {
   Buildings,
-  CalendarBlank,
   ChartBar,
   CircleNotch,
   Crown,
@@ -58,11 +57,6 @@ import { MY_WORKSPACES_QUERY_KEY, useMyWorkspacesWithMirror } from "./mirror";
 
 import { useAuth } from "~/auth";
 import { useBillingAccess } from "~/auth/billing-context";
-import {
-  cancelScheduledCapture,
-  listScheduledCaptures,
-} from "~/enterprise-capture/client";
-import { env } from "~/env";
 import { SettingsPageTitle } from "~/settings/page-title";
 
 export function SettingsTeam() {
@@ -666,8 +660,6 @@ function WorkspacePanel({
               </dl>
             </section>
           )}
-
-          <UpcomingCaptureBots workspaceId={workspaceId} />
         </div>
       </div>
 
@@ -714,100 +706,6 @@ function WorkspacePanel({
         )}
       </div>
     </div>
-  );
-}
-
-function UpcomingCaptureBots({ workspaceId }: { workspaceId: string }) {
-  const auth = useAuth();
-  const queryClient = useQueryClient();
-  const serverUrl = env.VITE_ENTERPRISE_API_URL;
-  const accessToken = auth.session?.access_token;
-  const upcoming = useQuery({
-    queryKey: ["scheduled-captures", workspaceId],
-    enabled: Boolean(serverUrl && accessToken),
-    retry: false,
-    queryFn: () =>
-      listScheduledCaptures({
-        serverUrl: serverUrl!,
-        accessToken: accessToken!,
-        workspaceId,
-      }),
-  });
-  const cancel = useMutation({
-    mutationFn: (calendarEventId: string) =>
-      cancelScheduledCapture({
-        serverUrl: serverUrl!,
-        accessToken: accessToken!,
-        workspaceId,
-        calendarEventId,
-      }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({
-        queryKey: ["scheduled-captures", workspaceId],
-      });
-    },
-  });
-
-  if (!serverUrl) return null;
-
-  const visible = (upcoming.data ?? []).filter(
-    (capture) =>
-      capture.status === "pending" || capture.status === "dispatched",
-  );
-
-  return (
-    <section className="border-border/60 bg-card/50 rounded-xl border p-4 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
-          <CalendarBlank className="text-muted-foreground size-4" />
-        </div>
-        <h3 className="text-sm font-medium">
-          <Trans>Upcoming bot attendance</Trans>
-        </h3>
-      </div>
-      <p className="text-muted-foreground mt-3 text-xs leading-5">
-        <Trans>
-          Calendar-scheduled capture jobs. Canceling stops the bot from joining.
-        </Trans>
-      </p>
-      {upcoming.isPending ? (
-        <p className="text-muted-foreground mt-3 text-sm">
-          <Trans>Loading scheduled captures…</Trans>
-        </p>
-      ) : upcoming.error ? (
-        <p className="text-destructive mt-3 text-xs">
-          {upcoming.error.message}
-        </p>
-      ) : visible.length === 0 ? (
-        <p className="text-muted-foreground mt-3 text-sm">
-          <Trans>No upcoming bots.</Trans>
-        </p>
-      ) : (
-        <ul className="border-border divide-border mt-3 divide-y overflow-hidden rounded-lg border">
-          {visible.map((capture) => (
-            <li
-              key={capture.calendarEventId}
-              className="flex items-center justify-between gap-3 px-3 py-2.5"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm">{capture.title}</p>
-                <p className="text-muted-foreground text-xs">
-                  {new Date(capture.startsAt).toLocaleString()}
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={cancel.isPending}
-                onClick={() => cancel.mutate(capture.calendarEventId)}
-              >
-                <Trans>Cancel bot</Trans>
-              </Button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
   );
 }
 
