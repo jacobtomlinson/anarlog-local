@@ -23,7 +23,7 @@ const MAX_ACCESS_TOKEN_BYTES = 16 * 1024;
 export const SNAPSHOT_TIMEOUT_MS = 10_000;
 
 const scopes = ["restricted", "workspace", "link", "public"] as const;
-export const settableScopes = ["restricted", "workspace", "public"] as const;
+export const settableScopes = ["restricted", "public"] as const;
 export const capabilities = ["viewer", "commenter", "editor"] as const;
 
 export type SessionShareScope = (typeof scopes)[number];
@@ -310,7 +310,7 @@ export function parseSessionShareScopeResult(
   ]);
   const generalScope = expectOneOf(row.general_scope, settableScopes);
   const generalWorkspaceId = expectNullableUuid(row.general_workspace_id);
-  if ((generalScope === "workspace") !== (generalWorkspaceId !== null)) {
+  if (generalWorkspaceId !== null) {
     throw unavailable();
   }
   return {

@@ -125,21 +125,6 @@ impl E2eeSyncHook {
         Ok(())
     }
 
-    pub fn set_workspaces(
-        &self,
-        personal_workspace_id: &str,
-        recovery_key: &anlg_e2ee::RecoveryKey,
-        mut shared_keyrings: HashMap<String, anlg_e2ee::WorkspaceKeyring>,
-    ) -> std::result::Result<(), anlg_e2ee::Error> {
-        shared_keyrings.insert(
-            personal_workspace_id.to_string(),
-            anlg_e2ee::WorkspaceKeyring::new(recovery_key.workspace_key(personal_workspace_id)?),
-        );
-        self.config.write().unwrap().keys = shared_keyrings;
-        self.request_reconciliation();
-        Ok(())
-    }
-
     pub fn has_workspace(&self, workspace_id: &str) -> bool {
         self.config.read().unwrap().keys.contains_key(workspace_id)
     }
@@ -802,32 +787,6 @@ mod tests {
             }
         }
         writer.join().unwrap();
-    }
-
-    #[tokio::test]
-    async fn mismatched_keys_and_witnesses_fail_before_sync() {
-        let pool = sqlx::SqlitePool::connect("sqlite::memory:").await.unwrap();
-        let hook = E2eeSyncHook::default();
-        let recovery_key = anlg_e2ee::RecoveryKey::parse(TEST_RECOVERY_KEY).unwrap();
-        hook.set_workspaces(
-            "workspace-1",
-            &recovery_key,
-            HashMap::from([(
-                "workspace-2".to_string(),
-                anlg_e2ee::WorkspaceKeyring::new(
-                    recovery_key.workspace_key("workspace-2").unwrap(),
-                ),
-            )]),
-        )
-        .unwrap();
-        hook.set_witness(test_witness("workspace-1"));
-
-        let error = hook.before_sync(&pool).await.unwrap_err();
-        assert!(
-            error
-                .to_string()
-                .contains("witnesses do not match configured workspaces")
-        );
     }
 
     #[tokio::test]

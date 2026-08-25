@@ -10,8 +10,8 @@ mod shared_attachments;
 
 #[cfg(test)]
 use cloudsync_credentials::{
-    CloudsyncWorkspace, DEVICE_FINGERPRINT_HEADER, DEVICE_NAME_HEADER, E2EE_KEY_ID_HEADER,
-    E2EE_MEMBER_PUBLIC_KEY_HEADER, MAX_TOKEN_ATTRIBUTES_BYTES, MAX_TOKEN_WORKSPACES,
+    CloudsyncWorkspace, CloudsyncWorkspaceKind, DEVICE_FINGERPRINT_HEADER, DEVICE_NAME_HEADER,
+    E2EE_KEY_ID_HEADER, MAX_TOKEN_ATTRIBUTES_BYTES, MAX_TOKEN_WORKSPACES,
     WORKSPACE_PROJECTION_SELECT, encode_workspace_token_attributes,
 };
 #[cfg(test)]

@@ -1,6 +1,5 @@
 export type E2eeRecoveryKeyIdentity = {
   keyId: string;
-  memberPublicKey: string;
 };
 
 export type ReplicaCredentials = {
@@ -40,7 +39,6 @@ export class ReplicaCredentialError extends Error {
 }
 
 const keyIdPattern = /^[A-Za-z0-9_-]{22}$/;
-const memberPublicKeyPattern = /^[A-Za-z0-9_-]{43}$/;
 
 function isReplicaCredentials(
   value: unknown,
@@ -92,17 +90,13 @@ export async function requestReplicaCredentials({
   timeoutMs?: number;
   fetcher?: typeof fetch;
 }): Promise<ReplicaCredentials> {
-  if (
-    !keyIdPattern.test(identity.keyId) ||
-    !memberPublicKeyPattern.test(identity.memberPublicKey)
-  ) {
+  if (!keyIdPattern.test(identity.keyId)) {
     throw new ReplicaCredentialError("invalid_response");
   }
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
     "X-Anarlog-E2EE-Key-Id": identity.keyId,
-    "X-Anarlog-E2EE-Member-Public-Key": identity.memberPublicKey,
   };
   if (device?.fingerprint) {
     headers["X-Device-Fingerprint"] = device.fingerprint;

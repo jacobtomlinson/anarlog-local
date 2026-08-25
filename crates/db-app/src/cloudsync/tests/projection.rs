@@ -7,28 +7,19 @@ async fn workspace_projection_replaces_stale_server_rows() {
         db.pool(),
         &projection(
             "user-a",
-            vec![
-                projected_workspace(
-                    "user-a",
-                    "user-a",
-                    "personal",
-                    "membership-personal",
-                    "owner",
-                    "Personal",
-                ),
-                projected_workspace(
-                    "workspace-shared",
-                    "user-b",
-                    "shared",
-                    "membership-shared",
-                    "member",
-                    "Shared",
-                ),
-            ],
+            vec![projected_workspace(
+                "user-a",
+                "user-a",
+                "personal",
+                "membership-personal",
+                "owner",
+                "Personal",
+            )],
         ),
     )
     .await
     .unwrap();
+    seed_legacy_shared_workspace(db.pool()).await;
 
     replace_cloudsync_workspace_projection(
         db.pool(),
@@ -52,8 +43,8 @@ async fn workspace_projection_replaces_stale_server_rows() {
             .fetch_all(db.pool())
             .await
             .unwrap();
-    let memberships: Vec<(String, String, String, String, String, String)> = sqlx::query_as(
-        "SELECT id, workspace_id, user_id, role, created_at, updated_at
+    let memberships: Vec<(String, String, String, String)> = sqlx::query_as(
+        "SELECT id, workspace_id, user_id, role
              FROM workspace_memberships ORDER BY id",
     )
     .fetch_all(db.pool())
@@ -62,18 +53,27 @@ async fn workspace_projection_replaces_stale_server_rows() {
 
     assert_eq!(
         workspaces,
-        vec![("user-a".to_string(), "My notes".to_string())]
+        vec![
+            ("user-a".to_string(), "My notes".to_string()),
+            ("workspace-shared".to_string(), "Shared".to_string()),
+        ]
     );
     assert_eq!(
         memberships,
-        vec![(
-            "membership-personal".to_string(),
-            "user-a".to_string(),
-            "user-a".to_string(),
-            "owner".to_string(),
-            "2026-07-16T00:01:00Z".to_string(),
-            "2026-07-16T00:02:00Z".to_string(),
-        )]
+        vec![
+            (
+                "membership-personal".to_string(),
+                "user-a".to_string(),
+                "user-a".to_string(),
+                "owner".to_string(),
+            ),
+            (
+                "membership-shared".to_string(),
+                "workspace-shared".to_string(),
+                "user-a".to_string(),
+                "member".to_string(),
+            ),
+        ]
     );
 }
 
@@ -85,32 +85,38 @@ async fn workspace_reconciliation_stages_revoked_sessions_before_projection_comm
         .unwrap();
     let current = projection(
         "user-a",
-        vec![
-            projected_workspace(
-                "user-a",
-                "user-a",
-                "personal",
-                "membership-personal",
-                "owner",
-                "Personal",
-            ),
-            projected_workspace(
-                "workspace-shared",
-                "user-b",
-                "shared",
-                "membership-shared",
-                "member",
-                "Shared",
-            ),
-        ],
+        vec![projected_workspace(
+            "user-a",
+            "user-a",
+            "personal",
+            "membership-personal",
+            "owner",
+            "Personal",
+        )],
     );
     replace_cloudsync_workspace_projection(db.pool(), &current)
         .await
         .unwrap();
+    seed_legacy_shared_workspace(db.pool()).await;
+    sqlx::query(
+        "INSERT INTO workspaces (id, owner_user_id, kind, name)
+         VALUES ('workspace-stale-personal', 'user-a', 'personal', 'Stale')",
+    )
+    .execute(db.pool())
+    .await
+    .unwrap();
+    sqlx::query(
+        "INSERT INTO workspace_memberships (id, workspace_id, user_id, role)
+         VALUES ('membership-stale-personal', 'workspace-stale-personal', 'user-a', 'member')",
+    )
+    .execute(db.pool())
+    .await
+    .unwrap();
     sqlx::query(
         "INSERT INTO sessions (id, workspace_id, owner_user_id, title)
          VALUES ('session-personal', 'user-a', 'user-a', 'Personal'),
-                ('session-shared', 'workspace-shared', 'user-b', 'Shared')",
+                ('session-shared', 'workspace-shared', 'user-b', 'Shared'),
+                ('session-stale-personal', 'workspace-stale-personal', 'user-a', 'Stale')",
     )
     .execute(db.pool())
     .await
@@ -135,7 +141,7 @@ async fn workspace_reconciliation_stages_revoked_sessions_before_projection_comm
         plan,
         CloudsyncWorkspaceReconciliationPlan {
             granted_workspace_ids: vec![],
-            revoked_workspace_ids: vec!["workspace-shared".to_string()],
+            revoked_workspace_ids: vec!["workspace-stale-personal".to_string()],
         }
     );
     assert!(plan.requires_replica_reset());
@@ -154,11 +160,18 @@ async fn workspace_reconciliation_stages_revoked_sessions_before_projection_comm
     .unwrap();
     assert_eq!(
         memberships_before_commit,
-        vec!["user-a".to_string(), "workspace-shared".to_string()]
+        vec![
+            "user-a".to_string(),
+            "workspace-shared".to_string(),
+            "workspace-stale-personal".to_string(),
+        ]
     );
     assert_eq!(
         queued,
-        vec![("session-shared".to_string(), "workspace-shared".to_string(),)]
+        vec![(
+            "session-stale-personal".to_string(),
+            "workspace-stale-personal".to_string(),
+        ),]
     );
 
     let generation = commit_cloudsync_workspace_projection(
@@ -179,8 +192,11 @@ async fn workspace_reconciliation_stages_revoked_sessions_before_projection_comm
         .fetch_one(db.pool())
         .await
         .unwrap();
-    assert_eq!(memberships_after_commit, vec!["user-a".to_string()]);
-    assert_eq!(session_count, 2);
+    assert_eq!(
+        memberships_after_commit,
+        vec!["user-a".to_string(), "workspace-shared".to_string()]
+    );
+    assert_eq!(session_count, 3);
     assert_eq!(
         cloudsync_full_resync_generation(db.pool()).await.unwrap(),
         Some(generation.clone())
@@ -239,28 +255,33 @@ async fn cancelled_workspace_reconciliation_rolls_back_the_first_eviction_batch(
         .unwrap();
     let current = projection(
         "user-a",
-        vec![
-            projected_workspace(
-                "user-a",
-                "user-a",
-                "personal",
-                "membership-personal",
-                "owner",
-                "Personal",
-            ),
-            projected_workspace(
-                "workspace-shared",
-                "user-b",
-                "shared",
-                "membership-shared",
-                "member",
-                "Shared",
-            ),
-        ],
+        vec![projected_workspace(
+            "user-a",
+            "user-a",
+            "personal",
+            "membership-personal",
+            "owner",
+            "Personal",
+        )],
     );
     replace_cloudsync_workspace_projection(db.pool(), &current)
         .await
         .unwrap();
+    seed_legacy_shared_workspace(db.pool()).await;
+    sqlx::query(
+        "INSERT INTO workspaces (id, owner_user_id, kind, name)
+         VALUES ('workspace-stale-personal', 'user-a', 'personal', 'Stale')",
+    )
+    .execute(db.pool())
+    .await
+    .unwrap();
+    sqlx::query(
+        "INSERT INTO workspace_memberships (id, workspace_id, user_id, role)
+         VALUES ('membership-stale-personal', 'workspace-stale-personal', 'user-a', 'member')",
+    )
+    .execute(db.pool())
+    .await
+    .unwrap();
     sqlx::query(
         "WITH RECURSIVE sequence(row_index) AS (
            VALUES (0)
@@ -269,10 +290,10 @@ async fn cancelled_workspace_reconciliation_rolls_back_the_first_eviction_batch(
          )
          INSERT INTO sessions (id, workspace_id, owner_user_id, title)
          SELECT
-           printf('shared-%03d', row_index),
-           'workspace-shared',
-           'user-b',
-           'Shared'
+           printf('stale-%03d', row_index),
+           'workspace-stale-personal',
+           'user-a',
+           'Stale'
          FROM sequence",
     )
     .execute(db.pool())
@@ -321,7 +342,11 @@ async fn cancelled_workspace_reconciliation_rolls_back_the_first_eviction_batch(
     assert_eq!(queued_count, 0);
     assert_eq!(
         memberships,
-        vec!["user-a".to_string(), "workspace-shared".to_string()]
+        vec![
+            "user-a".to_string(),
+            "workspace-shared".to_string(),
+            "workspace-stale-personal".to_string(),
+        ]
     );
 
     tokio::time::timeout(
@@ -357,7 +382,7 @@ async fn cancelled_reconciliation_rolls_back_a_large_legacy_membership_scan() {
     replace_cloudsync_workspace_projection(db.pool(), &personal)
         .await
         .unwrap();
-    seed_legacy_workspace_projection_rows(db.pool(), 511).await;
+    seed_legacy_personal_projection_rows(db.pool(), 511).await;
 
     let cancellation_checks = std::sync::atomic::AtomicUsize::new(0);
     let error = tokio::time::timeout(
@@ -410,28 +435,19 @@ async fn cancelled_projection_commit_rolls_back_projection_and_eviction_cleanup(
         .unwrap();
     let current = projection(
         "user-a",
-        vec![
-            projected_workspace(
-                "user-a",
-                "user-a",
-                "personal",
-                "membership-personal",
-                "owner",
-                "Personal",
-            ),
-            projected_workspace(
-                "workspace-shared",
-                "user-b",
-                "shared",
-                "membership-shared",
-                "member",
-                "Shared",
-            ),
-        ],
+        vec![projected_workspace(
+            "user-a",
+            "user-a",
+            "personal",
+            "membership-personal",
+            "owner",
+            "Personal",
+        )],
     );
     replace_cloudsync_workspace_projection(db.pool(), &current)
         .await
         .unwrap();
+    seed_legacy_shared_workspace(db.pool()).await;
     sqlx::query(
         "WITH RECURSIVE sequence(row_index) AS (
            VALUES (0)
@@ -542,7 +558,7 @@ async fn cancelled_projection_commit_rolls_back_large_legacy_table_deletes() {
     replace_cloudsync_workspace_projection(db.pool(), &current)
         .await
         .unwrap();
-    seed_legacy_workspace_projection_rows(db.pool(), 511).await;
+    seed_legacy_personal_projection_rows(db.pool(), 511).await;
     let changed = projection(
         "user-a",
         vec![projected_workspace(
@@ -632,7 +648,7 @@ async fn late_projection_cancellation_rolls_back_100k_rows_within_two_seconds() 
     replace_cloudsync_workspace_projection(db.pool(), &current)
         .await
         .unwrap();
-    seed_legacy_workspace_projection_rows(db.pool(), (LEGACY_ROW_COUNT - 1) as i64).await;
+    seed_legacy_personal_projection_rows(db.pool(), (LEGACY_ROW_COUNT - 1) as i64).await;
     let changed = projection(
         "user-a",
         vec![projected_workspace(
@@ -761,28 +777,19 @@ async fn reauthorized_workspace_cancels_staged_session_evictions() {
         .unwrap();
     let current = projection(
         "user-a",
-        vec![
-            projected_workspace(
-                "user-a",
-                "user-a",
-                "personal",
-                "membership-personal",
-                "owner",
-                "Personal",
-            ),
-            projected_workspace(
-                "workspace-shared",
-                "user-b",
-                "shared",
-                "membership-shared",
-                "member",
-                "Shared",
-            ),
-        ],
+        vec![projected_workspace(
+            "user-a",
+            "user-a",
+            "personal",
+            "membership-personal",
+            "owner",
+            "Personal",
+        )],
     );
     replace_cloudsync_workspace_projection(db.pool(), &current)
         .await
         .unwrap();
+    seed_legacy_shared_workspace(db.pool()).await;
     sqlx::query(
         "INSERT INTO sessions (id, workspace_id, title)
          VALUES ('session-shared', 'workspace-shared', 'Shared')",
@@ -904,7 +911,7 @@ async fn invalid_workspace_projections_preserve_existing_rows() {
     invalid_kind.workspaces.push(projected_workspace(
         "workspace-shared",
         "user-b",
-        "team",
+        "shared",
         "membership-shared",
         "member",
         "Shared",

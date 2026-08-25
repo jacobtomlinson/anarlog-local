@@ -4,7 +4,6 @@ import { writeText as writeClipboardText } from "@tauri-apps/plugin-clipboard-ma
 import {
   enableSessionShareLink,
   getSessionShareManagement,
-  getSessionShareWorkspaceSlug,
   listSessionShareAccess,
   revokeSessionAccessInvitation,
   setSessionShareScope,
@@ -86,15 +85,9 @@ export async function copyText(value: string) {
 }
 
 export async function copySessionShareUrl(
-  context: ShareManagementContext,
   shareId: string,
   assertActive: () => unknown,
 ) {
-  assertActive();
-  const workspaceShareSlug = await getSessionShareWorkspaceSlug(
-    context,
-    shareId,
-  );
   assertActive();
   const desktopScheme = await getSessionShareDesktopScheme();
   assertActive();
@@ -102,7 +95,6 @@ export async function copySessionShareUrl(
     buildAccountSessionShareUrl({
       appBaseUrl: env.VITE_APP_URL,
       shareId,
-      workspaceShareSlug,
       desktopScheme,
     }),
   );
@@ -125,7 +117,7 @@ export async function enableAndCopySessionShareLink({
       await enableSessionShareLink(context, shareId);
       assertActive();
     }
-    await copySessionShareUrl(context, shareId, assertActive);
+    await copySessionShareUrl(shareId, assertActive);
   } catch {
     await setSessionShareScope(withoutSignal(context), {
       shareId,
@@ -137,24 +129,18 @@ export async function enableAndCopySessionShareLink({
 
 export async function copyInvitationOrRevoke(
   context: ShareManagementContext,
-  shareId: string,
+  _shareId: string,
   invitation: { invitationId: string; inviteToken: string },
   assertActive: () => unknown,
   signal?: AbortSignal,
 ) {
   try {
     assertActive();
-    const workspaceShareSlug = await getSessionShareWorkspaceSlug(
-      context,
-      shareId,
-    );
-    assertActive();
     await copyText(
       buildSessionInvitationUrl({
         appBaseUrl: env.VITE_APP_URL,
         invitationId: invitation.invitationId,
         inviteToken: invitation.inviteToken,
-        workspaceShareSlug,
         desktopScheme: await getSessionShareDesktopScheme(),
       }),
     );

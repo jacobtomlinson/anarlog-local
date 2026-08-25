@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 pub(super) use anlg_db_sync::E2eeSyncHook;
 #[cfg(test)]
 pub(super) use anlg_db_sync::ReplicaSyncOutcome;
@@ -15,19 +13,13 @@ pub(crate) struct CloudsyncTokenConfiguration {
 pub(crate) struct E2eeWorkspaceKeyConfiguration {
     pub(super) personal_workspace_id: String,
     pub(super) recovery_key: anlg_e2ee::RecoveryKey,
-    pub(super) shared_keyrings: HashMap<String, anlg_e2ee::WorkspaceKeyring>,
 }
 
 impl E2eeWorkspaceKeyConfiguration {
-    pub(crate) fn new(
-        personal_workspace_id: String,
-        recovery_key: anlg_e2ee::RecoveryKey,
-        shared_keyrings: HashMap<String, anlg_e2ee::WorkspaceKeyring>,
-    ) -> Self {
+    pub(crate) fn new(personal_workspace_id: String, recovery_key: anlg_e2ee::RecoveryKey) -> Self {
         Self {
             personal_workspace_id,
             recovery_key,
-            shared_keyrings,
         }
     }
 }

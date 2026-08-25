@@ -160,10 +160,6 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Acme"
-msgstr ""
-
 #: src/settings/automations/index.tsx
 #: src/settings/automations/workflow-builder.tsx
 msgid "Action"
@@ -300,10 +296,6 @@ msgstr ""
 msgid "Additional spoken languages"
 msgstr "Lingue parlate aggiuntive"
 
-#: src/settings/team/index.tsx
-msgid "Admin"
-msgstr ""
-
 #: src/settings/ai/shared/index.tsx
 #: src/sidebar/settings.tsx
 msgid "Advanced"
@@ -339,14 +331,6 @@ msgstr ""
 
 #: src/shared/open-note-dialog.tsx
 msgid "All Notes"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Allow anyone-with-the-link sharing"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Allow public indexing"
 msgstr ""
 
 #: src/shared/control.tsx
@@ -432,7 +416,6 @@ msgid "Anarlog Pro is required to use cloud sync."
 msgstr ""
 
 #: src/main/sync-status.tsx
-#: src/settings/team/index.tsx
 msgid "Anarlog Pro required"
 msgstr ""
 
@@ -712,10 +695,6 @@ msgstr ""
 msgid "Calendar connected"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Calendar-scheduled capture jobs. Canceling stops the bot from joining."
-msgstr ""
-
 #: src/session-sharing/access-management.tsx
 msgid "Can comment"
 msgstr ""
@@ -744,16 +723,8 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Cancel bot"
-msgstr ""
-
 #: src/session/components/outer-header/metadata/date.tsx
 msgid "Cancel date edit"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Cancel invitation"
 msgstr ""
 
 #: src/settings/general/meeting-settings.tsx
@@ -925,10 +896,6 @@ msgstr ""
 
 #: src/settings/general/week-start.tsx
 msgid "Choose which day begins your calendar week."
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Claim email domain"
 msgstr ""
 
 #: src/settings/general/storage/legacy-cleanup.tsx
@@ -1445,10 +1412,6 @@ msgstr ""
 msgid "Could not update this person's access."
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Create"
-msgstr ""
-
 #: src/session/components/folder-picker.tsx
 msgid "Create \"{folderName}\""
 msgstr ""
@@ -1459,10 +1422,6 @@ msgstr ""
 
 #: src/settings/general/e2ee-setup.tsx
 msgid "Create a recovery key"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Create a shared workspace"
 msgstr ""
 
 #: src/onboarding/index.tsx
@@ -1556,10 +1515,6 @@ msgstr ""
 msgid "Delete {pendingDeleteCount} selected notes?"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Delete {workspaceName} for everyone?"
-msgstr ""
-
 #: src/sidebar/timeline/index.tsx
 msgid "Delete 1 selected note?"
 msgstr ""
@@ -1598,14 +1553,6 @@ msgstr ""
 
 #: src/sidebar/timeline/item.tsx
 msgid "Delete This Event"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Delete workspace"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Deleting removes the workspace for everyone. Transfer ownership first if you only want to leave."
 msgstr ""
 
 #: src/session/components/outer-header/overflow/delete.tsx
@@ -1651,7 +1598,6 @@ msgid "Device limit reached"
 msgstr ""
 
 #: src/settings/sync/index.tsx
-#: src/settings/team/index.tsx
 msgid "Devices"
 msgstr ""
 
@@ -1857,11 +1803,6 @@ msgstr ""
 
 #: src/settings/general/notification.tsx
 msgid "Event notifications"
-msgstr ""
-
-#. placeholder {0}: workspace.name
-#: src/session-sharing/general-access.tsx
-msgid "Everyone in {0}"
 msgstr ""
 
 #: src/imports/screen.tsx
@@ -2255,7 +2196,6 @@ msgid "Intelligence"
 msgstr ""
 
 #: src/session-sharing/access-management.tsx
-#: src/settings/team/index.tsx
 msgid "Invitation pending"
 msgstr ""
 
@@ -2269,7 +2209,6 @@ msgid "Invitations sent."
 msgstr ""
 
 #: src/session-sharing/invite-recipients.tsx
-#: src/settings/team/index.tsx
 msgid "Invite"
 msgstr ""
 
@@ -2281,10 +2220,6 @@ msgstr ""
 #: src/session-sharing/draft-panel.tsx
 #: src/session-sharing/management-panel.tsx
 msgid "Invite people to this note."
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Invite teammates, share notes across the workspace, and manage who has access. Your personal notes stay private."
 msgstr ""
 
 #. placeholder {0}: sent.length
@@ -2314,10 +2249,6 @@ msgstr ""
 
 #: src/session-sharing/management-panel.tsx
 msgid "Keep desktop edits"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Keep forever"
 msgstr ""
 
 #: src/settings/sync/index.tsx
@@ -2397,18 +2328,6 @@ msgstr ""
 msgid "Learn more"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Leave {workspaceName}?"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Leave workspace"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Leaving gives up your access to shared notes here."
-msgstr ""
-
 #: src/session-sharing/attachment-controls.tsx
 msgid "Let people with access play the recording."
 msgstr ""
@@ -2466,10 +2385,6 @@ msgstr ""
 msgid "Loading models..."
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Loading scheduled captures…"
-msgstr ""
-
 #: src/settings/general/index.tsx
 #: src/settings/hydration-boundary.tsx
 msgid "Loading settings"
@@ -2523,10 +2438,6 @@ msgstr ""
 #: src/settings/general/main-language.tsx
 msgid "Main language"
 msgstr "Lingua principale"
-
-#: src/settings/team/index.tsx
-msgid "Make owner"
-msgstr ""
 
 #: src/settings/general/account.tsx
 msgid "Manage billing"
@@ -2618,16 +2529,8 @@ msgstr "Riunioni"
 msgid "member"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Member"
-msgstr ""
-
 #: src/contacts/organization-details.tsx
 msgid "members"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Members"
 msgstr ""
 
 #: src/session/components/outer-header/overflow/export-modal.tsx
@@ -2927,10 +2830,6 @@ msgstr ""
 msgid "No transcript available"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "No upcoming bots."
-msgstr ""
-
 #: src/settings/developers/cli.tsx
 msgid "Not installed"
 msgstr ""
@@ -3019,10 +2918,6 @@ msgstr ""
 #. placeholder {0}: (config.filterLabel ?? "repository").toLowerCase()
 #: src/settings/todo/provider-content.tsx
 msgid "Only sync items from this {0}."
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Only workspace admins can see who has access. You are a member of this workspace."
 msgstr ""
 
 #: src/calendar/components/apple/permission.tsx
@@ -3238,10 +3133,6 @@ msgstr ""
 
 #: src/session/components/note-input/transcript/renderer/selection-menu.tsx
 msgid "Play from here"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Policies"
 msgstr ""
 
 #: src/automations/starters.tsx
@@ -3483,10 +3374,6 @@ msgstr ""
 msgid "Remove repository"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Rename workspace"
-msgstr ""
-
 #: src/automations/starters.tsx
 msgid "Render canonical Markdown"
 msgstr ""
@@ -3549,20 +3436,12 @@ msgstr ""
 msgid "Requested {0}"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Require SSO"
-msgstr ""
-
 #: src/settings/privacy/index.tsx
 msgid "Require Touch ID or your password when opening Anarlog."
 msgstr ""
 
 #: src/settings/privacy/index.tsx
 msgid "Require Windows Hello face, PIN, or password when opening Anarlog."
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Resend invitation"
 msgstr ""
 
 #: src/session-sharing/access-management.tsx
@@ -3620,10 +3499,6 @@ msgstr ""
 msgid "Resume sync"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Retention (days)"
-msgstr ""
-
 #: src/chat/components/message/error.tsx
 #: src/main/sync-status.tsx
 #: src/session/components/note-input/enhanced/enhance-error.tsx
@@ -3666,18 +3541,6 @@ msgstr ""
 msgid "Save draft"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Save policies"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Save SCIM token"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Save subdomain"
-msgstr ""
-
 #: src/settings/general/e2ee-setup.tsx
 msgid "Save this key in a password manager. New devices can usually be approved from another device; this key is your fallback and will not be shown again."
 msgstr ""
@@ -3689,10 +3552,6 @@ msgstr ""
 #: src/main/sync-status.tsx
 #: src/settings/sync/index.tsx
 msgid "Saved locally"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "SCIM bearer token"
 msgstr ""
 
 #: src/session/components/note-input/transcript/renderer/index.tsx
@@ -3776,10 +3635,6 @@ msgstr ""
 #: src/session/components/note-input/search/bar.tsx
 #: src/settings/general/searchable-select.tsx
 msgid "Search..."
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Seats"
 msgstr ""
 
 #: src/templates/sections-editor.tsx
@@ -3999,14 +3854,6 @@ msgstr ""
 msgid "Shared with me · View only"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Shares (30d)"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Sharing domain"
-msgstr ""
-
 #: src/session-sharing/management-panel.tsx
 msgid "Sharing paused to protect your edits"
 msgstr ""
@@ -4114,10 +3961,6 @@ msgstr ""
 
 #: src/calendar/components/oauth/provider-content.tsx
 msgid "Sign in to connect your calendar"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Sign in to create a shared workspace for your team."
 msgstr ""
 
 #: src/session/components/note-input/enhanced/enhance-error.tsx
@@ -4507,15 +4350,6 @@ msgstr ""
 msgid "Teach coding agents when and how to use the Anarlog CLI and MCP"
 msgstr ""
 
-#: src/settings/team/index.tsx
-#: src/sidebar/settings.tsx
-msgid "Team"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "teammate@company.com"
-msgstr ""
-
 #: src/settings/general/meeting-settings.tsx
 msgid "Tell participants when listening starts; this does not confirm consent."
 msgstr ""
@@ -4583,10 +4417,6 @@ msgstr ""
 
 #: src/settings/automations/workflow-builder.tsx
 msgid "Then"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "These rules apply to every member. Sharing changes fail closed on the server."
 msgstr ""
 
 #: src/chat/components/message/loading.tsx
@@ -4811,10 +4641,6 @@ msgstr ""
 msgid "Untitled Note"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Upcoming bot attendance"
-msgstr ""
-
 #: src/services/event-notification/index.ts
 msgid "Upcoming Event"
 msgstr ""
@@ -4857,7 +4683,6 @@ msgstr ""
 #: src/session-sharing/index.tsx
 #: src/settings/developers/cloud-api.tsx
 #: src/settings/dictionary/index.tsx
-#: src/settings/team/index.tsx
 #: src/sidebar/settings.tsx
 msgid "Upgrade to Pro"
 msgstr ""
@@ -4918,10 +4743,6 @@ msgstr ""
 msgid "Uploads meeting content for remote access while Anarlog is closed."
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Usage"
-msgstr ""
-
 #: src/automations/starters.tsx
 msgid "Use a stable filename in the configured export directory."
 msgstr ""
@@ -4950,10 +4771,6 @@ msgstr ""
 msgid "Use the meeting's action items and summary tasks."
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Use this domain for links shared from this workspace."
-msgstr ""
-
 #: src/settings/general/main-language.tsx
 msgid "Use this language for summaries and AI responses."
 msgstr ""
@@ -4968,10 +4785,6 @@ msgstr ""
 
 #: src/onboarding/permissions.tsx
 msgid "Use your microphone to capture your voice"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Verify domain"
 msgstr ""
 
 #: src/settings/general/storage/legacy-cleanup.tsx
@@ -5075,18 +4888,6 @@ msgstr ""
 msgid "Workspace"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Workspace activity from metadata only. Note content stays unreadable on the server."
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Workspace name"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Workspace subdomain"
-msgstr ""
-
 #: src/automations/starters.tsx
 msgid "Write to a folder"
 msgstr ""
@@ -5096,7 +4897,6 @@ msgid "Yesterday"
 msgstr ""
 
 #: src/session-sharing/comments.tsx
-#: src/settings/team/index.tsx
 msgid "You"
 msgstr ""
 

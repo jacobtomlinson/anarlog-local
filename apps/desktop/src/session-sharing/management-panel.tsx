@@ -28,11 +28,7 @@ import {
   matchSharedAttachmentsToLocal,
   useSessionShareAttachments,
 } from "./attachments";
-import {
-  getSessionShareWorkspaceSlug,
-  setSessionShareScope,
-  ShareManagementError,
-} from "./client";
+import { setSessionShareScope, ShareManagementError } from "./client";
 import { useSessionRecapDelivery } from "./delivery-management";
 import {
   EmailRecapForm,
@@ -41,7 +37,6 @@ import {
   type ShareRecapMode,
 } from "./delivery-panel";
 import {
-  generalAccessWorkspaceId,
   GeneralAccessSelector,
   type GeneralAccessTarget,
   type GeneralAccessValue,
@@ -58,14 +53,11 @@ import {
   ShareOperationAbortedError,
   type SharePanelData,
   type SharePanelIdentity,
-  withoutSignal,
 } from "./management";
 import { useShareOperationLifecycle } from "./management-operation";
 import { createPublishLatestSessionShare } from "./management-publish";
-import type { AvailableShareWorkspace } from "./source";
 import { useSessionShareSyncStatus } from "./sync-state";
 import { buildAccountSessionShareUrl } from "./urls";
-import { useWorkspaceShareScopes } from "./workspace-policy";
 
 import { trackAnalyticsEvent } from "~/analytics";
 import { useAuth } from "~/auth";
@@ -86,7 +78,6 @@ export function SessionSharePopoverContent({
   sharedAttachments,
   sharedSnapshot,
   sharedAttachmentsReady,
-  workspaces,
   pendingRef,
   onRetry,
   onActivated,
@@ -100,7 +91,6 @@ export function SessionSharePopoverContent({
   sharedAttachments: SharedNoteAttachment[];
   sharedSnapshot: SharedNoteSnapshot | null;
   sharedAttachmentsReady: boolean;
-  workspaces: AvailableShareWorkspace[];
   pendingRef: MutableRefObject<boolean>;
   onRetry: () => void;
   onActivated: () => Promise<unknown>;
@@ -108,7 +98,6 @@ export function SessionSharePopoverContent({
 }) {
   const auth = useAuth();
   const humans = useHumans();
-  const allowedScopes = useWorkspaceShareScopes(workspaces);
   const { operationLifecycleRef, runOperation, requireActiveContext } =
     useShareOperationLifecycle({ auth, identity, pendingRef });
   const management = data?.management;
@@ -192,17 +181,10 @@ export function SessionSharePopoverContent({
   const openWebCopyMutation = useMutation({
     mutationFn: () =>
       runOperation(async (signal) => {
-        const context = requireActiveContext(signal);
-        const workspaceShareSlug = await getSessionShareWorkspaceSlug(
-          context,
-          identity.shareId,
-        );
-        requireActiveContext(signal);
         await openerCommands.openUrl(
           buildAccountSessionShareUrl({
             appBaseUrl: env.VITE_APP_URL,
             shareId: identity.shareId,
-            workspaceShareSlug,
           }),
           null,
         );
@@ -244,24 +226,7 @@ export function SessionSharePopoverContent({
           await onActivated();
           return { copied: true };
         }
-        const workspaceId = generalAccessWorkspaceId(target, workspaces);
-        if (!workspaceId) throw new ShareManagementError();
-        try {
-          await setSessionShareScope(context, {
-            shareId: identity.shareId,
-            scope: "workspace",
-            workspaceId,
-          });
-          requireActiveContext(signal);
-        } catch {
-          await setSessionShareScope(withoutSignal(context), {
-            shareId: identity.shareId,
-            scope: "restricted",
-          }).catch(() => undefined);
-          throw new ShareManagementError();
-        }
-        await onActivated();
-        return { copied: false };
+        throw new ShareManagementError();
       }),
     onSuccess: ({ copied }) => {
       sonnerToast.success(
@@ -296,8 +261,8 @@ export function SessionSharePopoverContent({
     mutationFn: () =>
       runOperation(async (signal) => {
         if (!management) throw new ShareManagementError();
-        const context = requireActiveContext(signal);
-        await copySessionShareUrl(context, identity.shareId, () =>
+        requireActiveContext(signal);
+        await copySessionShareUrl(identity.shareId, () =>
           requireActiveContext(signal),
         );
         await onActivated();
@@ -326,7 +291,7 @@ export function SessionSharePopoverContent({
   pendingRef.current = anyPending || deliveryPending;
   const generalScopeValue: GeneralAccessValue = management
     ? management.generalScope === "workspace"
-      ? `workspace:${management.generalWorkspaceId}`
+      ? "restricted"
       : management.generalScope
     : "restricted";
   // The action buttons must track the same scope the select displays, so an
@@ -585,11 +550,9 @@ export function SessionSharePopoverContent({
                 </h3>
                 <GeneralAccessSelector
                   value={shownScopeValue}
-                  workspaces={workspaces}
                   disabled={!management}
                   canExpand={canPublish}
                   pending={scopeMutation.isPending}
-                  allowedScopes={allowedScopes}
                   onValueChange={(target) => {
                     setOptimisticScope(target);
                     scopeMutation.mutate(target);

@@ -492,13 +492,8 @@ impl MobileDbBridge {
         self.with_state(|_| Ok(()))?;
         let recovery_key =
             anlg_e2ee::RecoveryKey::parse(&recovery_key_code).map_err(cloudsync_error)?;
-        let member_public_key = recovery_key
-            .member_identity_key()
-            .map_err(cloudsync_error)?
-            .public_key();
         serde_json::to_string(&serde_json::json!({
             "keyId": recovery_key.key_id(),
-            "memberPublicKey": member_public_key,
         }))
         .map_err(serialization_error)
     }
@@ -1112,10 +1107,7 @@ mod tests {
         let parsed = anlg_e2ee::RecoveryKey::parse(&recovery_key).unwrap();
 
         assert_eq!(identity["keyId"], parsed.key_id());
-        assert_eq!(
-            identity["memberPublicKey"],
-            parsed.member_identity_key().unwrap().public_key()
-        );
+        assert_eq!(identity.as_object().unwrap().len(), 1);
     }
 
     #[test]

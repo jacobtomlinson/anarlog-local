@@ -264,7 +264,7 @@ async fn token_refresh_restarts_pending_full_resync_with_new_credentials() {
         workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
             id: "user-a".to_string(),
             owner_user_id: "user-a".to_string(),
-            kind: "personal".to_string(),
+            kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
             name: "Personal".to_string(),
             membership_id: "membership-personal".to_string(),
             role: "owner".to_string(),
@@ -323,7 +323,7 @@ async fn token_refresh_restarts_pending_full_resync_with_new_credentials() {
 }
 
 #[tokio::test]
-async fn token_configuration_projects_server_workspaces_after_account_claim() {
+async fn token_configuration_projects_personal_workspace_after_account_claim() {
     let (_dir, runtime) = setup_enabled_cloudsync_runtime().await;
     let (_witness_server, witness) = setup_witness("user-a").await;
     assert!(
@@ -336,32 +336,18 @@ async fn token_configuration_projects_server_workspaces_after_account_claim() {
     let projection = anlg_db_app::CloudsyncWorkspaceProjection {
         account_user_id: "user-a".to_string(),
         personal_workspace_id: "user-a".to_string(),
-        workspaces: vec![
-            anlg_db_app::CloudsyncWorkspaceProjectionEntry {
-                id: "user-a".to_string(),
-                owner_user_id: "user-a".to_string(),
-                kind: "personal".to_string(),
-                name: "Personal".to_string(),
-                membership_id: "membership-personal".to_string(),
-                role: "owner".to_string(),
-                membership_created_at: "2026-07-01T01:00:00Z".to_string(),
-                membership_updated_at: "2026-07-16T01:00:00Z".to_string(),
-                created_at: "2026-07-01T00:00:00Z".to_string(),
-                updated_at: "2026-07-16T00:00:00Z".to_string(),
-            },
-            anlg_db_app::CloudsyncWorkspaceProjectionEntry {
-                id: "workspace-shared".to_string(),
-                owner_user_id: "user-b".to_string(),
-                kind: "shared".to_string(),
-                name: "Shared".to_string(),
-                membership_id: "membership-shared".to_string(),
-                role: "member".to_string(),
-                membership_created_at: "2026-07-02T01:00:00Z".to_string(),
-                membership_updated_at: "2026-07-15T01:00:00Z".to_string(),
-                created_at: "2026-07-02T00:00:00Z".to_string(),
-                updated_at: "2026-07-15T00:00:00Z".to_string(),
-            },
-        ],
+        workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
+            id: "user-a".to_string(),
+            owner_user_id: "user-a".to_string(),
+            kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
+            name: "Personal".to_string(),
+            membership_id: "membership-personal".to_string(),
+            role: "owner".to_string(),
+            membership_created_at: "2026-07-01T01:00:00Z".to_string(),
+            membership_updated_at: "2026-07-16T01:00:00Z".to_string(),
+            created_at: "2026-07-01T00:00:00Z".to_string(),
+            updated_at: "2026-07-16T00:00:00Z".to_string(),
+        }],
     };
 
     assert_eq!(
@@ -401,25 +387,15 @@ async fn token_configuration_projects_server_workspaces_after_account_claim() {
 
     assert_eq!(
         workspaces,
-        vec![
-            ("user-a".to_string(), "Personal".to_string()),
-            ("workspace-shared".to_string(), "Shared".to_string()),
-        ]
+        vec![("user-a".to_string(), "Personal".to_string())]
     );
     assert_eq!(
         memberships,
-        vec![
-            (
-                "user-a".to_string(),
-                "user-a".to_string(),
-                "owner".to_string(),
-            ),
-            (
-                "workspace-shared".to_string(),
-                "user-a".to_string(),
-                "member".to_string(),
-            ),
-        ]
+        vec![(
+            "user-a".to_string(),
+            "user-a".to_string(),
+            "owner".to_string(),
+        )]
     );
     assert_eq!(writable_workspace_ids, vec!["user-a".to_string()]);
     assert!(
@@ -447,7 +423,7 @@ async fn token_configuration_account_mismatch_preserves_workspace_projection() {
             workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
                 id: "user-a".to_string(),
                 owner_user_id: "user-a".to_string(),
-                kind: "personal".to_string(),
+                kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
                 name: "Existing".to_string(),
                 membership_id: "membership-existing".to_string(),
                 role: "owner".to_string(),
@@ -472,7 +448,7 @@ async fn token_configuration_account_mismatch_preserves_workspace_projection() {
                 workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
                     id: "user-b".to_string(),
                     owner_user_id: "user-b".to_string(),
-                    kind: "personal".to_string(),
+                    kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
                     name: "Replacement".to_string(),
                     membership_id: "membership-replacement".to_string(),
                     role: "owner".to_string(),

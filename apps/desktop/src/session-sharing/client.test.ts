@@ -9,7 +9,6 @@ import {
   deleteSessionShareComment,
   enableSessionShareLink,
   getSessionShareManagement,
-  getSessionShareWorkspaceSlug,
   listSessionShareAccess,
   listSessionShareComments,
   parseSessionShareDocument,
@@ -21,7 +20,6 @@ import {
   revokeSessionAccessInvitation,
   rotateSessionShareLink,
   sendSessionAccessInvitationEmail,
-  setSessionShareScope,
   ShareManagementError,
   updateSessionAccessGrant,
 } from "./client";
@@ -118,42 +116,6 @@ describe("session share management client", () => {
       generalScope: "restricted",
       generalWorkspaceId: null,
     });
-
-    const scopeHarness = rpcHarness([
-      {
-        share_id: shareId,
-        general_scope: "workspace",
-        general_workspace_id: workspaceId,
-        public_slug: publicSlug,
-        access_version: 2,
-      },
-    ]);
-    await expect(
-      setSessionShareScope(scopeHarness.context, {
-        shareId,
-        scope: "workspace",
-        workspaceId,
-      }),
-    ).resolves.toMatchObject({
-      generalScope: "workspace",
-      generalWorkspaceId: workspaceId,
-    });
-  });
-
-  it("resolves the workspace sharing subdomain separately from the stable management contract", async () => {
-    const brandedHarness = rpcHarness([{ workspace_share_slug: "fastrepl" }]);
-    await expect(
-      getSessionShareWorkspaceSlug(brandedHarness.context, shareId),
-    ).resolves.toBe("fastrepl");
-    expect(brandedHarness.rpc).toHaveBeenCalledWith(
-      "get_session_share_workspace_slug",
-      { p_share_id: shareId },
-    );
-
-    const defaultHarness = rpcHarness([{ workspace_share_slug: null }]);
-    await expect(
-      getSessionShareWorkspaceSlug(defaultHarness.context, shareId),
-    ).resolves.toBeNull();
   });
 
   it("deletes any owner share by its local source identity", async () => {

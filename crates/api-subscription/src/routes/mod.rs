@@ -1,7 +1,6 @@
 pub(crate) mod account;
 pub(crate) mod billing;
 pub(crate) mod rpc;
-pub(crate) mod scim;
 
 use axum::{
     Router,
@@ -23,10 +22,4 @@ pub fn router(config: SubscriptionConfig) -> Router {
         .route("/start-trial", post(billing::start_trial))
         .route("/delete-account", delete(account::delete_account))
         .with_state(state)
-}
-
-pub fn scim_router(config: SubscriptionConfig) -> Router {
-    Router::new()
-        .merge(scim::router())
-        .with_state(AppState::new(config))
 }

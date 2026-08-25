@@ -49,7 +49,11 @@ fn projected_workspace(
     CloudsyncWorkspaceProjectionEntry {
         id: id.to_string(),
         owner_user_id: owner_user_id.to_string(),
-        kind: kind.to_string(),
+        kind: match kind {
+            "personal" => CloudsyncWorkspaceKind::Personal,
+            "shared" => CloudsyncWorkspaceKind::LegacyShared,
+            other => panic!("unsupported test workspace kind: {other}"),
+        },
         name: name.to_string(),
         membership_id: membership_id.to_string(),
         role: role.to_string(),
@@ -60,7 +64,11 @@ fn projected_workspace(
     }
 }
 
-async fn seed_legacy_workspace_projection_rows(pool: &SqlitePool, last_row_index: i64) {
+async fn seed_legacy_personal_projection_rows(pool: &SqlitePool, last_row_index: i64) {
+    seed_legacy_projection_rows(pool, last_row_index, "personal").await;
+}
+
+async fn seed_legacy_projection_rows(pool: &SqlitePool, last_row_index: i64, kind: &str) {
     sqlx::query(
         "WITH RECURSIVE sequence(row_index) AS (
            VALUES (0)
@@ -73,11 +81,12 @@ async fn seed_legacy_workspace_projection_rows(pool: &SqlitePool, last_row_index
          SELECT
            printf('legacy-workspace-%04d', row_index),
            'legacy-owner',
-           'shared',
+           ?,
            'Legacy'
          FROM sequence",
     )
     .bind(last_row_index)
+    .bind(kind)
     .execute(pool)
     .await
     .unwrap();
@@ -98,6 +107,23 @@ async fn seed_legacy_workspace_projection_rows(pool: &SqlitePool, last_row_index
          FROM sequence",
     )
     .bind(last_row_index)
+    .execute(pool)
+    .await
+    .unwrap();
+}
+
+async fn seed_legacy_shared_workspace(pool: &SqlitePool) {
+    sqlx::query(
+        "INSERT INTO workspaces (id, owner_user_id, kind, name)
+         VALUES ('workspace-shared', 'user-b', 'shared', 'Shared')",
+    )
+    .execute(pool)
+    .await
+    .unwrap();
+    sqlx::query(
+        "INSERT INTO workspace_memberships (id, workspace_id, user_id, role)
+         VALUES ('membership-shared', 'workspace-shared', 'user-a', 'member')",
+    )
     .execute(pool)
     .await
     .unwrap();

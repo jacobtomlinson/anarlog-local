@@ -1,16 +1,14 @@
 #![forbid(unsafe_code)]
 
 mod blob;
-mod member;
+mod keyring;
 
 pub use blob::{
     ATTACHMENT_BLOB_CHUNK_SIZE, ATTACHMENT_BLOB_MAX_PLAINTEXT_BYTES,
     AttachmentBlobCiphertextMetadata, AttachmentBlobContext, AttachmentBlobError,
     AttachmentBlobMetadata, AttachmentBlobPlaintextMetadata, AttachmentBlobResult,
 };
-pub use member::{
-    MemberIdentityKey, WorkspaceKeyGrant, WorkspaceKeyring, seal_workspace_key_for_member,
-};
+pub use keyring::WorkspaceKeyring;
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
@@ -53,10 +51,6 @@ pub enum Error {
     InvalidDeviceEnrollmentKey,
     #[error("the device enrollment package is invalid")]
     InvalidDeviceEnrollmentPackage,
-    #[error("the member identity key is invalid")]
-    InvalidMemberIdentityKey,
-    #[error("the workspace key grant is invalid")]
-    InvalidWorkspaceKeyGrant,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -251,10 +245,6 @@ impl RecoveryKey {
         URL_SAFE_NO_PAD.encode(&digest[..16])
     }
 
-    pub(crate) fn expose_bytes(&self) -> &[u8; 32] {
-        &self.0
-    }
-
     pub fn workspace_key(&self, workspace_id: &str) -> Result<WorkspaceKey> {
         let workspace_id = workspace_id.trim();
         if workspace_id.is_empty() || workspace_id.len() > 256 {
@@ -284,25 +274,13 @@ impl Clone for WorkspaceKey {
 }
 
 impl WorkspaceKey {
-    /// Mints a random shared-workspace key.
-    ///
-    /// Unlike [`RecoveryKey::workspace_key`], this is tied to no member, so it
-    /// can be handed to several of them and rotated without anyone's recovery
-    /// key changing.
+    /// Mints a random workspace key for local key rotation and recovery.
     pub fn generate() -> Result<Self> {
         let mut bytes = [0_u8; 32];
         getrandom::fill(&mut bytes).map_err(|_| Error::RandomnessUnavailable)?;
         let key = Self::new(bytes);
         bytes.zeroize();
         Ok(key)
-    }
-
-    pub(crate) fn from_bytes(bytes: [u8; 32]) -> Self {
-        Self::new(bytes)
-    }
-
-    pub(crate) fn expose_bytes(&self) -> &Zeroizing<[u8; 32]> {
-        &self.bytes
     }
 
     fn new(bytes: [u8; 32]) -> Self {

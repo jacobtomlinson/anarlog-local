@@ -14,7 +14,9 @@ const accessibleSessionRowSchema = z.object({
 
 const shareDetailRowSchema = z.object({
   id: z.string().uuid(),
-  general_scope: z.enum(["restricted", "workspace", "link", "public"]),
+  general_scope: z
+    .enum(["restricted", "workspace", "link", "public"])
+    .transform((scope) => (scope === "workspace" ? "restricted" : scope)),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -27,7 +29,7 @@ const snapshotRowSchema = z.object({
 export type ManagedShare = {
   shareId: string;
   title: string;
-  scope: "restricted" | "workspace" | "link" | "public";
+  scope: "restricted" | "link" | "public";
   updatedAt: string;
 };
 

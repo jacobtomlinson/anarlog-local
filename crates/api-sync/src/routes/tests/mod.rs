@@ -91,6 +91,7 @@ async fn mock_workspace_projection(server: &MockServer, body: Value) {
         .and(query_param("user_id", "eq.user-123"))
         .and(query_param("deleted_at", "is.null"))
         .and(query_param("workspace.deleted_at", "is.null"))
+        .and(query_param("workspace.kind", "eq.personal"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))
         .mount(server)
         .await;
@@ -108,17 +109,6 @@ async fn mock_e2ee_key_claim(server: &MockServer, returned_key_id: &str) {
         .respond_with(
             ResponseTemplate::new(200).set_body_json(json!([{ "key_id": returned_key_id }])),
         )
-        .mount(server)
-        .await;
-}
-
-async fn mock_workspace_key_grants(server: &MockServer, body: Value) {
-    Mock::given(method("POST"))
-        .and(path("/rest/v1/rpc/list_all_my_workspace_e2ee_grants"))
-        .and(header("apikey", "anon-key"))
-        .and(header("authorization", "Bearer supabase-token"))
-        .and(body_partial_json(json!({})))
-        .respond_with(ResponseTemplate::new(200).set_body_json(body))
         .mount(server)
         .await;
 }

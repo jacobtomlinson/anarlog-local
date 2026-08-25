@@ -13,12 +13,18 @@ pub(in crate::routes) const WORKSPACE_PROJECTION_SELECT: &str = "id,user_id,role
 pub(in crate::routes) const MAX_TOKEN_WORKSPACES: usize = 128;
 pub(in crate::routes) const MAX_TOKEN_ATTRIBUTES_BYTES: usize = 8 * 1024;
 
+#[derive(Clone, Copy, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum CloudsyncWorkspaceKind {
+    Personal,
+}
+
 #[derive(Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct CloudsyncWorkspace {
     pub(in crate::routes) id: String,
     pub(in crate::routes) owner_user_id: String,
-    pub(in crate::routes) kind: String,
+    pub(in crate::routes) kind: CloudsyncWorkspaceKind,
     pub(in crate::routes) name: String,
     pub(in crate::routes) membership_id: String,
     pub(in crate::routes) role: String,
@@ -67,6 +73,7 @@ pub(super) async fn fetch_workspace_projection(
             ("user_id", user_filter.as_str()),
             ("deleted_at", "is.null"),
             ("workspace.deleted_at", "is.null"),
+            ("workspace.kind", "eq.personal"),
         ])
         .send()
         .await
@@ -108,8 +115,8 @@ pub(super) fn validate_workspace_projection(
         if !matches!(row.role.as_str(), "owner" | "admin" | "member") {
             return invalid_workspace_projection("workspace membership has an invalid role");
         }
-        if !matches!(row.workspace.kind.as_str(), "personal" | "shared") {
-            return invalid_workspace_projection("workspace has an invalid kind");
+        if row.workspace.kind != "personal" {
+            return invalid_workspace_projection("workspace kind is no longer supported");
         }
         if chrono::DateTime::parse_from_rfc3339(&row.workspace.created_at).is_err()
             || chrono::DateTime::parse_from_rfc3339(&row.workspace.updated_at).is_err()
@@ -160,7 +167,7 @@ pub(super) fn validate_workspace_projection(
             .map(|row| CloudsyncWorkspace {
                 id: row.workspace.id,
                 owner_user_id: row.workspace.owner_user_id,
-                kind: row.workspace.kind,
+                kind: CloudsyncWorkspaceKind::Personal,
                 name: row.workspace.name,
                 membership_id: row.id,
                 role: row.role,

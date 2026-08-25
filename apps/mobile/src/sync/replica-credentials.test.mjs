@@ -8,7 +8,6 @@ import {
 
 const identity = {
   keyId: "ABCDEFGHIJKLMNOPQRSTUV",
-  memberPublicKey: "A".repeat(43),
 };
 
 const credentials = {
@@ -46,10 +45,7 @@ test("requests validated replica credentials with the E2EE identity", async () =
   const headers = new Headers(request.init.headers);
   assert.equal(headers.get("authorization"), "Bearer access-token");
   assert.equal(headers.get("x-anarlog-e2ee-key-id"), identity.keyId);
-  assert.equal(
-    headers.get("x-anarlog-e2ee-member-public-key"),
-    identity.memberPublicKey,
-  );
+  assert.equal(headers.get("x-anarlog-e2ee-member-public-key"), null);
   assert.equal(headers.get("x-device-fingerprint"), "device-1234");
   assert.equal(headers.get("x-anarlog-device-name"), "John's iPhone");
 });
@@ -100,7 +96,7 @@ test("rejects a malformed local identity before making a request", async () => {
       apiUrl: "https://api.anarlog.test",
       accessToken: "access-token",
       accountUserId: "user-123",
-      identity: { keyId: "invalid", memberPublicKey: "invalid" },
+      identity: { keyId: "invalid" },
       fetcher: async () => {
         requested = true;
         return new Response();

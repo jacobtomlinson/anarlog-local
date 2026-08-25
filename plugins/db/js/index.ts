@@ -7,12 +7,10 @@ import type {
   CloudsyncE2eeWitness,
   CloudsyncTokenConfigurationResult,
   CloudsyncWorkspaceProjection,
-  CloudsyncWorkspaceKeyGrant,
   E2eeIdentityStatus,
   E2eeDeviceEnrollmentPackage,
   E2eeDeviceIdentity,
   E2eeRecoveryKeyIdentity,
-  SealedWorkspaceE2eeKey,
   LegacyCleanupResult,
   LegacyCleanupStatus,
   LegacyImportReport,
@@ -23,19 +21,16 @@ import type {
   StartupStatus,
   SubscriptionRegistration,
   TranscriptPage,
-  WorkspaceE2eeKeyRecipient,
 } from "./bindings.gen";
 
 export type {
   CloudsyncE2eeWitness,
   CloudsyncTokenConfigurationResult,
   CloudsyncWorkspaceProjection,
-  CloudsyncWorkspaceKeyGrant,
   E2eeIdentityStatus,
   E2eeDeviceEnrollmentPackage,
   E2eeDeviceIdentity,
   E2eeRecoveryKeyIdentity,
-  SealedWorkspaceE2eeKey,
   GetMeetingInput,
   LegacyCleanupResult,
   LegacyCleanupStatus,
@@ -45,7 +40,6 @@ export type {
   SessionIngestApplyResult,
   StartupStatus,
   TranscriptPage,
-  WorkspaceE2eeKeyRecipient,
 } from "./bindings.gen";
 
 export type ListMeetingsInput = Partial<GeneratedListMeetingsInput>;
@@ -266,22 +260,6 @@ export async function sealE2eeRecoveryKeyForDevice(
   });
 }
 
-export async function sealWorkspaceE2eeKeyForRecipients(
-  accountUserId: string,
-  workspaceId: string,
-  recipients: WorkspaceE2eeKeyRecipient[],
-  rotate: boolean,
-  sourceGrant: CloudsyncWorkspaceKeyGrant | null = null,
-): Promise<SealedWorkspaceE2eeKey> {
-  return invoke("plugin:db|seal_workspace_e2ee_key_for_recipients", {
-    accountUserId,
-    workspaceId,
-    recipients,
-    rotate,
-    sourceGrant,
-  });
-}
-
 export async function importE2eeDeviceEnrollment(
   accountUserId: string,
   requestId: string,
@@ -308,7 +286,6 @@ export async function configureCloudsyncToken(
   workspaceId: string,
   e2eeWitness: CloudsyncE2eeWitness,
   workspaceProjection?: CloudsyncWorkspaceProjection,
-  workspaceKeyGrants: CloudsyncWorkspaceKeyGrant[] = [],
 ): Promise<CloudsyncTokenConfigurationResult> {
   return invoke("plugin:db|configure_cloudsync_token", {
     databaseId,
@@ -316,7 +293,6 @@ export async function configureCloudsyncToken(
     workspaceId,
     e2eeWitness,
     workspaceProjection: workspaceProjection ?? null,
-    workspaceKeyGrants,
   });
 }
 

@@ -350,15 +350,12 @@ export async function inspectE2eeRecoveryKey(
     const candidate = value as Record<string, unknown>;
     if (
       typeof candidate.keyId !== "string" ||
-      !/^[A-Za-z0-9_-]{22}$/.test(candidate.keyId) ||
-      typeof candidate.memberPublicKey !== "string" ||
-      !/^[A-Za-z0-9_-]{43}$/.test(candidate.memberPublicKey)
+      !/^[A-Za-z0-9_-]{22}$/.test(candidate.keyId)
     ) {
       throw new Error("Unexpected recovery key identity");
     }
     return {
       keyId: candidate.keyId,
-      memberPublicKey: candidate.memberPublicKey,
     };
   } catch (error) {
     captureOperationalError(error, {

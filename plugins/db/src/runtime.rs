@@ -257,10 +257,9 @@ impl PluginDbRuntime {
 
     fn set_e2ee_workspace_keys(&self, configuration: E2eeWorkspaceKeyConfiguration) -> Result<()> {
         self.e2ee_sync_hook
-            .set_workspaces(
+            .set_personal_workspace(
                 &configuration.personal_workspace_id,
                 &configuration.recovery_key,
-                configuration.shared_keyrings,
             )
             .map_err(|error| std::io::Error::other(error.to_string()))?;
         Ok(())
