@@ -2,7 +2,6 @@ import { type ReactNode } from "react";
 
 import { cn } from "@anlg/utils";
 
-import { AutomationsNav } from "./automations";
 import { CalendarNav } from "./calendar";
 import { ContactsNav } from "./contacts";
 import type { SidebarNoteFilter } from "./note-filter";
@@ -31,13 +30,8 @@ export function LeftSidebar({
   const isCalendarMode = currentTab?.type === "calendar";
   const isContactsMode = currentTab?.type === "contacts";
   const isTemplatesMode = currentTab?.type === "templates";
-  const isAutomationsMode = currentTab?.type === "automations";
   const isSpecialMode =
-    isSettingsMode ||
-    isCalendarMode ||
-    isContactsMode ||
-    isTemplatesMode ||
-    isAutomationsMode;
+    isSettingsMode || isCalendarMode || isContactsMode || isTemplatesMode;
   const isTimelineSidebarLayout = !isSpecialMode;
   // Navs with their own CustomSidebarHeader fill the chrome row themselves; a
   // top padding here would push the header out of it (and overflow-hidden
@@ -63,8 +57,6 @@ export function LeftSidebar({
             <ContactsNav />
           ) : isTemplatesMode ? (
             <TemplatesNav />
-          ) : isAutomationsMode ? (
-            <AutomationsNav />
           ) : (
             <div className="flex h-full min-h-0 flex-col">
               {noteFilter === "mine" ? (

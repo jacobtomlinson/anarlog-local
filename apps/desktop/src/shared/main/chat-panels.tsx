@@ -9,7 +9,6 @@ import {
 } from "@anlg/ui/components/ui/resizable";
 
 import {
-  AUTOMATIONS_SURFACE_MIN_WIDTH_PX,
   NOTE_SURFACE_MIN_WIDTH_PX,
   usesNoteSurfaceMinWidth,
 } from "./layout-widths";
@@ -36,8 +35,7 @@ export function MainChatPanels({
   const { chat, leftsidebar } = useShell();
   const currentTab = useTabs((state) => state.currentTab);
   const bodyPanelContainerRef = useRef<HTMLDivElement>(null);
-  const isAutomationsTab = currentTab?.type === "automations";
-  const isRightPanelOpen = isAutomationsTab || chat.mode === "RightPanelOpen";
+  const isRightPanelOpen = chat.mode === "RightPanelOpen";
   const leftSidebarExpanded = leftSidebarAvailable && leftsidebar.expanded;
   const reserveNoteSurfaceMinWidth = usesNoteSurfaceMinWidth(currentTab);
   const collapseLeftSidebar = useCallback(() => {
@@ -105,12 +103,10 @@ export function MainChatPanels({
             ) : null}
           </ResizablePanelGroup>
 
-          {isAutomationsTab ? null : (
-            <PersistentChatPanel
-              floatingContainerRef={bodyPanelContainerRef}
-              sessionProps={sessionProps}
-            />
-          )}
+          <PersistentChatPanel
+            floatingContainerRef={bodyPanelContainerRef}
+            sessionProps={sessionProps}
+          />
         </>
       )}
     </ChatSessionHost>
@@ -126,13 +122,6 @@ function getMainBodyMinWidth({
   leftSidebarExpanded: boolean;
   noteSurfaceMinWidth: number;
 }) {
-  if (currentTab?.type === "automations") {
-    return (
-      AUTOMATIONS_SURFACE_MIN_WIDTH_PX +
-      (leftSidebarExpanded ? LEFT_SIDEBAR_MIN_WIDTH_PX : 0)
-    );
-  }
-
   if (!usesNoteSurfaceMinWidth(currentTab)) {
     return undefined;
   }

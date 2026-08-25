@@ -41,7 +41,6 @@ import {
   setChatGroupTitleIfCurrent,
   upsertChatMessage,
   useChatGroup,
-  useChatGroups,
   usePersistedChatMessages,
   useRecentChatGroups,
 } from "./queries";
@@ -78,10 +77,8 @@ describe("chat SQLite queries", () => {
       },
     ];
 
-    const recent = renderHook(() => useRecentChatGroups("general")).result
-      .current;
-    const selected = renderHook(() => useChatGroup("group-1", "general")).result
-      .current;
+    const recent = renderHook(() => useRecentChatGroups()).result.current;
+    const selected = renderHook(() => useChatGroup("group-1")).result.current;
 
     expect(recent).toEqual([
       {
@@ -93,30 +90,6 @@ describe("chat SQLite queries", () => {
       },
     ]);
     expect(selected?.id).toBe("group-1");
-  });
-
-  it("isolates general and automation chat history", () => {
-    renderHook(() => useRecentChatGroups("general"));
-    const generalQuery =
-      mocks.liveQueries[mocks.liveQueries.length - 1]?.sql ?? "";
-
-    renderHook(() => useRecentChatGroups("automations"));
-    const automationsQuery =
-      mocks.liveQueries[mocks.liveQueries.length - 1]?.sql ?? "";
-
-    expect(generalQuery).toMatch(/AND\s+NOT\s+EXISTS/);
-    expect(automationsQuery).toMatch(/AND\s+EXISTS/);
-    expect(generalQuery).toContain("'$.chatScope'");
-    expect(automationsQuery).toContain("'$.chatScope'");
-  });
-
-  it("loads the complete automation history for the sidebar", () => {
-    renderHook(() => useChatGroups("automations"));
-    const automationsQuery = mocks.liveQueries[mocks.liveQueries.length - 1];
-
-    expect(automationsQuery?.sql).not.toContain("LIMIT");
-    expect(automationsQuery?.params).toEqual([]);
-    expect(automationsQuery?.sql).toContain("'$.chatScope'");
   });
 
   it("maps chat messages in their durable order", () => {

@@ -53,6 +53,9 @@ vi.mock("./main-language", () => ({
     <span data-testid="main-language">{value}</span>
   ),
 }));
+vi.mock("./markdown-export", () => ({
+  MarkdownExportSettings: () => <span>Markdown export settings</span>,
+}));
 vi.mock("./meeting-settings", () => ({
   MeetingSettingsView: (props: unknown) => {
     mocks.meetingSettingsProps(props);

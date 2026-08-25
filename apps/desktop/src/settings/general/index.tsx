@@ -15,6 +15,7 @@ import {
   getAdditionalSpokenLanguages,
 } from "./language";
 import { MainLanguageView } from "./main-language";
+import { MarkdownExportSettings } from "./markdown-export";
 import { MeetingSettingsView } from "./meeting-settings";
 import { NotificationSettingsView } from "./notification";
 import { Permissions } from "./permissions";
@@ -326,6 +327,8 @@ function SettingsSectionContent({
               />
             )}
           </form.Subscribe>
+
+          <MarkdownExportSettings />
 
           <div>
             <h2 className="mb-4 font-sans text-lg font-semibold">

@@ -18,7 +18,7 @@ export function CustomSidebarHeader({ children }: { children?: ReactNode }) {
   const openCurrent = useTabs((state) => state.openCurrent);
 
   const handleBack = useCallback(() => {
-    if (currentTab?.type !== "automations" && chat.mode !== "FloatingClosed") {
+    if (chat.mode !== "FloatingClosed") {
       chat.sendEvent({ type: "CLOSE" });
       return;
     }

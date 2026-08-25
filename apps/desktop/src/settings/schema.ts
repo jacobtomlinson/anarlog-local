@@ -251,16 +251,6 @@ export const SETTING_DEFINITIONS = {
     path: ["todo", "github_repository"],
     default: "" as string,
   },
-  automation_draft_template: {
-    type: "string",
-    path: ["automations", "draft_template"],
-    default: "" as string,
-  },
-  automation_workflows: {
-    type: "string",
-    path: ["automations", "workflows"],
-    default: "[]" as string,
-  },
   automation_markdown_export_enabled: {
     type: "boolean",
     path: ["automations", "markdown_export_enabled"],
@@ -274,66 +264,6 @@ export const SETTING_DEFINITIONS = {
   automation_markdown_export_last_run: {
     type: "string",
     path: ["automations", "markdown_export_last_run"],
-    default: "" as string,
-  },
-  automation_slack_recap_enabled: {
-    type: "boolean",
-    path: ["automations", "slack_recap_enabled"],
-    default: false as boolean,
-  },
-  automation_slack_recap_channel: {
-    type: "string",
-    path: ["automations", "slack_recap_channel"],
-    default: "" as string,
-  },
-  automation_slack_recap_last_run: {
-    type: "string",
-    path: ["automations", "slack_recap_last_run"],
-    default: "" as string,
-  },
-  automation_slack_recap_processed: {
-    type: "string",
-    path: ["automations", "slack_recap_processed"],
-    default: "" as string,
-  },
-  automation_linear_issues_enabled: {
-    type: "boolean",
-    path: ["automations", "linear_issues_enabled"],
-    default: false as boolean,
-  },
-  automation_linear_issues_team: {
-    type: "string",
-    path: ["automations", "linear_issues_team"],
-    default: "" as string,
-  },
-  automation_linear_issues_last_run: {
-    type: "string",
-    path: ["automations", "linear_issues_last_run"],
-    default: "" as string,
-  },
-  automation_linear_issues_processed: {
-    type: "string",
-    path: ["automations", "linear_issues_processed"],
-    default: "" as string,
-  },
-  automation_notion_update_enabled: {
-    type: "boolean",
-    path: ["automations", "notion_update_enabled"],
-    default: false as boolean,
-  },
-  automation_notion_update_page: {
-    type: "string",
-    path: ["automations", "notion_update_page"],
-    default: "" as string,
-  },
-  automation_notion_update_last_run: {
-    type: "string",
-    path: ["automations", "notion_update_last_run"],
-    default: "" as string,
-  },
-  automation_notion_update_processed: {
-    type: "string",
-    path: ["automations", "notion_update_processed"],
     default: "" as string,
   },
 } as const;

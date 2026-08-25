@@ -10,7 +10,6 @@ import {
   DownloadSimple,
   FileText,
   Gear,
-  Lightning,
   type Icon,
   Lock,
   MagnifyingGlass,
@@ -42,7 +41,7 @@ type SettingsNavItem =
       requiresPro?: boolean;
     }
   | {
-      id: "automations" | "calendar" | "contacts" | "templates";
+      id: "calendar" | "contacts" | "templates";
       label: string;
       icon: Icon;
       destination: TabInput;
@@ -113,13 +112,6 @@ export function SettingsNav() {
           label: t`Templates`,
           icon: FileText,
           destination: { type: "templates" },
-        },
-        {
-          id: "automations",
-          label: t`Automations`,
-          icon: Lightning,
-          destination: { type: "automations" },
-          requiresPro: true,
         },
       ],
     },

@@ -44,7 +44,7 @@ import {
 } from "./pending-persists";
 import { useChatActions } from "./use-chat-actions";
 
-import type { AnlgUIMessage, ChatSendOptions } from "~/chat/types";
+import type { ChatSendOptions } from "~/chat/types";
 
 describe("useChatActions", () => {
   beforeEach(() => {
@@ -63,7 +63,6 @@ describe("useChatActions", () => {
     const sendMessage = vi.fn();
     const { result } = renderHook(() =>
       useChatActions({
-        chatScope: "general",
         groupId: undefined,
         onGroupCreated,
       }),
@@ -81,7 +80,7 @@ describe("useChatActions", () => {
       expect.objectContaining({
         id: "message-1",
         role: "user",
-        metadata: expect.objectContaining({ chatScope: "general" }),
+        metadata: expect.objectContaining({ createdAt: expect.any(Number) }),
       }),
       {
         chatGroupId: "group-1",
@@ -113,7 +112,6 @@ describe("useChatActions", () => {
     const sendMessage = vi.fn();
     const { result } = renderHook(() =>
       useChatActions({
-        chatScope: "general",
         groupId: "group-existing",
         onGroupCreated: vi.fn(),
       }),
@@ -155,7 +153,6 @@ describe("useChatActions", () => {
     });
     const { result } = renderHook(() =>
       useChatActions({
-        chatScope: "general",
         groupId: undefined,
         onGroupCreated,
         onGroupCreateFailed,
@@ -205,7 +202,6 @@ describe("useChatActions", () => {
     const sendMessage = vi.fn();
     const { result } = renderHook(() =>
       useChatActions({
-        chatScope: "general",
         groupId: undefined,
         onGroupCreated: vi.fn(),
         onGroupCreateFailed,
@@ -241,7 +237,6 @@ describe("useChatActions", () => {
     const trackCompletion = vi.fn();
     const { result } = renderHook(() =>
       useChatActions({
-        chatScope: "general",
         groupId: undefined,
         onGroupCreated: vi.fn(),
       }),
@@ -267,38 +262,5 @@ describe("useChatActions", () => {
       expectedTitle: "Hello",
       title: "Generated title",
     });
-  });
-
-  it("persists automation messages with their own scope", async () => {
-    const sendMessage = vi.fn();
-    const { result } = renderHook(() =>
-      useChatActions({
-        chatScope: "automations",
-        groupId: undefined,
-        onGroupCreated: vi.fn(),
-      }),
-    );
-
-    act(() => {
-      result.current.handleSendMessage(
-        "Create a weekly recap",
-        [{ type: "text", text: "Create a weekly recap" }],
-        sendMessage,
-      );
-    });
-
-    const message = sendMessage.mock.calls[0]?.[0] as AnlgUIMessage;
-    expect(message.metadata?.chatScope).toBe("automations");
-
-    const options = sendMessage.mock.calls[0]?.[1] as ChatSendOptions;
-    await options.beforeSend?.(vi.fn());
-
-    expect(mocks.createChatGroupWithMessage).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: expect.objectContaining({
-          metadataJson: expect.stringContaining('"chatScope":"automations"'),
-        }),
-      }),
-    );
   });
 });

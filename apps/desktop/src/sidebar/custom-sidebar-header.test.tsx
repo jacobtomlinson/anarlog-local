@@ -87,18 +87,6 @@ describe("CustomSidebarHeader", () => {
     expect(mocks.openCurrent).not.toHaveBeenCalled();
   });
 
-  it("opens home directly from Automations without collapsing its chat", () => {
-    mocks.chatMode = "RightPanelOpen";
-    mocks.currentTab = { type: "automations" };
-
-    render(<CustomSidebarHeader />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Go home" }));
-
-    expect(mocks.openCurrent).toHaveBeenCalledWith({ type: "empty" });
-    expect(mocks.sendEvent).not.toHaveBeenCalled();
-  });
-
   it("does not render history controls", () => {
     render(<CustomSidebarHeader />);
 
