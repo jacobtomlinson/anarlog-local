@@ -94,13 +94,6 @@ pub async fn read_range(
     .map_err(|_| Error::CacheUnavailable)?
 }
 
-pub fn ensure_file_size(path: &Path, expected_size: u64) -> Result<()> {
-    if std::fs::metadata(path)?.len() != expected_size {
-        return Err(Error::LocalAttachmentUnavailable);
-    }
-    Ok(())
-}
-
 pub fn file_matches(path: &Path, expected_size: u64, expected_sha256: &str) -> Result<bool> {
     let metadata = match std::fs::metadata(path) {
         Ok(metadata) => metadata,
@@ -111,16 +104,6 @@ pub fn file_matches(path: &Path, expected_size: u64, expected_sha256: &str) -> R
         return Ok(false);
     }
     Ok(hash_file(path)? == expected_sha256)
-}
-
-pub async fn file_matches_async(
-    path: PathBuf,
-    expected_size: u64,
-    expected_sha256: String,
-) -> Result<bool> {
-    tokio::task::spawn_blocking(move || file_matches(&path, expected_size, &expected_sha256))
-        .await
-        .map_err(|_| Error::CacheUnavailable)?
 }
 
 pub async fn file_matches_cancellable_async(
@@ -241,13 +224,6 @@ pub fn snapshot_verified_file(
         return Err(Error::ChecksumMismatch);
     }
     Ok(cache_guard)
-}
-
-pub fn private_cache_path(root: &Path, cache_id: &str) -> Result<PathBuf> {
-    if !valid_cache_id(cache_id) {
-        return Err(Error::InvalidTransferState);
-    }
-    Ok(root.join(format!("{cache_id}.anb1")))
 }
 
 pub async fn create_shared_upload_cache_root(path: &Path) -> Result<()> {
@@ -411,15 +387,4 @@ pub fn hex_digest(bytes: &[u8]) -> String {
             write!(&mut value, "{byte:02x}").expect("writing to String cannot fail");
             value
         })
-}
-
-#[cfg(unix)]
-pub fn sync_destination_directory(path: &Path) -> Result<()> {
-    std::fs::File::open(path)?.sync_all()?;
-    Ok(())
-}
-
-#[cfg(not(unix))]
-pub fn sync_destination_directory(_path: &Path) -> Result<()> {
-    Ok(())
 }

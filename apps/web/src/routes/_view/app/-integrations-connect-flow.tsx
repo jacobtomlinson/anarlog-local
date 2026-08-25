@@ -303,10 +303,7 @@ export function ConnectFlow({ sessionToken }: { sessionToken?: string } = {}) {
             locally on your device. Nango securely stores the credentials needed
             to keep your calendar connected.
           </p>
-          <p>
-            If you use encrypted Cloud Sync or share a note, its event context
-            may be included.
-          </p>
+          <p>If you share a note, its event context may be included.</p>
           <p>
             Contact enhancement from event details is processed locally on your
             device. If you choose to use AI on an event-linked note, relevant

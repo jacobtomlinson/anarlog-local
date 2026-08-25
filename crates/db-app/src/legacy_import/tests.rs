@@ -85,17 +85,13 @@ fn transcript_row(id: &str, words_json: &str) -> LegacyImportRow {
 }
 
 #[tokio::test]
-async fn import_fails_closed_without_a_workspace_binding() {
+async fn import_uses_owner_as_local_workspace_without_legacy_binding() {
     let db = test_db().await;
-    sqlx::query("DELETE FROM app_settings WHERE id = 'cloudsync_workspace_binding'")
-        .execute(db.pool())
-        .await
-        .unwrap();
     begin_legacy_import_run(db.pool(), "run-1", "/vault", false)
         .await
         .unwrap();
 
-    let error = apply_legacy_import_item(
+    let result = apply_legacy_import_item(
         db.pool(),
         LegacyImportItem {
             id: "item-1",
@@ -108,19 +104,15 @@ async fn import_fails_closed_without_a_workspace_binding() {
         false,
     )
     .await
-    .unwrap_err();
+    .unwrap();
 
-    assert!(matches!(error, sqlx::Error::Database(_)));
-    let session_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM sessions")
-        .fetch_one(db.pool())
-        .await
-        .unwrap();
-    let item_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM migration_import_items")
-        .fetch_one(db.pool())
-        .await
-        .unwrap();
-    assert_eq!(session_count, 0);
-    assert_eq!(item_count, 0);
+    assert_eq!(result.imported_count, 1);
+    let workspace_id: String =
+        sqlx::query_scalar("SELECT workspace_id FROM sessions WHERE id = 'session-1'")
+            .fetch_one(db.pool())
+            .await
+            .unwrap();
+    assert_eq!(workspace_id, "user-1");
 }
 
 #[tokio::test]

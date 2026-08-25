@@ -26,7 +26,6 @@ import { accountSessionQueryKey } from "./-account-session";
 const loadAccountAccessSection = () => import("./-account-access");
 const loadApiKeysSection = () => import("./-account-api-keys");
 const loadDangerAreaSection = () => import("./-account-danger");
-const loadDevicesSection = () => import("./-account-devices");
 const loadIntegrationsSection = () => import("./-account-integrations");
 const loadPlanSection = () => import("./-account-plan");
 const loadProfileInfoSection = () => import("./-account-profile-info");
@@ -45,9 +44,6 @@ const DangerAreaSection = lazy(() =>
   loadDangerAreaSection().then((module) => ({
     default: module.DangerAreaSection,
   })),
-);
-const DevicesSection = lazy(() =>
-  loadDevicesSection().then((module) => ({ default: module.DevicesSection })),
 );
 const IntegrationsSection = lazy(() =>
   loadIntegrationsSection().then((module) => ({
@@ -82,11 +78,7 @@ const accountTabPreloaders: Record<AccountTabId, () => Promise<unknown>> = {
       loadDangerAreaSection(),
     ]),
   connections: () =>
-    Promise.all([
-      loadIntegrationsSection(),
-      loadDevicesSection(),
-      loadSharedNotesSection(),
-    ]),
+    Promise.all([loadIntegrationsSection(), loadSharedNotesSection()]),
   developer: () =>
     Promise.all([loadApiKeysSection(), loadAccountAccessSection()]),
 };
@@ -329,8 +321,6 @@ function AccountSectionBody({
       return <ReferralSection ineligible={referralIneligible} />;
     case "integrations":
       return <IntegrationsSection />;
-    case "devices":
-      return <DevicesSection />;
     case "shares":
       return <SharedNotesSection />;
     case "api-keys":

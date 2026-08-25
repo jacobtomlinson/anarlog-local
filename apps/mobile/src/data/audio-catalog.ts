@@ -1,6 +1,5 @@
 import { File, FileMode, Paths } from "expo-file-system";
 
-import { requestMobileAttachmentUploads } from "@/attachment-sync/upload-runner";
 import { executeTransaction, useLiveQuery } from "@/db";
 import { id, nowIso } from "@/lib/ids";
 
@@ -16,11 +15,11 @@ export type { SessionAudio } from "./audio-catalog-model";
 const ATTACHMENT_UPSERT_SQL = `
 INSERT INTO session_attachments (
   id, workspace_id, session_id, filename, relative_path, content_type,
-  size_bytes, sha256, storage_kind, cloud_object_key, source_type,
-  source_id, metadata_json, cloud_sync_enabled, created_at, updated_at, deleted_at
+  size_bytes, sha256, storage_kind, source_type, source_id, metadata_json,
+  created_at, updated_at, deleted_at
 )
-SELECT ?, workspace_id, id, ?, ?, ?, ?, ?, 'local_file', '',
-  'session_audio', 'primary', '{"transcript_status":"processing"}', 1, ?, ?, NULL
+SELECT ?, workspace_id, id, ?, ?, ?, ?, ?, 'local_file',
+  'session_audio', 'primary', '{"transcript_status":"processing"}', ?, ?, NULL
 FROM sessions
 WHERE id = ? AND deleted_at IS NULL
 ON CONFLICT(id) DO UPDATE SET
@@ -30,8 +29,6 @@ ON CONFLICT(id) DO UPDATE SET
   size_bytes = excluded.size_bytes,
   sha256 = excluded.sha256,
   storage_kind = 'local_file',
-  cloud_object_key = '',
-  cloud_sync_enabled = 1,
   metadata_json = excluded.metadata_json,
   updated_at = excluded.updated_at,
   deleted_at = NULL
@@ -63,7 +60,6 @@ export async function catalogSessionAudio(
   },
 ): Promise<void> {
   const attachmentId = `session-audio:${sessionId}`;
-  const transferJobId = id();
   const now = nowIso();
   const localFile = new File(
     Paths.document,
@@ -97,24 +93,7 @@ export async function catalogSessionAudio(
       sql: LOCAL_STATE_UPSERT_SQL,
       params: [attachmentId, sessionId, file.filename, now, attachmentId],
     },
-    {
-      sql: `
-        INSERT OR IGNORE INTO attachment_transfer_jobs (
-          id, attachment_id, session_id, workspace_id, direction,
-          expected_sha256, expected_size_bytes
-        )
-        SELECT ?, id, session_id, workspace_id, 'upload', sha256, size_bytes
-        FROM session_attachments
-        WHERE id = ? AND deleted_at IS NULL AND cloud_sync_enabled = 1
-          AND EXISTS (
-            SELECT 1 FROM attachment_local_state
-            WHERE attachment_id = ? AND availability = 'present'
-          )
-      `,
-      params: [transferJobId, attachmentId, attachmentId],
-    },
   ]);
-  requestMobileAttachmentUploads();
 }
 
 const SESSION_AUDIO_SQL = `
@@ -127,8 +106,7 @@ SELECT
   COALESCE(json_extract(attachment.metadata_json, '$.transcript_status'), '') AS transcript_status,
   attachment.created_at,
   CASE WHEN local_state.availability = 'present' THEN 1 ELSE 0 END AS available_locally,
-  COALESCE(local_state.relative_path, '') AS local_relative_path,
-  attachment.cloud_object_key
+  COALESCE(local_state.relative_path, '') AS local_relative_path
 FROM session_attachments AS attachment
 LEFT JOIN attachment_local_state AS local_state
   ON local_state.attachment_id = attachment.id

@@ -9,7 +9,6 @@ export type NoteAttachmentRow = {
   created_at: string;
   available_locally: number;
   local_relative_path: string;
-  cloud_object_key: string;
 };
 
 export type NoteAttachment = {
@@ -23,7 +22,6 @@ export type NoteAttachment = {
   createdAt: string;
   availableLocally: boolean;
   localRelativePath: string | null;
-  cloudObjectKey: string | null;
 };
 
 const MAX_ATTACHMENT_BYTES = 512 * 1024 * 1024;
@@ -63,7 +61,6 @@ export function mapNoteAttachmentRows(
         createdAt: row.created_at,
         availableLocally,
         localRelativePath: availableLocally ? row.local_relative_path : null,
-        cloudObjectKey: row.cloud_object_key || null,
       },
     ];
   });

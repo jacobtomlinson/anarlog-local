@@ -629,20 +629,8 @@ export async function applyConnectionSync({
         )
         SELECT
           ?,
-          NULLIF((
-            SELECT json_extract(value_json, '$.workspace_id')
-            FROM app_settings
-            WHERE id = 'cloudsync_workspace_binding'
-          ), ''),
-          COALESCE(
-            NULLIF(NULLIF(?, ''), '${DEFAULT_USER_ID}'),
-            NULLIF((
-              SELECT json_extract(value_json, '$.workspace_id')
-              FROM app_settings
-              WHERE id = 'cloudsync_workspace_binding'
-            ), ''),
-            '${DEFAULT_USER_ID}'
-          ),
+          ?,
+          COALESCE(NULLIF(?, ''), '${DEFAULT_USER_ID}'),
           ?,
           ?,
           ?,
@@ -656,6 +644,7 @@ export async function applyConnectionSync({
       `,
       params: [
         human.id,
+        human.ownerUserId,
         human.ownerUserId,
         human.name,
         human.email,

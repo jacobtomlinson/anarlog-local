@@ -1,80 +1,18 @@
 import {
-  commands as attachmentSyncCommands,
+  commands as attachmentCommands,
   type SharedAttachmentCacheResult,
 } from "@anlg/plugin-attachment-sync";
 
 export type { SharedAttachmentCacheResult };
 
-export type UploadDescriptor = {
-  attachmentRef: string;
-  versionRef: string;
-  ciphertextSizeBytes: number;
-  formatVersion: number;
-};
-
-export type PreparedUpload = {
-  cacheId: string;
-  ciphertextSha256: string;
-  ciphertextSizeBytes: number;
-};
-
-export type RestoredAttachment = {
-  attachmentId: string;
-  sessionId: string;
-  relativePath: string;
-  sizeBytes: number;
-  sha256: string;
-};
-
 export const attachmentTransferNative = {
-  describeUpload(jobId: string, attemptCount: number) {
-    return unwrapNative(
-      attachmentSyncCommands.describeUpload(jobId, attemptCount),
-      "describe attachment upload",
-    );
-  },
-  prepareUpload(
-    jobId: string,
-    attemptCount: number,
-    objectId: string,
-    objectKey: string,
-  ) {
-    return unwrapNative(
-      attachmentSyncCommands.prepareUpload(
-        jobId,
-        attemptCount,
-        objectId,
-        objectKey,
-      ),
-      "prepare attachment upload",
-    );
-  },
-  async readUploadRange(
-    jobId: string,
-    attemptCount: number,
-    cacheId: string,
-    start: number,
-    end: number,
-  ) {
-    const bytes = await unwrapNative(
-      attachmentSyncCommands.readUploadRange(
-        jobId,
-        attemptCount,
-        cacheId,
-        start,
-        end,
-      ),
-      "read attachment upload cache",
-    );
-    return Uint8Array.from(bytes);
-  },
   prepareSharedUpload(
     attachmentId: string,
     expectedSha256: string,
     expectedSizeBytes: number,
     expectedFilename: string,
     expectedContentType: string,
-    expectedCloudObjectKey: string,
+    expectedRemoteObjectKey: string,
     signal?: AbortSignal,
   ) {
     return runCancellableNative(
@@ -83,17 +21,17 @@ export const attachmentTransferNative = {
       {
         label: "shared attachment upload operation",
         begin: (operationId) =>
-          attachmentSyncCommands.beginSharedUploadOperation(operationId),
+          attachmentCommands.beginSharedUploadOperation(operationId),
         cancel: (operationId) =>
-          attachmentSyncCommands.cancelSharedUploadOperation(operationId),
+          attachmentCommands.cancelSharedUploadOperation(operationId),
       },
       (operationId) =>
-        attachmentSyncCommands.prepareSharedUpload(operationId, attachmentId, {
+        attachmentCommands.prepareSharedUpload(operationId, attachmentId, {
           sha256: expectedSha256,
           sizeBytes: expectedSizeBytes,
           filename: expectedFilename,
           contentType: expectedContentType,
-          cloudObjectKey: expectedCloudObjectKey,
+          remoteObjectKey: expectedRemoteObjectKey,
         }),
     );
   },
@@ -104,12 +42,12 @@ export const attachmentTransferNative = {
     expectedSizeBytes: number,
     expectedFilename: string,
     expectedContentType: string,
-    expectedCloudObjectKey: string,
+    expectedRemoteObjectKey: string,
     start: number,
     end: number,
   ) {
     const bytes = await unwrapNative(
-      attachmentSyncCommands.readSharedUploadRange(
+      attachmentCommands.readSharedUploadRange(
         attachmentId,
         cacheId,
         {
@@ -117,7 +55,7 @@ export const attachmentTransferNative = {
           sizeBytes: expectedSizeBytes,
           filename: expectedFilename,
           contentType: expectedContentType,
-          cloudObjectKey: expectedCloudObjectKey,
+          remoteObjectKey: expectedRemoteObjectKey,
         },
         start,
         end,
@@ -133,7 +71,7 @@ export const attachmentTransferNative = {
     expectedSizeBytes: number,
     expectedFilename: string,
     expectedContentType: string,
-    expectedCloudObjectKey: string,
+    expectedRemoteObjectKey: string,
     signal?: AbortSignal,
   ) {
     return runCancellableNative(
@@ -142,12 +80,12 @@ export const attachmentTransferNative = {
       {
         label: "shared attachment upload operation",
         begin: (operationId) =>
-          attachmentSyncCommands.beginSharedUploadOperation(operationId),
+          attachmentCommands.beginSharedUploadOperation(operationId),
         cancel: (operationId) =>
-          attachmentSyncCommands.cancelSharedUploadOperation(operationId),
+          attachmentCommands.cancelSharedUploadOperation(operationId),
       },
       (operationId) =>
-        attachmentSyncCommands.validateSharedUpload(
+        attachmentCommands.validateSharedUpload(
           operationId,
           attachmentId,
           cacheId,
@@ -156,114 +94,15 @@ export const attachmentTransferNative = {
             sizeBytes: expectedSizeBytes,
             filename: expectedFilename,
             contentType: expectedContentType,
-            cloudObjectKey: expectedCloudObjectKey,
+            remoteObjectKey: expectedRemoteObjectKey,
           },
         ),
     );
   },
   cleanupSharedUpload(cacheId: string) {
     return unwrapNative(
-      attachmentSyncCommands.cleanupSharedUpload(cacheId),
+      attachmentCommands.cleanupSharedUpload(cacheId),
       "clean shared attachment upload snapshot",
-    );
-  },
-  prepareDeleteGuard(
-    jobId: string,
-    attemptCount: number,
-    createGuard: boolean,
-    signal?: AbortSignal,
-  ) {
-    return runCancellableNative(
-      signal,
-      "prepare attachment delete guard",
-      {
-        label: "attachment delete guard operation",
-        begin: (operationId) =>
-          attachmentSyncCommands.beginSharedUploadOperation(operationId),
-        cancel: (operationId) =>
-          attachmentSyncCommands.cancelSharedUploadOperation(operationId),
-      },
-      (operationId) =>
-        attachmentSyncCommands.prepareDeleteGuard(
-          operationId,
-          jobId,
-          attemptCount,
-          createGuard,
-        ),
-    );
-  },
-  commitDeleteGuard(
-    jobId: string,
-    attemptCount: number,
-    guardId: string | null,
-    signal?: AbortSignal,
-  ) {
-    return runCancellableNative(
-      signal,
-      "commit attachment delete guard",
-      {
-        label: "attachment delete guard operation",
-        begin: (operationId) =>
-          attachmentSyncCommands.beginSharedUploadOperation(operationId),
-        cancel: (operationId) =>
-          attachmentSyncCommands.cancelSharedUploadOperation(operationId),
-      },
-      (operationId) =>
-        attachmentSyncCommands.commitDeleteGuard(
-          operationId,
-          jobId,
-          attemptCount,
-          guardId,
-        ),
-    );
-  },
-  reconcileDeleteGuards() {
-    return unwrapNative(
-      attachmentSyncCommands.reconcileDeleteGuards(),
-      "reconcile attachment delete guards",
-    );
-  },
-  downloadAndRestore(
-    input: {
-      jobId: string;
-      attemptCount: number;
-      objectId: string;
-      signedUrl: string;
-      ciphertextSha256: string;
-      ciphertextSizeBytes: number;
-      formatVersion: number;
-    },
-    signal?: AbortSignal,
-  ) {
-    return runCancellableDownload(
-      null,
-      signal,
-      "restore attachment download",
-      (operationId) =>
-        attachmentSyncCommands.downloadAndRestore(
-          operationId,
-          input.jobId,
-          input.attemptCount,
-          input.objectId,
-          input.signedUrl,
-          input.ciphertextSha256,
-          input.ciphertextSizeBytes,
-          input.formatVersion,
-        ),
-    );
-  },
-  cleanupTransferCache(
-    jobId: string,
-    attemptCount: number,
-    expectedCacheId: string,
-  ) {
-    return unwrapNative(
-      attachmentSyncCommands.cleanupTransferCache(
-        jobId,
-        attemptCount,
-        expectedCacheId,
-      ),
-      "clean attachment transfer cache",
     );
   },
   downloadSharedAttachment(
@@ -277,11 +116,10 @@ export const attachmentTransferNative = {
     signal?: AbortSignal,
   ) {
     return runCancellableDownload<SharedAttachmentCacheResult>(
-      input.scopeId,
       signal,
       "download shared attachment",
       (operationId) =>
-        attachmentSyncCommands.downloadSharedAttachment(
+        attachmentCommands.downloadSharedAttachment(
           operationId,
           input.scopeId,
           input.attachmentId,
@@ -293,26 +131,25 @@ export const attachmentTransferNative = {
   },
   sharedAttachmentPath(scopeId: string, attachmentId: string) {
     return unwrapNative(
-      attachmentSyncCommands.sharedAttachmentPath(scopeId, attachmentId),
+      attachmentCommands.sharedAttachmentPath(scopeId, attachmentId),
       "resolve shared attachment cache",
     );
   },
   removeSharedAttachment(scopeId: string, attachmentId: string) {
     return unwrapNative(
-      attachmentSyncCommands.removeSharedAttachment(scopeId, attachmentId),
+      attachmentCommands.removeSharedAttachment(scopeId, attachmentId),
       "remove shared attachment cache",
     );
   },
   clearSharedAttachmentScope(scopeId: string) {
     return unwrapNative(
-      attachmentSyncCommands.clearSharedAttachmentScope(scopeId),
+      attachmentCommands.clearSharedAttachmentScope(scopeId),
       "clear shared attachment cache",
     );
   },
 };
 
 async function runCancellableDownload<T>(
-  scopeId: string | null,
   signal: AbortSignal | undefined,
   label: string,
   operation: (
@@ -323,11 +160,11 @@ async function runCancellableDownload<T>(
     signal,
     label,
     {
-      label: "attachment download",
+      label: "shared attachment download",
       begin: (operationId) =>
-        attachmentSyncCommands.beginAttachmentDownload(operationId, scopeId),
+        attachmentCommands.beginSharedUploadOperation(operationId),
       cancel: (operationId) =>
-        attachmentSyncCommands.cancelAttachmentDownload(operationId),
+        attachmentCommands.cancelSharedUploadOperation(operationId),
     },
     operation,
   );
@@ -391,7 +228,7 @@ function throwIfAborted(signal?: AbortSignal) {
 
 function throwAbort(signal?: AbortSignal): never {
   if (signal?.reason) throw signal.reason;
-  const error = new Error("Attachment transfer aborted");
+  const error = new Error("Shared attachment operation aborted");
   error.name = "AbortError";
   throw error;
 }

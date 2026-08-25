@@ -9,6 +9,11 @@ pub use types::*;
 
 use conflict::{reconcile_content_conflict, row_matches_existing};
 
+// Older databases may still carry the retired workspace-binding setting. It
+// is read only while importing legacy rows so existing users keep their local
+// workspace identity; new local imports use the row owner and never create
+// the retired setting.
+
 pub async fn apply_legacy_import_item(
     pool: &SqlitePool,
     item: LegacyImportItem<'_>,
@@ -146,6 +151,9 @@ async fn insert_row_if_missing(
     transaction: &mut Transaction<'_, Sqlite>,
     row: &LegacyImportRow,
 ) -> Result<InsertOutcome, sqlx::Error> {
+    // Older imported databases may still carry the retired workspace-binding
+    // setting. Read it only to preserve their identity; new local imports use
+    // the row owner as the workspace and never write the retired setting.
     let result = match row {
         LegacyImportRow::Calendar(row) => sqlx::query(
             "INSERT INTO calendars \
@@ -215,11 +223,12 @@ async fn insert_row_if_missing(
         LegacyImportRow::Organization(row) => sqlx::query(
             "INSERT INTO organizations \
              (id, workspace_id, owner_user_id, name, memo, pinned, pin_order, created_at, updated_at) \
-             VALUES (?, NULLIF((SELECT json_extract(value_json, '$.workspace_id') \
-               FROM app_settings WHERE id = 'cloudsync_workspace_binding'), ''), \
+             VALUES (?, COALESCE(NULLIF((SELECT json_extract(value_json, '$.workspace_id') \
+               FROM app_settings WHERE id = 'cloudsync_workspace_binding'), ''), ?), \
                ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING",
         )
         .bind(&row.id)
+        .bind(&row.owner_user_id)
         .bind(&row.owner_user_id)
         .bind(&row.name)
         .bind(&row.memo)
@@ -233,11 +242,12 @@ async fn insert_row_if_missing(
             "INSERT INTO humans \
              (id, workspace_id, owner_user_id, organization_id, name, email, phone, job_title, \
               linkedin_username, memo, pinned, pin_order, created_at, updated_at) \
-             VALUES (?, NULLIF((SELECT json_extract(value_json, '$.workspace_id') \
-               FROM app_settings WHERE id = 'cloudsync_workspace_binding'), ''), \
+             VALUES (?, COALESCE(NULLIF((SELECT json_extract(value_json, '$.workspace_id') \
+               FROM app_settings WHERE id = 'cloudsync_workspace_binding'), ''), ?), \
                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING",
         )
         .bind(&row.id)
+        .bind(&row.owner_user_id)
         .bind(&row.owner_user_id)
         .bind(&row.organization_id)
         .bind(&row.name)
@@ -257,11 +267,12 @@ async fn insert_row_if_missing(
              (id, workspace_id, owner_user_id, title, created_at, updated_at, started_at, \
               ended_at, event_id, external_event_id, external_provider, series_id, event_json, \
               metadata_json, folder_path) \
-             VALUES (?, NULLIF((SELECT json_extract(value_json, '$.workspace_id') \
-               FROM app_settings WHERE id = 'cloudsync_workspace_binding'), ''), \
+             VALUES (?, COALESCE(NULLIF((SELECT json_extract(value_json, '$.workspace_id') \
+               FROM app_settings WHERE id = 'cloudsync_workspace_binding'), ''), ?), \
                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO NOTHING",
         )
         .bind(&row.id)
+        .bind(&row.owner_user_id)
         .bind(&row.owner_user_id)
         .bind(&row.title)
         .bind(&row.created_at)

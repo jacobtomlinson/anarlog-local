@@ -218,7 +218,7 @@ const baseNodeViews = {
 
 const COMPOSITION_SYNC_GRACE_MS = 500;
 
-// Stretching this delay does not reduce upload volume -- CloudSync stages a
+// Stretching this delay does not reduce upload volume -- the editor stages a
 // row's current value, not one entry per write, so a sync tick ships the note
 // once however often it was written (crates/db-core/tests/write_coalescing.rs).
 // maxWait is the part that matters: trailing-only never fires while keystrokes

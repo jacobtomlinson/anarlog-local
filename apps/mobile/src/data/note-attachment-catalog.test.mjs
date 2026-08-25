@@ -14,8 +14,6 @@ const row = {
   created_at: "2026-08-17T00:00:00.000Z",
   available_locally: 1,
   local_relative_path: "attachments/9cfb2f08-a02f-41cf-a13e-07f36b87ef2b",
-  cloud_object_key:
-    "e8d8149f-af6a-4c14-8b91-066fa196187c/02425e17-c452-41c9-869c-196d09f75c91.anb1",
 };
 
 test("maps a local note attachment to its canonical device path", () => {
@@ -31,8 +29,6 @@ test("maps a local note attachment to its canonical device path", () => {
       createdAt: "2026-08-17T00:00:00.000Z",
       availableLocally: true,
       localRelativePath: "attachments/9cfb2f08-a02f-41cf-a13e-07f36b87ef2b",
-      cloudObjectKey:
-        "e8d8149f-af6a-4c14-8b91-066fa196187c/02425e17-c452-41c9-869c-196d09f75c91.anb1",
     },
   ]);
 });

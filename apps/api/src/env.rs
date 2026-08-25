@@ -51,17 +51,13 @@ pub struct Env {
     #[serde(default, deserialize_with = "anlg_api_env::filter_empty")]
     pub posthog_api_key: Option<String>,
     #[serde(default)]
-    pub anarlog_attachment_backup_gc_enabled: bool,
-    #[serde(default, deserialize_with = "anlg_api_env::filter_empty")]
-    pub sqlitecloud_cloudsync_management_api_key: Option<String>,
+    pub anarlog_durable_cleanup_enabled: bool,
 
     #[serde(flatten)]
     pub observability: crate::observability::Env,
 
     #[serde(flatten)]
     pub supabase: anlg_api_env::SupabaseEnv,
-    #[serde(flatten)]
-    pub sync: anlg_api_sync::SyncEnv,
     #[serde(flatten)]
     nango: OptionalNangoEnv,
     #[serde(flatten)]
@@ -118,13 +114,6 @@ impl RuntimeConfig {
         {
             return Err("STRIPE_SECRET_KEY must be a live key in production".to_string());
         }
-        if env.anarlog_attachment_backup_gc_enabled && subscription.is_none() {
-            return Err(
-                "Stripe and Loops configuration is required when ANARLOG_ATTACHMENT_BACKUP_GC_ENABLED is true"
-                    .to_string(),
-            );
-        }
-
         Ok(Self {
             env,
             nango,
@@ -308,42 +297,6 @@ fn field_name_to_env_var(field: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[derive(Deserialize)]
-    struct SyncOnlyEnv {
-        #[serde(flatten)]
-        sync: anlg_api_sync::SyncEnv,
-    }
-
-    #[test]
-    fn deserializes_cloudsync_ttl_from_environment_string() {
-        let env: SyncOnlyEnv = envy::from_iter([(
-            "ANARLOG_CLOUDSYNC_TOKEN_TTL_SECONDS".to_string(),
-            "300".to_string(),
-        )])
-        .unwrap();
-
-        assert_eq!(env.sync.anarlog_cloudsync_token_ttl_seconds, Some(300));
-    }
-
-    #[test]
-    fn durable_cleanup_is_opt_in() {
-        #[derive(Deserialize)]
-        struct CleanupOnlyEnv {
-            #[serde(default)]
-            anarlog_attachment_backup_gc_enabled: bool,
-        }
-
-        let disabled: CleanupOnlyEnv = envy::from_iter(Vec::<(String, String)>::new()).unwrap();
-        let enabled: CleanupOnlyEnv = envy::from_iter([(
-            "ANARLOG_ATTACHMENT_BACKUP_GC_ENABLED".to_string(),
-            "true".to_string(),
-        )])
-        .unwrap();
-
-        assert!(!disabled.anarlog_attachment_backup_gc_enabled);
-        assert!(enabled.anarlog_attachment_backup_gc_enabled);
-    }
 
     #[test]
     fn core_supabase_configuration_remains_required() {

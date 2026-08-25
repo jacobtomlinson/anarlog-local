@@ -239,10 +239,8 @@ describe("calendar SQLite storage", () => {
     expect(sql).toContain("INSERT INTO events");
     expect(sql).toContain("UPDATE sessions");
     expect(sql).toContain("INSERT INTO humans");
-    expect(sql).toContain("cloudsync_workspace_binding");
-    expect(sql).toContain("NULLIF((");
-    expect(sql).not.toContain("COALESCE((");
-    expect(sql).toContain("NULLIF(NULLIF(?, ''), 'default-user')");
+    expect(sql).toContain("owner_user_id");
+    expect(sql).toContain("COALESCE(NULLIF(?, ''), 'default-user')");
     expect(sql).toContain("UPDATE session_participants");
     expect(sql).toContain("INSERT INTO session_participants");
     expect(sql).toContain("session.workspace_id");

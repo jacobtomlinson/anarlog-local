@@ -46,21 +46,18 @@ export async function createSession(
           id, workspace_id, owner_user_id, title, event_json, created_at,
           updated_at, deleted_at
         ) VALUES (
-          ?, NULLIF((
-            SELECT json_extract(value_json, '$.workspace_id')
-            FROM app_settings
-            WHERE id = 'cloudsync_workspace_binding'
-          ), ''), COALESCE(
-            NULLIF(NULLIF(?, ''), '${DEFAULT_USER_ID}'),
-            NULLIF((
-              SELECT json_extract(value_json, '$.workspace_id')
-              FROM app_settings
-              WHERE id = 'cloudsync_workspace_binding'
-            ), '')
-          ), ?, ?, ?, ?, NULL
+          ?, ?, COALESCE(NULLIF(?, ''), ''), ?, ?, ?, ?, NULL
         )
       `,
-      params: [sessionId, userId, title, initial?.event_json ?? "", now, now],
+      params: [
+        sessionId,
+        userId,
+        userId,
+        title,
+        initial?.event_json ?? "",
+        now,
+        now,
+      ],
     },
     createEmptyNoteStatement(sessionId, now, initial?.raw_md ?? ""),
     {
@@ -148,18 +145,7 @@ export async function getOrCreateSessionForEventId(
           started_at, ended_at, event_id, external_event_id, external_provider,
           series_id, event_json, deleted_at
         )
-        SELECT ?, NULLIF((
-          SELECT json_extract(value_json, '$.workspace_id')
-          FROM app_settings
-          WHERE id = 'cloudsync_workspace_binding'
-        ), ''), COALESCE(
-          NULLIF(NULLIF(?, ''), '${DEFAULT_USER_ID}'),
-          NULLIF((
-            SELECT json_extract(value_json, '$.workspace_id')
-            FROM app_settings
-            WHERE id = 'cloudsync_workspace_binding'
-          ), '')
-        ), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL
+        SELECT ?, ?, COALESCE(NULLIF(?, ''), ''), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL
         WHERE NOT EXISTS (
           SELECT 1
           FROM sessions
@@ -169,6 +155,7 @@ export async function getOrCreateSessionForEventId(
       `,
       params: [
         sessionId,
+        userId,
         userId,
         title ?? sessionEvent.title,
         now,

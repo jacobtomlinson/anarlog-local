@@ -189,7 +189,7 @@ export function SettingsAccount() {
         open={isSignOutDialogOpen}
         onOpenChange={setIsSignOutDialogOpen}
         title={t`Sign out of Anarlog?`}
-        description={t`You'll need to sign in again to use cloud sync and account features.`}
+        description={t`You'll need to sign in again to use account features.`}
         confirmLabel={t`Sign out`}
         pendingLabel={t`Signing out...`}
         isPending={signOutMutation.isPending}

@@ -87,12 +87,6 @@ describe("AppSettingsView", () => {
     ).toBeNull();
   });
 
-  it("keeps cloud sync in its dedicated settings page", () => {
-    renderAppSettings();
-
-    expect(screen.queryByRole("switch", { name: "Cloud sync" })).toBeNull();
-  });
-
   it("keeps telemetry in its dedicated privacy page", () => {
     renderAppSettings();
 

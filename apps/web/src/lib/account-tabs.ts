@@ -3,7 +3,6 @@ export const ACCOUNT_SECTIONS = [
   { id: "plan", label: "Your plan" },
   { id: "referrals", label: "Refer friends" },
   { id: "integrations", label: "Integrations" },
-  { id: "devices", label: "Synced devices" },
   { id: "shares", label: "Shared notes" },
   { id: "api-keys", label: "Cloud API keys" },
   { id: "session", label: "Session controls" },
@@ -21,7 +20,7 @@ export const ACCOUNT_TABS = [
   {
     id: "connections",
     label: "Connections",
-    sectionIds: ["integrations", "devices", "shares"],
+    sectionIds: ["integrations", "shares"],
   },
   {
     id: "developer",
@@ -40,7 +39,6 @@ const SECTION_TAB: Record<AccountSectionId, AccountTabId> = {
   referrals: "account",
   danger: "account",
   integrations: "connections",
-  devices: "connections",
   shares: "connections",
   "api-keys": "developer",
   session: "developer",

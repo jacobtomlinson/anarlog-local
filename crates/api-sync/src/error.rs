@@ -11,35 +11,8 @@ pub enum SyncError {
     #[error("Invalid request: {0}")]
     BadRequest(String),
 
-    #[error("Anarlog Pro is required for CloudSync")]
+    #[error("Anarlog Pro is required for shared note publication")]
     ProPlanRequired,
-
-    #[error("A newer Anarlog version is required for encrypted CloudSync")]
-    CloudsyncUpgradeRequired,
-
-    #[error("This account is protected by a different E2EE recovery key")]
-    E2eeKeyMismatch,
-
-    #[error("Set up encrypted sync on an existing device first")]
-    E2eeEnrollmentRequiresExistingKey,
-
-    #[error("E2EE device enrollment is unavailable")]
-    E2eeEnrollmentUnavailable,
-
-    #[error("E2EE device enrollment is already approved")]
-    E2eeEnrollmentConflict,
-
-    #[error("CloudSync device limit reached")]
-    SyncDeviceLimitReached,
-
-    #[error("E2EE freshness witness access is not permitted")]
-    E2eeWitnessForbidden,
-
-    #[error("E2EE freshness witness is not initialized")]
-    E2eeWitnessUninitialized,
-
-    #[error("E2EE freshness witness is unavailable")]
-    E2eeWitnessServiceUnavailable,
 
     #[error("Shared note publication is not permitted")]
     SnapshotPublicationForbidden,
@@ -58,36 +31,6 @@ pub enum SyncError {
 
     #[error("Shared note recap email is unavailable")]
     RecapEmailUnavailable,
-
-    #[error("CloudSync credential service is unavailable")]
-    Upstream,
-
-    #[error("Attachment backup access is not permitted")]
-    AttachmentBackupForbidden,
-
-    #[error("Attachment backup is unavailable")]
-    AttachmentBackupNotFound,
-
-    #[error("Attachment backup changed")]
-    AttachmentBackupConflict,
-
-    #[error("Attachment backup dependency appeared")]
-    AttachmentBackupDependencyAppeared,
-
-    #[error("Attachment backup deletion was canceled")]
-    AttachmentBackupDeleteCancelled,
-
-    #[error("Attachment backup deletion can no longer be canceled")]
-    AttachmentBackupDeleteTooLate,
-
-    #[error("Attachment backup quota is exhausted")]
-    AttachmentBackupQuotaExceeded,
-
-    #[error("Attachment backup service is unavailable")]
-    AttachmentBackupServiceUnavailable,
-
-    #[error("Attachment backup verification is busy")]
-    AttachmentBackupVerificationBusy,
 
     #[error("Shared attachment access is not permitted")]
     SharedAttachmentForbidden,
@@ -118,54 +61,7 @@ impl IntoResponse for SyncError {
             Self::ProPlanRequired => (
                 StatusCode::FORBIDDEN,
                 "subscription_required",
-                "Anarlog Pro is required for CloudSync".to_string(),
-            ),
-            Self::CloudsyncUpgradeRequired => (
-                StatusCode::UPGRADE_REQUIRED,
-                "cloudsync_upgrade_required",
-                "Update Anarlog to continue using encrypted CloudSync".to_string(),
-            ),
-            Self::E2eeKeyMismatch => (
-                StatusCode::CONFLICT,
-                "e2ee_key_mismatch",
-                "This account is protected by a different E2EE recovery key".to_string(),
-            ),
-            Self::E2eeEnrollmentRequiresExistingKey => (
-                StatusCode::CONFLICT,
-                "e2ee_enrollment_requires_existing_key",
-                "Set up encrypted sync on an existing device first".to_string(),
-            ),
-            Self::E2eeEnrollmentUnavailable => (
-                StatusCode::NOT_FOUND,
-                "e2ee_enrollment_unavailable",
-                "E2EE device enrollment is unavailable".to_string(),
-            ),
-            Self::E2eeEnrollmentConflict => (
-                StatusCode::CONFLICT,
-                "e2ee_enrollment_conflict",
-                "E2EE device enrollment is already approved".to_string(),
-            ),
-            Self::SyncDeviceLimitReached => (
-                StatusCode::FORBIDDEN,
-                "sync_device_limit_reached",
-                "Cloud sync is limited to 5 devices per account; remove a device before syncing here"
-                    .to_string(),
-            ),
-            Self::E2eeWitnessForbidden => (
-                StatusCode::FORBIDDEN,
-                "e2ee_witness_forbidden",
-                "E2EE freshness witness access is not permitted".to_string(),
-            ),
-            Self::E2eeWitnessUninitialized => (
-                StatusCode::CONFLICT,
-                "e2ee_witness_uninitialized",
-                "Open an existing trusted device before setting up encrypted sync on this device"
-                    .to_string(),
-            ),
-            Self::E2eeWitnessServiceUnavailable => (
-                StatusCode::BAD_GATEWAY,
-                "e2ee_witness_unavailable",
-                "E2EE freshness witness is unavailable".to_string(),
+                "Anarlog Pro is required for shared note publication".to_string(),
             ),
             Self::SnapshotPublicationForbidden => (
                 StatusCode::FORBIDDEN,
@@ -198,56 +94,6 @@ impl IntoResponse for SyncError {
                 "shared_note_recap_email_unavailable",
                 "Shared note recap email is unavailable".to_string(),
             ),
-            Self::Upstream => (
-                StatusCode::BAD_GATEWAY,
-                "cloudsync_credential_service_unavailable",
-                "CloudSync credential service is unavailable".to_string(),
-            ),
-            Self::AttachmentBackupForbidden => (
-                StatusCode::FORBIDDEN,
-                "attachment_backup_forbidden",
-                "Attachment backup access is not permitted".to_string(),
-            ),
-            Self::AttachmentBackupNotFound => (
-                StatusCode::NOT_FOUND,
-                "attachment_backup_not_found",
-                "Attachment backup is unavailable".to_string(),
-            ),
-            Self::AttachmentBackupConflict => (
-                StatusCode::CONFLICT,
-                "attachment_backup_conflict",
-                "Attachment backup changed".to_string(),
-            ),
-            Self::AttachmentBackupDependencyAppeared => (
-                StatusCode::CONFLICT,
-                "attachment_backup_dependency_appeared",
-                "Attachment backup dependency appeared".to_string(),
-            ),
-            Self::AttachmentBackupDeleteCancelled => (
-                StatusCode::CONFLICT,
-                "attachment_backup_delete_cancelled",
-                "Attachment backup deletion was canceled".to_string(),
-            ),
-            Self::AttachmentBackupDeleteTooLate => (
-                StatusCode::CONFLICT,
-                "attachment_backup_delete_too_late",
-                "Attachment backup deletion can no longer be canceled".to_string(),
-            ),
-            Self::AttachmentBackupQuotaExceeded => (
-                StatusCode::INSUFFICIENT_STORAGE,
-                "attachment_backup_quota_exceeded",
-                "Attachment backup quota is exhausted".to_string(),
-            ),
-            Self::AttachmentBackupServiceUnavailable => (
-                StatusCode::BAD_GATEWAY,
-                "attachment_backup_service_unavailable",
-                "Attachment backup service is unavailable".to_string(),
-            ),
-            Self::AttachmentBackupVerificationBusy => (
-                StatusCode::SERVICE_UNAVAILABLE,
-                "attachment_backup_verification_busy",
-                "Attachment backup verification is busy".to_string(),
-            ),
             Self::SharedAttachmentForbidden => (
                 StatusCode::FORBIDDEN,
                 "shared_attachment_forbidden",
@@ -278,13 +124,8 @@ impl IntoResponse for SyncError {
                 "shared_attachment_verification_busy",
                 "Shared attachment verification is busy".to_string(),
             ),
-            Self::Internal(message) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "internal_server_error",
-                message,
-            ),
+            Self::Internal(message) => (StatusCode::INTERNAL_SERVER_ERROR, "internal", message),
         };
-
         anlg_api_error::error_response(status, code, &message)
     }
 }

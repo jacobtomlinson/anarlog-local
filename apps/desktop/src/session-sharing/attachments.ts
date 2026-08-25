@@ -21,12 +21,8 @@ type AttachmentRow = {
   sha256: string;
   source_type: string;
   source_id: string;
-  cloud_sync_enabled: number | boolean;
-  cloud_object_key: string;
+  shared_object_key: string;
   local_availability: string;
-  transfer_direction: string | null;
-  transfer_phase: string | null;
-  transfer_error: string | null;
 };
 
 export type SessionShareAttachment = {
@@ -37,12 +33,9 @@ export type SessionShareAttachment = {
   sha256: string;
   sourceType: string;
   sourceId: string;
-  cloudSyncEnabled: boolean;
-  cloudObjectKey: string;
+  // Kept as the historical SQLite column name for shared-note object compatibility.
+  remoteObjectKey: string;
   localAvailability: "present" | "absent";
-  transferDirection: "upload" | "download" | "delete" | null;
-  transferPhase: string | null;
-  transferError: string;
 };
 
 type ReservedSharedAttachment = {
@@ -75,23 +68,12 @@ const SESSION_ATTACHMENTS_SQL = `
     attachment.sha256,
     attachment.source_type,
     attachment.source_id,
-    attachment.cloud_sync_enabled,
-    attachment.cloud_object_key,
-    COALESCE(local.availability, 'absent') AS local_availability,
-    job.direction AS transfer_direction,
-    job.phase AS transfer_phase,
-    job.last_error AS transfer_error
+    -- Retain the shipped column name for existing local databases.
+    attachment.cloud_object_key AS shared_object_key,
+    COALESCE(local.availability, 'absent') AS local_availability
   FROM session_attachments AS attachment
   LEFT JOIN attachment_local_state AS local
     ON local.attachment_id = attachment.id
-  LEFT JOIN attachment_transfer_jobs AS job
-    ON job.id = (
-      SELECT candidate.id
-      FROM attachment_transfer_jobs AS candidate
-      WHERE candidate.attachment_id = attachment.id
-      ORDER BY candidate.updated_at DESC, candidate.created_at DESC, candidate.id
-      LIMIT 1
-    )
   WHERE attachment.session_id = ?
     AND attachment.deleted_at IS NULL
   ORDER BY attachment.source_type = 'session_audio' DESC,
@@ -109,7 +91,7 @@ export function useSessionShareAttachments(sessionId: string) {
 }
 
 export async function loadSessionShareAttachments(sessionId: string) {
-  await flushDatabaseWrites([`session:${sessionId}`, "attachment-transfers"]);
+  await flushDatabaseWrites([`session:${sessionId}`]);
   return mapAttachmentRows(
     await liveQueryClient.execute<AttachmentRow>(SESSION_ATTACHMENTS_SQL, [
       sessionId,
@@ -137,7 +119,7 @@ export async function prepareSessionShareAttachment(input: {
   const attachment = input.attachment;
   if (
     attachment.localAvailability !== "present" ||
-    !meetsAttachmentBackupRequirement(attachment) ||
+    !meetsRemoteAttachmentRequirement(attachment) ||
     attachment.sizeBytes <= 0 ||
     !SHA256_PATTERN.test(attachment.sha256)
   ) {
@@ -178,7 +160,7 @@ export async function prepareSessionShareAttachment(input: {
     attachment.sizeBytes,
     attachment.filename,
     attachment.contentType,
-    attachment.cloudObjectKey,
+    attachment.remoteObjectKey,
     input.signal,
   );
   let operationFailed = false;
@@ -219,7 +201,7 @@ export async function prepareSessionShareAttachment(input: {
           prepared.sizeBytes,
           attachment.filename,
           attachment.contentType,
-          attachment.cloudObjectKey,
+          attachment.remoteObjectKey,
           start,
           end,
         );
@@ -272,7 +254,7 @@ export async function prepareSessionShareAttachment(input: {
         prepared.sizeBytes,
         attachment.filename,
         attachment.contentType,
-        attachment.cloudObjectKey,
+        attachment.remoteObjectKey,
         input.signal,
       ))
     ) {
@@ -296,7 +278,7 @@ export async function prepareSessionShareAttachment(input: {
         prepared.sizeBytes,
         attachment.filename,
         attachment.contentType,
-        attachment.cloudObjectKey,
+        attachment.remoteObjectKey,
         input.signal,
       ))
     ) {
@@ -382,17 +364,17 @@ export function restoreLocalAttachmentIds(
 export function isAttachmentShareable(attachment: SessionShareAttachment) {
   return (
     attachment.localAvailability === "present" &&
-    meetsAttachmentBackupRequirement(attachment) &&
+    meetsRemoteAttachmentRequirement(attachment) &&
     attachment.sizeBytes > 0 &&
     attachment.sizeBytes <= 512 * 1024 * 1024 &&
     SHA256_PATTERN.test(attachment.sha256)
   );
 }
 
-function meetsAttachmentBackupRequirement(attachment: SessionShareAttachment) {
+function meetsRemoteAttachmentRequirement(attachment: SessionShareAttachment) {
   return (
     attachment.sourceType === "session_audio" ||
-    (attachment.cloudSyncEnabled && attachment.cloudObjectKey.length > 0)
+    attachment.remoteObjectKey.length > 0
   );
 }
 
@@ -521,22 +503,10 @@ function mapAttachmentRows(rows: AttachmentRow[]): SessionShareAttachment[] {
     sha256: row.sha256,
     sourceType: row.source_type,
     sourceId: row.source_id,
-    cloudSyncEnabled: Boolean(row.cloud_sync_enabled),
-    cloudObjectKey: row.cloud_object_key,
+    remoteObjectKey: row.shared_object_key,
     localAvailability:
       row.local_availability === "present" ? "present" : "absent",
-    transferDirection: isTransferDirection(row.transfer_direction)
-      ? row.transfer_direction
-      : null,
-    transferPhase: row.transfer_phase,
-    transferError: row.transfer_error ?? "",
   }));
-}
-
-function isTransferDirection(
-  value: string | null,
-): value is "upload" | "download" | "delete" {
-  return value === "upload" || value === "download" || value === "delete";
 }
 
 function assertSharedAttachmentResponse(

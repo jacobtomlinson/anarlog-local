@@ -150,8 +150,7 @@ describe("SQLite settings", () => {
 
     const statements = mocks.executeTransaction.mock.calls[0][0];
     expect(statements).toHaveLength(2);
-    expect(statements[0].sql).toContain("INSERT INTO synced_preferences");
-    expect(statements[0].sql).toContain("cloudsync_workspace_binding");
+    expect(statements[0].sql).toContain("INSERT INTO app_settings");
     expect(statements[0].sql).toContain("ON CONFLICT(id) DO UPDATE");
     expect(statements[0].params.slice(0, 2)).toEqual([
       "theme",

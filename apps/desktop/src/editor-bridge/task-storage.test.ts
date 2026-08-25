@@ -149,20 +149,17 @@ describe("SQLite task storage", () => {
     const statements = harness.executeTransaction.mock.calls[0][0];
     expect(statements).toHaveLength(2);
     expect(statements[0].sql).toContain("SET deleted_at = ?");
-    expect(statements[0].sql).toContain("$.account_user_id");
     expect(statements[0].sql).toContain("json_each(?)");
     expect(statements[1].sql).toContain("INSERT INTO action_items");
     expect(statements[1].sql).toContain("SELECT NULLIF(workspace_id");
-    expect(statements[1].sql).toContain("cloudsync_workspace_binding");
-    expect(statements[1].sql).toContain("$.account_user_id");
+    expect(statements[1].sql).toContain("COALESCE(NULLIF(?, ?), '')");
     expect(statements[1].sql).toContain("NULLIF(workspace_id, '')");
-    expect(statements[1].sql).not.toContain("\n          ''\n");
     expect(statements[1].sql).toContain("deleted_at = NULL");
     expect(statements[1].params).toContain("task-1");
     expect(statements[1].params).toContain("Follow up");
   });
 
-  it("resolves legacy default task ownership from the workspace binding", async () => {
+  it("uses the local default owner for task writes", async () => {
     const harness = createHarness();
     const storage = createSqliteTaskStorage(
       DEFAULT_USER_ID,
@@ -175,8 +172,8 @@ describe("SQLite task storage", () => {
       expect(harness.executeTransaction).toHaveBeenCalledOnce(),
     );
     const statements = harness.executeTransaction.mock.calls[0][0];
-    expect(statements[0].sql).toContain("$.account_user_id");
-    expect(statements[1].sql).toContain("$.account_user_id");
+    expect(statements[0].sql).toContain("COALESCE(NULLIF(?, ?), '')");
+    expect(statements[1].sql).toContain("COALESCE(NULLIF(?, ?), '')");
     expect(
       statements.flatMap(
         (statement: { params: unknown[] }) => statement.params,

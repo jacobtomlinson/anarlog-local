@@ -7,19 +7,13 @@ pub const SHARED_PREVIEW_SCOPE_PREFIX: &str = "preview:";
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TransferPaths {
     cache_base: PathBuf,
-    data_base: PathBuf,
 }
 
 impl TransferPaths {
-    pub fn new(cache_base: impl Into<PathBuf>, data_base: impl Into<PathBuf>) -> Self {
+    pub fn new(cache_base: impl Into<PathBuf>) -> Self {
         Self {
             cache_base: cache_base.into(),
-            data_base: data_base.into(),
         }
-    }
-
-    pub fn private_cache_root(&self) -> PathBuf {
-        self.cache_root().join("private")
     }
 
     pub fn shared_upload_cache_root(&self) -> PathBuf {
@@ -32,10 +26,6 @@ impl TransferPaths {
 
     pub fn shared_preview_cache_root(&self) -> PathBuf {
         self.cache_root().join("shared-preview")
-    }
-
-    pub fn delete_guard_root(&self) -> PathBuf {
-        self.data_base.join("attachment-sync").join("delete-guards")
     }
 
     pub fn shared_scope_path(&self, scope_id: &str) -> Result<PathBuf> {
@@ -63,25 +53,17 @@ mod tests {
 
     #[test]
     fn derives_platform_neutral_transfer_roots() {
-        let paths = TransferPaths::new(Path::new("/cache"), Path::new("/data"));
+        let paths = TransferPaths::new(Path::new("/cache"));
 
-        assert_eq!(
-            paths.private_cache_root(),
-            Path::new("/cache/attachment-sync/private")
-        );
         assert_eq!(
             paths.shared_upload_cache_root(),
             Path::new("/cache/attachment-sync/shared-upload")
-        );
-        assert_eq!(
-            paths.delete_guard_root(),
-            Path::new("/data/attachment-sync/delete-guards")
         );
     }
 
     #[test]
     fn preview_scopes_are_isolated_from_durable_shared_cache() {
-        let paths = TransferPaths::new("/cache", "/data");
+        let paths = TransferPaths::new("/cache");
         let preview_id = Uuid::new_v4();
         let preview_scope = format!("{SHARED_PREVIEW_SCOPE_PREFIX}{preview_id}");
 

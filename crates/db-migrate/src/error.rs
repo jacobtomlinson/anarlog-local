@@ -20,11 +20,6 @@ pub enum MigrateError {
     RetiredMigrationStillActive { version: i64 },
     #[error("retired migration version {version} is declared more than once")]
     DuplicateRetiredMigration { version: i64 },
-    #[error("cloudsync alter step {step_id} targets non-synced table {table_name}")]
-    InvalidCloudsyncStep {
-        step_id: &'static str,
-        table_name: &'static str,
-    },
     // The desktop startup dialog classifies this failure by matching
     // "created by a newer version of Anarlog" in the rendered message.
     #[error(

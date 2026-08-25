@@ -2,39 +2,36 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::pin::Pin;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use anlg_db_core::Db;
+use sha2::{Digest, Sha384};
 use sqlx::migrate::{
     AppliedMigration, Migrate, MigrateError as SqlxMigrateError, Migration, MigrationType,
 };
-use sqlx::{Executor, SqlSafeStr, Sqlite, SqliteConnection};
+use sqlx::{SqlSafeStr, Sqlite, SqliteConnection};
 
 use crate::error::MigrateError;
-use crate::schema::{DbSchema, MigrationScope, MigrationStep, RetiredMigration};
+use crate::schema::{DbSchema, MigrationStep, RetiredMigration};
 
 type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 #[derive(Clone, Copy)]
 struct StepMeta {
-    scope: MigrationScope,
     breaking: bool,
 }
 
-struct DbMigrateConnection<'a> {
-    db: &'a Db,
+struct DbMigrateConnection {
     conn: sqlx::pool::PoolConnection<Sqlite>,
     meta_by_version: HashMap<i64, StepMeta>,
 }
 
-impl<'a> DbMigrateConnection<'a> {
+impl DbMigrateConnection {
     fn new(
-        db: &'a Db,
         conn: sqlx::pool::PoolConnection<Sqlite>,
         meta_by_version: HashMap<i64, StepMeta>,
     ) -> Self {
         Self {
-            db,
             conn,
             meta_by_version,
         }
@@ -55,7 +52,6 @@ pub(crate) async fn run_migrations(
             (
                 migration.version,
                 StepMeta {
-                    scope: step.scope,
                     breaking: is_breaking_step(step.sql),
                 },
             )
@@ -67,7 +63,7 @@ pub(crate) async fn run_migrations(
         .collect();
 
     let conn = db.pool().acquire().await?;
-    let mut conn = DbMigrateConnection::new(db, conn, meta_by_version);
+    let mut conn = DbMigrateConnection::new(conn, meta_by_version);
     run_direct(&migrations, &retired_by_version, &mut conn, on_progress).await?;
     Ok(())
 }
@@ -77,7 +73,7 @@ const MIGRATIONS_TABLE: &str = "_sqlx_migrations";
 async fn run_direct(
     migrations: &[Migration],
     retired_by_version: &HashMap<i64, RetiredMigration>,
-    conn: &mut DbMigrateConnection<'_>,
+    conn: &mut DbMigrateConnection,
     mut on_progress: impl FnMut(crate::MigrationProgress) + Send,
 ) -> Result<(), MigrateError> {
     conn.lock().await?;
@@ -321,13 +317,24 @@ fn resolve_migrations(
 
         migrations.push((
             step,
-            Migration::new(
-                version,
-                Cow::Borrowed(description),
-                MigrationType::Simple,
-                step.sql.into_sql_str(),
-                step.sql.starts_with("-- no-transaction"),
-            ),
+            if matches!(step.scope, crate::schema::MigrationScope::Retired) {
+                Migration {
+                    version,
+                    description: Cow::Borrowed(description),
+                    migration_type: MigrationType::Simple,
+                    sql: "".into_sql_str(),
+                    checksum: Cow::Owned(Sha384::digest(step.sql).to_vec()),
+                    no_tx: false,
+                }
+            } else {
+                Migration::new(
+                    version,
+                    Cow::Borrowed(description),
+                    MigrationType::Simple,
+                    step.sql.into_sql_str(),
+                    step.sql.starts_with("-- no-transaction"),
+                )
+            },
         ));
     }
 
@@ -335,19 +342,8 @@ fn resolve_migrations(
     Ok(migrations)
 }
 
-fn validate_step(schema: DbSchema, step: &MigrationStep) -> Result<(), MigrateError> {
-    let MigrationScope::CloudsyncAlter { table_name } = step.scope else {
-        return Ok(());
-    };
-
-    if (schema.validate_cloudsync_table)(table_name) {
-        return Ok(());
-    }
-
-    Err(MigrateError::InvalidCloudsyncStep {
-        step_id: step.id,
-        table_name,
-    })
+fn validate_step(_schema: DbSchema, _step: &MigrationStep) -> Result<(), MigrateError> {
+    Ok(())
 }
 
 fn parse_step_id(step_id: &'static str) -> Result<(i64, &'static str), MigrateError> {
@@ -368,11 +364,7 @@ fn parse_step_id(step_id: &'static str) -> Result<(i64, &'static str), MigrateEr
     Ok((version, description))
 }
 
-fn cloudsync_error(err: impl std::error::Error + Send + Sync + 'static) -> SqlxMigrateError {
-    SqlxMigrateError::Execute(sqlx::Error::config(err))
-}
-
-impl Migrate for DbMigrateConnection<'_> {
+impl Migrate for DbMigrateConnection {
     fn create_schema_if_not_exists<'e>(
         &'e mut self,
         schema_name: &'e str,
@@ -419,10 +411,7 @@ impl Migrate for DbMigrateConnection<'_> {
                 .meta_by_version
                 .get(&migration.version)
                 .copied()
-                .unwrap_or(StepMeta {
-                    scope: MigrationScope::Plain,
-                    breaking: false,
-                });
+                .unwrap_or(StepMeta { breaking: false });
 
             // Raise the floor before the schema change lands: crashing in
             // between locks older builds out of a schema that is still
@@ -434,67 +423,7 @@ impl Migrate for DbMigrateConnection<'_> {
                     .map_err(SqlxMigrateError::from)?;
             }
 
-            match meta.scope {
-                MigrationScope::Plain => {
-                    <SqliteConnection as Migrate>::apply(&mut *self.conn, table_name, migration)
-                        .await
-                }
-                MigrationScope::CloudsyncAlter {
-                    table_name: cs_table,
-                } => {
-                    let cloudsync_table_enabled = self.db.cloudsync_enabled()
-                        && anlg_db_core::cloudsync_is_enabled_on(&mut *self.conn, cs_table)
-                            .await
-                            .map_err(cloudsync_error)?;
-
-                    if !cloudsync_table_enabled {
-                        return <SqliteConnection as Migrate>::apply(
-                            &mut *self.conn,
-                            table_name,
-                            migration,
-                        )
-                        .await;
-                    }
-
-                    let start = Instant::now();
-
-                    // The alter window bypasses sqlx's per-migration transaction, so a
-                    // crash mid-way would otherwise leave a half-migrated schema with no
-                    // _sqlx_migrations row, and the re-run would fail on already-applied
-                    // DDL. Wrap it ourselves unless the step opts out.
-                    let wrap_in_transaction = !migration.no_tx;
-                    if wrap_in_transaction {
-                        sqlx::query("BEGIN IMMEDIATE")
-                            .execute(&mut *self.conn)
-                            .await
-                            .map_err(SqlxMigrateError::from)?;
-                    }
-
-                    let result =
-                        cloudsync_alter_migration(&mut self.conn, cs_table, migration).await;
-
-                    match result {
-                        Ok(()) if wrap_in_transaction => {
-                            sqlx::query("COMMIT")
-                                .execute(&mut *self.conn)
-                                .await
-                                .map_err(SqlxMigrateError::from)?;
-                        }
-                        Ok(()) => {}
-                        Err(error) => {
-                            if wrap_in_transaction {
-                                let _ = sqlx::query("ROLLBACK").execute(&mut *self.conn).await;
-                            }
-                            return Err(error);
-                        }
-                    }
-
-                    let elapsed = start.elapsed();
-                    update_execution_time(&mut self.conn, migration.version, elapsed).await?;
-
-                    Ok(elapsed)
-                }
-            }
+            <SqliteConnection as Migrate>::apply(&mut *self.conn, table_name, migration).await
         })
     }
 
@@ -505,66 +434,4 @@ impl Migrate for DbMigrateConnection<'_> {
     ) -> BoxFuture<'e, Result<Duration, SqlxMigrateError>> {
         <SqliteConnection as Migrate>::revert(&mut *self.conn, table_name, migration)
     }
-}
-
-async fn cloudsync_alter_migration(
-    conn: &mut SqliteConnection,
-    cs_table: &str,
-    migration: &Migration,
-) -> Result<(), SqlxMigrateError> {
-    anlg_db_core::cloudsync_begin_alter_on(&mut *conn, cs_table)
-        .await
-        .map_err(cloudsync_error)?;
-
-    execute_migration(&mut *conn, migration).await?;
-
-    anlg_db_core::cloudsync_commit_alter_on(&mut *conn, cs_table)
-        .await
-        .map_err(cloudsync_error)?;
-
-    Ok(())
-}
-
-async fn execute_migration(
-    conn: &mut SqliteConnection,
-    migration: &Migration,
-) -> Result<(), SqlxMigrateError> {
-    conn.execute(migration.sql.clone())
-        .await
-        .map_err(|err| SqlxMigrateError::ExecuteMigration(err, migration.version))?;
-
-    sqlx::query(
-        r#"
-INSERT INTO _sqlx_migrations ( version, description, success, checksum, execution_time )
-VALUES ( ?1, ?2, TRUE, ?3, -1 )
-        "#,
-    )
-    .bind(migration.version)
-    .bind(&*migration.description)
-    .bind(&*migration.checksum)
-    .execute(&mut *conn)
-    .await?;
-
-    Ok(())
-}
-
-async fn update_execution_time(
-    conn: &mut SqliteConnection,
-    version: i64,
-    elapsed: Duration,
-) -> Result<(), SqlxMigrateError> {
-    #[allow(clippy::cast_possible_truncation)]
-    sqlx::query(
-        r#"
-UPDATE _sqlx_migrations
-SET execution_time = ?1
-WHERE version = ?2
-        "#,
-    )
-    .bind(elapsed.as_nanos() as i64)
-    .bind(version)
-    .execute(&mut *conn)
-    .await?;
-
-    Ok(())
 }

@@ -81,28 +81,6 @@ export function useStartListening(sessionId: string) {
       return;
     }
     try {
-      await lifecycle.acquireCloudsyncLease();
-    } catch (error) {
-      console.error("[listener] failed to defer CloudSync for capture", error);
-      trackAnalyticsEvent("session_start_failed", {
-        failure_stage: "cloud_sync_deferral",
-      });
-      try {
-        await lifecycle.releaseCloudsyncLease();
-      } catch (cleanupError) {
-        console.error(
-          "[listener] failed to release capture CloudSync deferral",
-          cleanupError,
-        );
-      }
-      sonnerToast.error(
-        "Anarlog could not safely start recording. Please try again.",
-        { id: "capture-state-persist-failed" },
-      );
-      return;
-    }
-
-    try {
       await lifecycle.persistMarker();
     } catch (error) {
       console.error(
@@ -118,14 +96,6 @@ export function useStartListening(sessionId: string) {
         console.error(
           "[listener] failed to clean up capture state",
           cleanupError,
-        );
-      }
-      try {
-        await lifecycle.releaseCloudsyncLease();
-      } catch (releaseError) {
-        console.error(
-          "[listener] failed to release capture CloudSync deferral",
-          releaseError,
         );
       }
       sonnerToast.error(
@@ -168,8 +138,6 @@ export function useStartListening(sessionId: string) {
           "[listener] failed to clean up capture state",
           cleanupError,
         );
-      } finally {
-        await lifecycle.releaseCloudsyncLease();
       }
       sonnerToast.error(
         "Anarlog could not safely start recording. Please try again.",
@@ -191,8 +159,6 @@ export function useStartListening(sessionId: string) {
           "Anarlog could not safely start recording. Please try again.",
           { id: "capture-state-persist-failed" },
         );
-      } finally {
-        await lifecycle.releaseCloudsyncLease();
       }
       return;
     }

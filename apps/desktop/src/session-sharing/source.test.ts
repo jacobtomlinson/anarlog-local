@@ -45,7 +45,6 @@ function sourceRow(
     assigned_workspace_kind: string | null;
     assigned_workspace_deleted_at: string | null;
     assigned_workspace_role: string | null;
-    binding_json: string | null;
   }> = {},
 ) {
   return {
@@ -73,7 +72,6 @@ function sourceRow(
     assigned_workspace_kind: "personal",
     assigned_workspace_deleted_at: null,
     assigned_workspace_role: "owner",
-    binding_json: null,
     ...overrides,
   };
 }
@@ -161,16 +159,12 @@ describe("loadSessionShareSource", () => {
     ).resolves.toMatchObject({ participants: ["John Jeong"] });
   });
 
-  it("uses the bound personal workspace while its local projection is missing", async () => {
+  it("uses the account workspace when the local projection is missing", async () => {
     mocks.execute.mockResolvedValue([
       sourceRow({
         personal_workspace_available: 0,
         assigned_workspace_kind: null,
         assigned_workspace_role: null,
-        binding_json: JSON.stringify({
-          workspace_id: ACCOUNT_ID,
-          account_user_id: ACCOUNT_ID,
-        }),
       }),
     ]);
 
@@ -179,19 +173,18 @@ describe("loadSessionShareSource", () => {
     ).resolves.toMatchObject({ workspaceId: ACCOUNT_ID });
   });
 
-  it("rejects an unprojected personal workspace without an account binding", async () => {
+  it("accepts a legacy account workspace without Sync metadata", async () => {
     mocks.execute.mockResolvedValue([
       sourceRow({
         personal_workspace_available: 0,
         assigned_workspace_kind: null,
         assigned_workspace_role: null,
-        binding_json: null,
       }),
     ]);
 
     await expect(
       loadSessionShareSource("session-1", ACCOUNT_ID),
-    ).rejects.toThrow("personal workspace is unavailable");
+    ).resolves.toMatchObject({ workspaceId: ACCOUNT_ID });
   });
 
   it.each(["owner", "admin"])(
@@ -232,10 +225,6 @@ describe("loadSessionShareSource", () => {
         assigned_workspace_kind: "shared",
         assigned_workspace_deleted_at: "2026-07-17T00:00:00Z",
         assigned_workspace_role: "owner",
-        binding_json: JSON.stringify({
-          workspace_id: "workspace-shared",
-          account_user_id: ACCOUNT_ID,
-        }),
       }),
     ]);
 
@@ -244,22 +233,18 @@ describe("loadSessionShareSource", () => {
     ).rejects.toThrow("no longer share");
   });
 
-  it("falls back to the projected personal workspace for a legacy binding", async () => {
+  it("rejects an unknown workspace without Sync metadata", async () => {
     mocks.execute.mockResolvedValue([
       sourceRow({
         workspace_id: "legacy-local-workspace",
         assigned_workspace_kind: null,
         assigned_workspace_role: null,
-        binding_json: JSON.stringify({
-          workspace_id: "legacy-local-workspace",
-          account_user_id: ACCOUNT_ID,
-        }),
       }),
     ]);
 
     await expect(
       loadSessionShareSource("session-1", ACCOUNT_ID),
-    ).resolves.toMatchObject({ workspaceId: ACCOUNT_ID });
+    ).rejects.toThrow("unavailable workspace");
   });
 
   it.each(["", DEFAULT_USER_ID])(

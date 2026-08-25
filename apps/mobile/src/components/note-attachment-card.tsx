@@ -13,20 +13,16 @@ function formatBytes(bytes: number): string {
 
 export function NoteAttachmentCard({
   availableLocally,
-  cloudAvailable,
   errorMessage,
   filename,
   loading,
-  onDownload,
   onShare,
   sizeBytes,
 }: {
   availableLocally: boolean;
-  cloudAvailable: boolean;
   errorMessage: string | null;
   filename: string;
   loading: boolean;
-  onDownload: () => void;
   onShare: () => void;
   sizeBytes: number;
 }) {
@@ -34,7 +30,7 @@ export function NoteAttachmentCard({
     <Card style={styles.card} tone="muted">
       <View style={styles.icon}>
         <Ionicons
-          name={availableLocally ? "document-attach-outline" : "cloud-outline"}
+          name="document-attach-outline"
           size={18}
           color={Colors.muted}
         />
@@ -46,19 +42,15 @@ export function NoteAttachmentCard({
         <Text style={styles.description}>
           {availableLocally
             ? formatBytes(sizeBytes)
-            : cloudAvailable
-              ? `${formatBytes(sizeBytes)} · Available from sync`
-              : `${formatBytes(sizeBytes)} · Waiting for sync`}
+            : `${formatBytes(sizeBytes)} · Not on this phone`}
         </Text>
         {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
       </View>
       <Button
-        disabled={!availableLocally && !cloudAvailable}
-        label={
-          availableLocally ? "Share" : cloudAvailable ? "Download" : "Pending"
-        }
+        disabled={!availableLocally}
+        label={availableLocally ? "Share" : "Unavailable"}
         loading={loading}
-        onPress={availableLocally ? onShare : onDownload}
+        onPress={onShare}
         size="small"
         variant={availableLocally ? "outline" : "primary"}
       />

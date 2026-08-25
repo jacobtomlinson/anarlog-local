@@ -40,6 +40,6 @@ export function assertRestorableAudioMetadata(expected: {
     );
   }
   if (!Number.isSafeInteger(expected.sizeBytes) || expected.sizeBytes <= 0) {
-    throw new Error("This recording has invalid synced file metadata.");
+    throw new Error("This recording has invalid file metadata.");
   }
 }

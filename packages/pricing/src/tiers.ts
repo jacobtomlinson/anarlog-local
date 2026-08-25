@@ -98,7 +98,6 @@ export const MARKETING_PLAN_TIERS: MarketingPlanData[] = [
         tooltip:
           "Run follow-up work automatically when a meeting ends — post a recap, update a page, or create issues.",
       },
-      { label: "Cloud Sync", included: true },
       {
         label: "Shareable Links",
         included: true,

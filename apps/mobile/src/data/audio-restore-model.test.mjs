@@ -29,10 +29,10 @@ test("rejects unverified legacy metadata", () => {
   );
 });
 
-test("rejects invalid synced audio sizes", () => {
+test("rejects invalid restored audio sizes", () => {
   assert.throws(
     () => assertRestorableAudioMetadata({ sha256, sizeBytes: 0 }),
-    /invalid synced file metadata/,
+    /invalid file metadata/,
   );
 });
 

@@ -16,42 +16,18 @@ pub struct ChangeNotifier {
 
 impl ChangeNotifier {
     pub fn new() -> (Self, SqlitePoolOptions) {
-        Self::build(Some(false), None)
-    }
-
-    pub fn new_with_cloudsync(
-        initializer: anlg_cloudsync::CloudsyncConnectionInitializer,
-    ) -> (Self, SqlitePoolOptions) {
-        Self::build(Some(true), Some(initializer))
-    }
-
-    pub fn disabled() -> (Self, SqlitePoolOptions) {
-        Self::build(None, None)
-    }
-
-    fn build(
-        cloudsync_enabled: Option<bool>,
-        cloudsync_initializer: Option<anlg_cloudsync::CloudsyncConnectionInitializer>,
-    ) -> (Self, SqlitePoolOptions) {
         let (table_change_tx, _) = broadcast::channel(256);
         let change_tracker = Arc::new(ChangeTracker::default());
-
         let notifier = Self {
             table_change_tx,
             change_tracker,
         };
 
-        let Some(cloudsync_enabled) = cloudsync_enabled else {
-            return (notifier, SqlitePoolOptions::new());
-        };
-
         let callback_tx = notifier.table_change_tx.clone();
         let callback_tracker = Arc::clone(&notifier.change_tracker);
-
         let pool_options = SqlitePoolOptions::new().after_connect(move |conn, _| {
             let callback_tx = callback_tx.clone();
             let callback_tracker = Arc::clone(&callback_tracker);
-            let cloudsync_initializer = cloudsync_initializer.clone();
 
             Box::pin(async move {
                 let mut handle = conn.lock_handle().await?;
@@ -59,7 +35,7 @@ impl ChangeNotifier {
 
                 let update_state = Arc::clone(&hook_state);
                 handle.set_update_hook(move |update| {
-                    if cloudsync_enabled && update.database != "main" {
+                    if update.database != "main" {
                         return;
                     }
                     let kind = match update.operation {
@@ -72,37 +48,31 @@ impl ChangeNotifier {
                 });
 
                 let commit_state = Arc::clone(&hook_state);
-                if cloudsync_enabled {
-                    anlg_cloudsync::install_transaction_observer(
-                        &mut handle,
-                        move || commit_state.flush(),
-                        move || hook_state.clear(),
-                    )
-                    .map_err(|error| sqlx::Error::Configuration(Box::new(error)))?;
-                } else {
-                    handle.set_commit_hook(move || {
-                        commit_state.flush();
-                        true
-                    });
+                handle.set_commit_hook(move || {
+                    commit_state.flush();
+                    true
+                });
 
-                    handle.set_rollback_hook(move || {
-                        hook_state.clear();
-                    });
-                }
+                handle.set_rollback_hook(move || {
+                    hook_state.clear();
+                });
                 drop(handle);
-
-                if let Some(initializer) = cloudsync_initializer {
-                    initializer
-                        .initialize(conn)
-                        .await
-                        .map_err(|error| sqlx::Error::Configuration(Box::new(error)))?;
-                }
-
                 Ok(())
             })
         });
 
         (notifier, pool_options)
+    }
+
+    pub fn disabled() -> (Self, SqlitePoolOptions) {
+        let (table_change_tx, _) = broadcast::channel(256);
+        (
+            Self {
+                table_change_tx,
+                change_tracker: Arc::new(ChangeTracker::default()),
+            },
+            SqlitePoolOptions::new(),
+        )
     }
 
     pub fn subscribe(&self) -> broadcast::Receiver<TableChange> {

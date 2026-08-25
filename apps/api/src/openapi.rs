@@ -26,7 +26,7 @@ use utoipa::{Modify, OpenApi};
         (name = "google-meet", description = "Google Meet meeting import"),
         (name = "microsoft-teams", description = "Microsoft Teams meeting import"),
         (name = "nango", description = "Integration management via Nango"),
-        (name = "sync", description = "CloudSync credential management"),
+        (name = "sync", description = "Shared-note collaboration"),
         (name = "shared-notes", description = "Public shared-note delivery"),
         (name = "cloud-api", description = "Opt-in hosted access to Anarlog meeting data"),
         (name = "subscription", description = "Subscription and trial management")

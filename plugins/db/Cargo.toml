@@ -14,14 +14,9 @@ anlg-db-core = { workspace = true }
 anlg-db-execute = { workspace = true }
 anlg-db-migrate = { workspace = true }
 anlg-db-reactive = { workspace = true, features = ["specta"] }
-anlg-db-sync = { workspace = true }
-anlg-e2ee = { workspace = true }
 anlg-fs-sync-core = { workspace = true }
-anlg-session-ingest = { workspace = true }
 anlg-storage = { workspace = true }
 
-futures-util = { workspace = true }
-reqwest = { workspace = true, features = ["json", "query", "stream"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
@@ -29,7 +24,6 @@ specta = { workspace = true, features = ["serde_json"] }
 specta-typescript = { workspace = true }
 sqlx = { workspace = true, features = ["runtime-tokio", "sqlite", "sqlite-unbundled", "macros"] }
 tauri = { workspace = true, features = ["test"] }
-tauri-plugin-store2 = { workspace = true }
 tauri-specta = { workspace = true, features = ["derive", "typescript"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["sync", "time"] }
