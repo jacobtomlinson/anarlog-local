@@ -2,7 +2,6 @@ import {
   Buildings,
   CalendarBlank,
   MagnifyingGlass,
-  Monitor,
   User,
 } from "@phosphor-icons/react";
 
@@ -103,17 +102,6 @@ const renderers: RendererMap = {
         icon: User,
         label: "Account",
         tab: { type: "settings", state: { tab: "account" } },
-      };
-    },
-  },
-
-  device: {
-    toChip: (entity) => {
-      return {
-        key: entity.key,
-        icon: Monitor,
-        label: "Device",
-        tab: { type: "settings", state: { tab: "sync" } },
       };
     },
   },

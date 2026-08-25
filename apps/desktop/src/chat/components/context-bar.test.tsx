@@ -328,7 +328,7 @@ describe("ContextBar", () => {
     });
   });
 
-  it("opens account and device chips in settings", () => {
+  it("opens account chips in settings", () => {
     render(
       <ContextBar
         entities={[
@@ -340,27 +340,15 @@ describe("ContextBar", () => {
             email: "user@example.com",
             pending: false,
           },
-          {
-            kind: "device",
-            key: "device:current",
-            source: "auto-current",
-            platform: "linux",
-            pending: false,
-          },
         ]}
       />,
     );
 
     fireEvent.click(screen.getByText("Account"));
-    fireEvent.click(screen.getByText("Device"));
 
     expect(openNewMock).toHaveBeenNthCalledWith(1, {
       type: "settings",
       state: { tab: "account" },
-    });
-    expect(openNewMock).toHaveBeenNthCalledWith(2, {
-      type: "settings",
-      state: { tab: "sync" },
     });
   });
 

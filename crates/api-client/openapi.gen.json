@@ -4862,10 +4862,6 @@
       "name": "nango"
     },
     {
-      "description": "CloudSync credential management",
-      "name": "sync"
-    },
-    {
       "description": "Public shared-note delivery",
       "name": "shared-notes"
     },

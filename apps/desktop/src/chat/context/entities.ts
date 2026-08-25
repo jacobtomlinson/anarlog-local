@@ -1,5 +1,4 @@
 import type { AccountInfo } from "@anlg/plugin-auth";
-import type { DeviceInfo } from "@anlg/plugin-misc";
 
 import type { AnlgUIMessage } from "../types";
 
@@ -69,12 +68,7 @@ export type ContextEntity =
       kind: "account";
       key: string;
       source?: ContextEntitySource;
-    } & Partial<AccountInfo>)
-  | ({
-      kind: "device";
-      key: string;
-      source?: ContextEntitySource;
-    } & Partial<DeviceInfo>);
+    } & Partial<AccountInfo>);
 
 export type ContextEntityKind = ContextEntity["kind"];
 
