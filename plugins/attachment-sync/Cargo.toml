@@ -19,7 +19,6 @@ tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [dependencies]
 anlg-attachment-sync-core = { workspace = true }
-anlg-e2ee = { workspace = true }
 anlg-fs-sync-core = { workspace = true }
 
 tauri = { workspace = true, features = ["test"] }

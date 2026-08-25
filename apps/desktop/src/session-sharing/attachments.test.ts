@@ -32,13 +32,9 @@ const attachment: SessionShareAttachment = {
   sha256: "a".repeat(64),
   sourceType: "note_upload",
   sourceId: "diagram.png",
-  cloudSyncEnabled: true,
-  cloudObjectKey:
-    "11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.anb1",
+  remoteObjectKey:
+    "11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.sna1",
   localAvailability: "present",
-  transferDirection: null,
-  transferPhase: "completed",
-  transferError: "",
 };
 
 describe("shared attachment selection", () => {
@@ -50,20 +46,18 @@ describe("shared attachment selection", () => {
 
     expect(dbMocks.flushDatabaseWrites).toHaveBeenCalledWith([
       "session:session-1",
-      "attachment-transfers",
     ]);
   });
 
-  it("requires a completed private backup before sharing", async () => {
+  it("requires a local shared attachment object before sharing", async () => {
     expect(isAttachmentShareable(attachment)).toBe(true);
     expect(
       isAttachmentShareable({
         ...attachment,
-        cloudSyncEnabled: false,
-        cloudObjectKey: "",
+        remoteObjectKey: "",
       }),
     ).toBe(false);
-    expect(isAttachmentShareable({ ...attachment, cloudObjectKey: "" })).toBe(
+    expect(isAttachmentShareable({ ...attachment, remoteObjectKey: "" })).toBe(
       false,
     );
 
@@ -77,22 +71,21 @@ describe("shared attachment selection", () => {
           user: { id: "11111111-1111-4111-8111-111111111111" },
         } as any,
         shareId: "22222222-2222-4222-8222-222222222222",
-        attachment: { ...attachment, cloudObjectKey: "" },
+        attachment: { ...attachment, remoteObjectKey: "" },
         fetcher,
       }),
     ).rejects.toThrow("not available");
     expect(fetcher).not.toHaveBeenCalled();
   });
 
-  it("allows local session audio without a private backup", async () => {
+  it("allows local session audio without a shared object", async () => {
     const localAudio = {
       ...attachment,
       filename: "audio.mp3",
       contentType: "audio/mpeg",
       sourceType: "session_audio",
       sourceId: "session-1",
-      cloudSyncEnabled: false,
-      cloudObjectKey: "",
+      remoteObjectKey: "",
     };
     const sharedAttachmentId = "33333333-3333-4333-8333-333333333333";
     const fetcher = vi.fn().mockResolvedValue(
@@ -205,7 +198,7 @@ describe("shared attachment selection", () => {
       attachment.sizeBytes,
       attachment.filename,
       attachment.contentType,
-      attachment.cloudObjectKey,
+      attachment.remoteObjectKey,
       undefined,
     );
     expect(native.readSharedUploadRange).toHaveBeenCalledWith(
@@ -215,7 +208,7 @@ describe("shared attachment selection", () => {
       attachment.sizeBytes,
       attachment.filename,
       attachment.contentType,
-      attachment.cloudObjectKey,
+      attachment.remoteObjectKey,
       0,
       attachment.sizeBytes,
     );

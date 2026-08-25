@@ -526,7 +526,6 @@ mod tests {
     fn live_query_test_schema() -> anlg_db_migrate::DbSchema {
         anlg_db_migrate::DbSchema {
             steps: LIVE_QUERY_TEST_MIGRATION_STEPS,
-            validate_cloudsync_table: |_| false,
         }
     }
 
@@ -539,7 +538,6 @@ mod tests {
         let db_path = dir.path().join("app.db");
         let db = anlg_db_core::Db::open(DbOpenOptions {
             storage: DbStorage::Local(&db_path),
-            cloudsync_enabled: false,
             journal_mode_wal: true,
             foreign_keys: true,
             max_connections: Some(4),

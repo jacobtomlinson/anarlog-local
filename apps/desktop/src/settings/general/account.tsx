@@ -80,11 +80,8 @@ export function SettingsAccount() {
         },
       });
     },
-    onError: (error) => {
-      const message = String(error).includes("unsent local changes")
-        ? t`Sync your changes before signing out.`
-        : t`Anarlog couldn't sign you out. Try again.`;
-      sonnerToast.error(message);
+    onError: () => {
+      sonnerToast.error(t`Anarlog couldn't sign you out. Try again.`);
     },
   });
   const openAccountMutation = useMutation({
@@ -189,7 +186,7 @@ export function SettingsAccount() {
         open={isSignOutDialogOpen}
         onOpenChange={setIsSignOutDialogOpen}
         title={t`Sign out of Anarlog?`}
-        description={t`You'll need to sign in again to use cloud sync and account features.`}
+        description={t`You'll need to sign in again to use account features.`}
         confirmLabel={t`Sign out`}
         pendingLabel={t`Signing out...`}
         isPending={signOutMutation.isPending}

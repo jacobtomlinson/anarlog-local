@@ -60,7 +60,7 @@ function PricingPage() {
               {proPlan?.price?.yearly
                 ? ` or $${proPlan.price.yearly}/year`
                 : null}{" "}
-              when you want hosted transcription, AI, sync, and sharing.
+              when you want hosted transcription, AI, and sharing.
             </p>
             <div className="mt-8">
               <Link

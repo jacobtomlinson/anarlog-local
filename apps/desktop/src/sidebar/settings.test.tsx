@@ -155,7 +155,6 @@ describe("SettingsNav", () => {
       "Intelligence",
       "Dictionary",
       "Data",
-      "Sync",
       "Imports",
       "Advanced",
       "Privacy",
@@ -262,34 +261,7 @@ describe("SettingsNav", () => {
     );
   });
 
-  it("opens Sync inside settings", () => {
-    render(<SettingsNav />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Sync" }));
-
-    expect(mocks.updateSettingsTabState).toHaveBeenCalledWith(
-      mocks.currentTab,
-      { tab: "sync" },
-    );
-  });
-
-  it("shows locked Pro features and opens the upgrade flow", () => {
-    mocks.isPro = false;
-
-    render(<SettingsNav />);
-
-    expect(screen.getByText("Sync")).toBeTruthy();
-    expect(screen.getByText("Imports")).toBeTruthy();
-
-    fireEvent.click(
-      screen.getByRole("button", { name: "Upgrade to Pro for Sync" }),
-    );
-
-    expect(mocks.upgradeToPro).toHaveBeenCalledOnce();
-    expect(mocks.updateSettingsTabState).not.toHaveBeenCalled();
-  });
-
-  it.each(["Team", "Automations", "Dictionary", "Sync"])(
+  it.each(["Team", "Automations", "Dictionary"])(
     "does not open locked %s navigation",
     (label) => {
       mocks.isPro = false;

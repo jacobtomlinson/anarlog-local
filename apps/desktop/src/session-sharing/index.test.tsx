@@ -939,12 +939,8 @@ describe("SessionShareButton", () => {
       sha256: "a".repeat(64),
       sourceType: "note_upload",
       sourceId: "diagram.png",
-      cloudSyncEnabled: true,
-      cloudObjectKey: "private/object.anb1",
+      remoteObjectKey: "owner/share/object.sna1",
       localAvailability: "present",
-      transferDirection: null,
-      transferPhase: "completed",
-      transferError: "",
     };
     mocks.sessionAttachments = [localAttachment];
     mocks.loadSessionShareAttachments.mockResolvedValueOnce([
@@ -1180,12 +1176,8 @@ describe("SessionShareButton", () => {
       sha256: "a".repeat(64),
       sourceType: "session_audio",
       sourceId: "session-1",
-      cloudSyncEnabled: false,
-      cloudObjectKey: "",
+      remoteObjectKey: "",
       localAvailability: "present",
-      transferDirection: null,
-      transferPhase: "completed",
-      transferError: "",
     };
     const remoteAttachment = {
       id: "88888888-8888-4888-8888-888888888888",

@@ -1,7 +1,9 @@
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MigrationScope {
     Plain,
-    CloudsyncAlter { table_name: &'static str },
+    /// A shipped Sync-only migration whose checksum and history remain valid,
+    /// but whose schema change is intentionally not applied by local-only builds.
+    Retired,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -20,5 +22,4 @@ pub struct RetiredMigration {
 #[derive(Clone, Copy)]
 pub struct DbSchema {
     pub steps: &'static [MigrationStep],
-    pub validate_cloudsync_table: fn(&str) -> bool,
 }

@@ -185,83 +185,12 @@ interface NativeModuleInterface {
   ): void;
   ubrn_uniffi_mobile_bridge_fn_constructor_mobiledbbridge_open(
     dbPath: Uint8Array,
-    cloudsyncOpenMode: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus,
-  ): bigint;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cleanup_attachment_upload_cache(
-    uniffiSelf: bigint,
-    jobId: Uint8Array,
-    attemptCount: number,
-    cacheId: Uint8Array,
   ): bigint;
   ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_close(
     uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus,
   ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_init(
-    uniffiSelf: bigint,
-    tableName: Uint8Array,
-    crdtAlgo: Uint8Array,
-    initFlags: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_network_init(
-    uniffiSelf: bigint,
-    connectionString: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_network_set_apikey(
-    uniffiSelf: bigint,
-    apiKey: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_network_set_token(
-    uniffiSelf: bigint,
-    token: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_network_sync(
-    uniffiSelf: bigint,
-    waitMs: Uint8Array,
-    maxRetries: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_status(
-    uniffiSelf: bigint,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_sync_now(
-    uniffiSelf: bigint,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_cloudsync_version(
-    uniffiSelf: bigint,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_configure_attachment_storage(
-    uniffiSelf: bigint,
-    documentsPath: Uint8Array,
-    cachePath: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_configure_cloudsync(
-    uniffiSelf: bigint,
-    configJson: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_configure_e2ee_replica(
-    uniffiSelf: bigint,
-    workspaceId: Uint8Array,
-    witnessEndpoint: Uint8Array,
-    witnessAccessToken: Uint8Array,
-    recoveryKeyCode: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_describe_attachment_upload(
-    uniffiSelf: bigint,
-    jobId: Uint8Array,
-    attemptCount: number,
-  ): bigint;
   ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_execute(
     uniffiSelf: bigint,
     sql: Uint8Array,
@@ -280,42 +209,6 @@ interface NativeModuleInterface {
     statementsJson: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus,
   ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_generate_e2ee_recovery_key(
-    uniffiSelf: bigint,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_inspect_e2ee_recovery_key(
-    uniffiSelf: bigint,
-    recoveryKeyCode: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): Uint8Array;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_prepare_attachment_upload(
-    uniffiSelf: bigint,
-    jobId: Uint8Array,
-    attemptCount: number,
-    objectId: Uint8Array,
-    objectKey: Uint8Array,
-  ): bigint;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_read_attachment_upload_range(
-    uniffiSelf: bigint,
-    jobId: Uint8Array,
-    attemptCount: number,
-    cacheId: Uint8Array,
-    start: number,
-    end: number,
-  ): bigint;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_restore_attachment(
-    uniffiSelf: bigint,
-    requestJson: Uint8Array,
-  ): bigint;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_start_cloudsync(
-    uniffiSelf: bigint,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
-  ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_stop_cloudsync(
-    uniffiSelf: bigint,
-    uniffi_out_err: UniffiRustCallStatus,
-  ): void;
   ubrn_uniffi_mobile_bridge_fn_method_mobiledbbridge_subscribe(
     uniffiSelf: bigint,
     sql: Uint8Array,
@@ -340,30 +233,10 @@ interface NativeModuleInterface {
   ): void;
   ubrn_ffi_mobile_bridge_uniffi_contract_version(): number;
   ubrn_uniffi_mobile_bridge_checksum_constructor_mobiledbbridge_open(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cleanup_attachment_upload_cache(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_close(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_init(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_network_init(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_network_set_apikey(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_network_set_token(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_network_sync(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_status(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_sync_now(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_cloudsync_version(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_configure_attachment_storage(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_configure_cloudsync(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_configure_e2ee_replica(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_describe_attachment_upload(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_execute(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_execute_proxy(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_execute_transaction(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_generate_e2ee_recovery_key(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_inspect_e2ee_recovery_key(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_prepare_attachment_upload(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_read_attachment_upload_range(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_restore_attachment(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_start_cloudsync(): number;
-  ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_stop_cloudsync(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_subscribe(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_mobiledbbridge_unsubscribe(): number;
   ubrn_uniffi_mobile_bridge_checksum_method_queryeventlistener_on_result(): number;

@@ -295,262 +295,46 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Enables the begin_attachment_download command without any pre-configured scope.",
+          "description": "Enables the play command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-begin-attachment-download",
-          "markdownDescription": "Enables the begin_attachment_download command without any pre-configured scope."
+          "const": "allow-play",
+          "markdownDescription": "Enables the play command without any pre-configured scope."
         },
         {
-          "description": "Denies the begin_attachment_download command without any pre-configured scope.",
+          "description": "Denies the play command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-begin-attachment-download",
-          "markdownDescription": "Denies the begin_attachment_download command without any pre-configured scope."
+          "const": "deny-play",
+          "markdownDescription": "Denies the play command without any pre-configured scope."
         },
         {
-          "description": "Enables the begin_shared_upload_operation command without any pre-configured scope.",
+          "description": "Enables the set_volume command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-begin-shared-upload-operation",
-          "markdownDescription": "Enables the begin_shared_upload_operation command without any pre-configured scope."
+          "const": "allow-set-volume",
+          "markdownDescription": "Enables the set_volume command without any pre-configured scope."
         },
         {
-          "description": "Denies the begin_shared_upload_operation command without any pre-configured scope.",
+          "description": "Denies the set_volume command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-begin-shared-upload-operation",
-          "markdownDescription": "Denies the begin_shared_upload_operation command without any pre-configured scope."
+          "const": "deny-set-volume",
+          "markdownDescription": "Denies the set_volume command without any pre-configured scope."
         },
         {
-          "description": "Enables the cancel_attachment_download command without any pre-configured scope.",
+          "description": "Enables the stop command without any pre-configured scope.",
           "type": "string",
-          "const": "allow-cancel-attachment-download",
-          "markdownDescription": "Enables the cancel_attachment_download command without any pre-configured scope."
+          "const": "allow-stop",
+          "markdownDescription": "Enables the stop command without any pre-configured scope."
         },
         {
-          "description": "Denies the cancel_attachment_download command without any pre-configured scope.",
+          "description": "Denies the stop command without any pre-configured scope.",
           "type": "string",
-          "const": "deny-cancel-attachment-download",
-          "markdownDescription": "Denies the cancel_attachment_download command without any pre-configured scope."
+          "const": "deny-stop",
+          "markdownDescription": "Denies the stop command without any pre-configured scope."
         },
         {
-          "description": "Enables the cancel_shared_upload_operation command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-cancel-shared-upload-operation",
-          "markdownDescription": "Enables the cancel_shared_upload_operation command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the cancel_shared_upload_operation command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-cancel-shared-upload-operation",
-          "markdownDescription": "Denies the cancel_shared_upload_operation command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the cleanup_shared_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-cleanup-shared-upload",
-          "markdownDescription": "Enables the cleanup_shared_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the cleanup_shared_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-cleanup-shared-upload",
-          "markdownDescription": "Denies the cleanup_shared_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the cleanup_transfer_cache command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-cleanup-transfer-cache",
-          "markdownDescription": "Enables the cleanup_transfer_cache command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the cleanup_transfer_cache command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-cleanup-transfer-cache",
-          "markdownDescription": "Denies the cleanup_transfer_cache command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the clear_shared_attachment_preview_scopes command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-clear-shared-attachment-preview-scopes",
-          "markdownDescription": "Enables the clear_shared_attachment_preview_scopes command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the clear_shared_attachment_preview_scopes command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-clear-shared-attachment-preview-scopes",
-          "markdownDescription": "Denies the clear_shared_attachment_preview_scopes command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the clear_shared_attachment_scope command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-clear-shared-attachment-scope",
-          "markdownDescription": "Enables the clear_shared_attachment_scope command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the clear_shared_attachment_scope command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-clear-shared-attachment-scope",
-          "markdownDescription": "Denies the clear_shared_attachment_scope command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the commit_delete_guard command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-commit-delete-guard",
-          "markdownDescription": "Enables the commit_delete_guard command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the commit_delete_guard command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-commit-delete-guard",
-          "markdownDescription": "Denies the commit_delete_guard command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the describe_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-describe-upload",
-          "markdownDescription": "Enables the describe_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the describe_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-describe-upload",
-          "markdownDescription": "Denies the describe_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the download_and_restore command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-download-and-restore",
-          "markdownDescription": "Enables the download_and_restore command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the download_and_restore command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-download-and-restore",
-          "markdownDescription": "Denies the download_and_restore command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the download_shared_attachment command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-download-shared-attachment",
-          "markdownDescription": "Enables the download_shared_attachment command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the download_shared_attachment command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-download-shared-attachment",
-          "markdownDescription": "Denies the download_shared_attachment command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the prepare_delete_guard command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-prepare-delete-guard",
-          "markdownDescription": "Enables the prepare_delete_guard command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the prepare_delete_guard command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-prepare-delete-guard",
-          "markdownDescription": "Denies the prepare_delete_guard command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the prepare_shared_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-prepare-shared-upload",
-          "markdownDescription": "Enables the prepare_shared_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the prepare_shared_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-prepare-shared-upload",
-          "markdownDescription": "Denies the prepare_shared_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the prepare_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-prepare-upload",
-          "markdownDescription": "Enables the prepare_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the prepare_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-prepare-upload",
-          "markdownDescription": "Denies the prepare_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the read_shared_upload_range command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-read-shared-upload-range",
-          "markdownDescription": "Enables the read_shared_upload_range command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the read_shared_upload_range command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-read-shared-upload-range",
-          "markdownDescription": "Denies the read_shared_upload_range command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the read_upload_range command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-read-upload-range",
-          "markdownDescription": "Enables the read_upload_range command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the read_upload_range command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-read-upload-range",
-          "markdownDescription": "Denies the read_upload_range command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the reconcile_delete_guards command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-reconcile-delete-guards",
-          "markdownDescription": "Enables the reconcile_delete_guards command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the reconcile_delete_guards command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-reconcile-delete-guards",
-          "markdownDescription": "Denies the reconcile_delete_guards command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the remove_shared_attachment command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-remove-shared-attachment",
-          "markdownDescription": "Enables the remove_shared_attachment command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the remove_shared_attachment command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-remove-shared-attachment",
-          "markdownDescription": "Denies the remove_shared_attachment command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the shared_attachment_path command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-shared-attachment-path",
-          "markdownDescription": "Enables the shared_attachment_path command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the shared_attachment_path command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-shared-attachment-path",
-          "markdownDescription": "Denies the shared_attachment_path command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the validate_shared_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-validate-shared-upload",
-          "markdownDescription": "Enables the validate_shared_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the validate_shared_upload command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-validate-shared-upload",
-          "markdownDescription": "Denies the validate_shared_upload command without any pre-configured scope."
-        },
-        {
-          "description": "Attachment transfer and scoped cache permissions\n#### This default permission set includes:\n\n- `allow-describe-upload`\n- `allow-prepare-upload`\n- `allow-read-upload-range`\n- `allow-begin-shared-upload-operation`\n- `allow-cancel-shared-upload-operation`\n- `allow-prepare-shared-upload`\n- `allow-read-shared-upload-range`\n- `allow-validate-shared-upload`\n- `allow-cleanup-shared-upload`\n- `allow-prepare-delete-guard`\n- `allow-commit-delete-guard`\n- `allow-reconcile-delete-guards`\n- `allow-begin-attachment-download`\n- `allow-cancel-attachment-download`\n- `allow-download-and-restore`\n- `allow-cleanup-transfer-cache`\n- `allow-download-shared-attachment`\n- `allow-shared-attachment-path`\n- `allow-remove-shared-attachment`\n- `allow-clear-shared-attachment-scope`\n- `allow-clear-shared-attachment-preview-scopes`",
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-play`\n- `allow-stop`\n- `allow-set-volume`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Attachment transfer and scoped cache permissions\n#### This default permission set includes:\n\n- `allow-describe-upload`\n- `allow-prepare-upload`\n- `allow-read-upload-range`\n- `allow-begin-shared-upload-operation`\n- `allow-cancel-shared-upload-operation`\n- `allow-prepare-shared-upload`\n- `allow-read-shared-upload-range`\n- `allow-validate-shared-upload`\n- `allow-cleanup-shared-upload`\n- `allow-prepare-delete-guard`\n- `allow-commit-delete-guard`\n- `allow-reconcile-delete-guards`\n- `allow-begin-attachment-download`\n- `allow-cancel-attachment-download`\n- `allow-download-and-restore`\n- `allow-cleanup-transfer-cache`\n- `allow-download-shared-attachment`\n- `allow-shared-attachment-path`\n- `allow-remove-shared-attachment`\n- `allow-clear-shared-attachment-scope`\n- `allow-clear-shared-attachment-preview-scopes`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-play`\n- `allow-stop`\n- `allow-set-volume`"
         }
       ]
     }

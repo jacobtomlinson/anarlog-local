@@ -16,18 +16,7 @@ const SESSION_INSERT_SQL = `
 INSERT INTO sessions (
   id, workspace_id, owner_user_id, title, event_json, created_at,
   updated_at, deleted_at
-) VALUES (
-  ?, NULLIF((
-    SELECT json_extract(value_json, '$.workspace_id')
-    FROM app_settings WHERE id = 'cloudsync_workspace_binding'
-  ), ''), COALESCE(
-    NULLIF(NULLIF(?, ''), '00000000-0000-0000-0000-000000000000'),
-    NULLIF((
-      SELECT json_extract(value_json, '$.workspace_id')
-      FROM app_settings WHERE id = 'cloudsync_workspace_binding'
-    ), '')
-  ), ?, ?, ?, ?, NULL
-)
+) VALUES (?, NULL, ?, ?, ?, ?, ?, NULL)
 `;
 
 const NOTE_INSERT_SQL = `

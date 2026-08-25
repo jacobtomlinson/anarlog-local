@@ -402,8 +402,9 @@ export async function purgeForeignViewerSharedNoteCaches(
     flushDatabaseWritesByPrefix(["shared-note-cache:"]),
   ]);
   signal.throwIfAborted();
-  const viewers = await liveQueryClient.execute<{ viewer_user_id: string }>(
-    `
+  const viewers =
+    (await liveQueryClient.execute<{ viewer_user_id: string }>(
+      `
       SELECT DISTINCT viewer_user_id
       FROM (
         SELECT viewer_user_id FROM shared_session_attachment_cache
@@ -412,8 +413,8 @@ export async function purgeForeignViewerSharedNoteCaches(
       )
       WHERE viewer_user_id <> ?
     `,
-    [activeViewerUserId],
-  );
+      [activeViewerUserId],
+    )) ?? [];
   for (const viewer of viewers) {
     signal.throwIfAborted();
     await purgeViewerSharedNoteCache(

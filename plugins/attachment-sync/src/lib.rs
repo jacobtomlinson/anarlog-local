@@ -31,22 +31,12 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
     tauri_specta::Builder::<R>::new()
         .plugin_name(PLUGIN_NAME)
         .commands(tauri_specta::collect_commands![
-            commands::describe_upload,
-            commands::prepare_upload::<tauri::Wry>,
-            commands::read_upload_range::<tauri::Wry>,
             commands::begin_shared_upload_operation,
             commands::cancel_shared_upload_operation,
             commands::prepare_shared_upload::<tauri::Wry>,
             commands::read_shared_upload_range::<tauri::Wry>,
             commands::validate_shared_upload::<tauri::Wry>,
             commands::cleanup_shared_upload::<tauri::Wry>,
-            commands::prepare_delete_guard::<tauri::Wry>,
-            commands::commit_delete_guard::<tauri::Wry>,
-            commands::reconcile_delete_guards::<tauri::Wry>,
-            commands::begin_attachment_download,
-            commands::cancel_attachment_download,
-            commands::download_and_restore::<tauri::Wry>,
-            commands::cleanup_transfer_cache::<tauri::Wry>,
             commands::download_shared_attachment::<tauri::Wry>,
             commands::shared_attachment_path::<tauri::Wry>,
             commands::remove_shared_attachment::<tauri::Wry>,
@@ -62,7 +52,6 @@ pub fn init<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
         .invoke_handler(specta_builder.invoke_handler())
         .setup(|app, _api| {
             app.manage(control::DownloadControl::default());
-            runtime::clear_private_attachment_cache_root(app)?;
             runtime::clear_shared_upload_cache_root(app)?;
             runtime::clear_shared_attachment_cache_root(app)?;
             runtime::clear_shared_attachment_preview_cache_root(app)?;

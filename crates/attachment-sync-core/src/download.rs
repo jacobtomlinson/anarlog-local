@@ -1,20 +1,17 @@
-use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
 
-use anlg_e2ee::{AttachmentBlobContext, AttachmentBlobMetadata, WorkspaceKey};
 use futures_util::StreamExt;
 use sha2::{Digest, Sha256};
 use tokio::io::AsyncWriteExt;
 use uuid::Uuid;
 
-use super::cache::{hex_digest, sync_destination_directory};
+use super::cache::hex_digest;
 use crate::error::{Error, Result};
 
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(30 * 60);
 
 pub enum DownloadObject<'a> {
-    Private(&'a str),
     Shared(&'a str),
 }
 
@@ -55,9 +52,6 @@ pub fn validate_signed_download_url(
         return Err(Error::InvalidDownloadUrl);
     }
     let valid_path = match object {
-        DownloadObject::Private(object_key) => {
-            signed.path() == format!("/storage/v1/object/sign/attachment-backups/{object_key}")
-        }
         DownloadObject::Shared(attachment_id) => {
             valid_shared_attachment_download_path(signed.path(), attachment_id)
         }
@@ -169,34 +163,4 @@ pub async fn download_to_path(
         return Err(Error::ChecksumMismatch);
     }
     Ok(())
-}
-
-pub fn stage_attachment_restore(
-    key: &WorkspaceKey,
-    context: &AttachmentBlobContext,
-    cache_path: &Path,
-    destination_parent: &Path,
-    expected: &AttachmentBlobMetadata,
-) -> Result<tempfile::NamedTempFile> {
-    std::fs::create_dir_all(destination_parent)?;
-    let mut source = std::fs::File::open(cache_path)?;
-    let mut temp = tempfile::NamedTempFile::new_in(destination_parent)?;
-    key.open_attachment_blob(context, &mut source, &mut temp, expected)?;
-    temp.flush()?;
-    temp.as_file().sync_all()?;
-    Ok(temp)
-}
-
-pub fn persist_staged_attachment(
-    staged: tempfile::NamedTempFile,
-    destination: &Path,
-) -> Result<()> {
-    let parent = destination
-        .parent()
-        .ok_or(Error::LocalAttachmentUnavailable)?;
-    staged
-        .persist(destination)
-        .map(|_| ())
-        .map_err(|error| Error::Io(error.error))?;
-    sync_destination_directory(parent)
 }

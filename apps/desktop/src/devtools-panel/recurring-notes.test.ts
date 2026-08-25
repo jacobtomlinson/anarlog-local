@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  execute: vi.fn(() => Promise.resolve([{ workspace_id: "workspace-1" }])),
   executeTransaction: vi.fn(
     (_statements: Array<{ sql: string; params: unknown[] }>) =>
       Promise.resolve([1]),
@@ -10,7 +9,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("~/db", () => ({
   executeTransaction: mocks.executeTransaction,
-  liveQueryClient: { execute: mocks.execute },
 }));
 
 vi.mock("~/db/write-queue", () => ({
@@ -31,7 +29,7 @@ describe("populateRecurringMeetingNotes", () => {
       now: new Date("2026-06-03T10:00:00.000Z"),
     });
 
-    expect(sessionId).toBe("workspace-1:devtools-recurring-notes-current");
+    expect(sessionId).toBe("user-1:devtools-recurring-notes-current");
     expect(mocks.executeTransaction).toHaveBeenCalledTimes(1);
 
     const statements = mocks.executeTransaction.mock.calls[0][0];
@@ -40,13 +38,11 @@ describe("populateRecurringMeetingNotes", () => {
     );
     expect(sessionInserts).toHaveLength(4);
     expect(
-      sessionInserts.every((statement) =>
-        statement.params.includes("workspace-1"),
-      ),
+      sessionInserts.every((statement) => statement.params.includes("user-1")),
     ).toBe(true);
     expect(
       sessionInserts.every((statement) =>
-        String(statement.params[0]).startsWith("workspace-1:"),
+        String(statement.params[0]).startsWith("user-1:"),
       ),
     ).toBe(true);
     const participantInserts = statements.filter((statement) =>
@@ -69,13 +65,9 @@ describe("populateRecurringMeetingNotes", () => {
     );
   });
 
-  test("namespaces synced fixture ids by workspace", async () => {
-    mocks.execute
-      .mockResolvedValueOnce([{ workspace_id: "workspace-a" }])
-      .mockResolvedValueOnce([{ workspace_id: "workspace-b" }]);
-
-    await populateRecurringMeetingNotes({ userId: null });
-    await populateRecurringMeetingNotes({ userId: null });
+  test("namespaces fixture ids by local owner", async () => {
+    await populateRecurringMeetingNotes({ userId: "user-a" });
+    await populateRecurringMeetingNotes({ userId: "user-b" });
 
     const sessionIds = mocks.executeTransaction.mock.calls.map((call) =>
       call[0]
@@ -85,11 +77,11 @@ describe("populateRecurringMeetingNotes", () => {
     expect(sessionIds[0]).toHaveLength(4);
     expect(sessionIds[1]).toHaveLength(4);
     expect(new Set(sessionIds[0])).not.toEqual(new Set(sessionIds[1]));
-    expect(
-      sessionIds[0]?.every((id) => String(id).startsWith("workspace-a:")),
-    ).toBe(true);
-    expect(
-      sessionIds[1]?.every((id) => String(id).startsWith("workspace-b:")),
-    ).toBe(true);
+    expect(sessionIds[0]?.every((id) => String(id).startsWith("user-a:"))).toBe(
+      true,
+    );
+    expect(sessionIds[1]?.every((id) => String(id).startsWith("user-b:"))).toBe(
+      true,
+    );
   });
 });

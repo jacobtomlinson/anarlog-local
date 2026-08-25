@@ -11,14 +11,11 @@ use uuid::{Uuid, Version};
 
 use crate::{
     SubscriptionConfig,
-    cloudsync_cleanup::CloudsyncCleanupClient,
     error::{Result, SubscriptionError},
     supabase::SupabaseClient,
 };
 
-const ATTACHMENT_BACKUP_BUCKET: &str = "attachment-backups";
 const SHARED_ATTACHMENT_BUCKET: &str = "shared-note-attachments";
-const AUDIO_BUCKET: &str = "audio-files";
 const ATTACHMENT_BATCH_SIZE: usize = 32;
 const ATTACHMENT_CONCURRENCY: usize = 4;
 const ATTACHMENT_LEASE_SECONDS: i32 = 300;
@@ -27,7 +24,6 @@ const ACCOUNT_LEASE_SECONDS: i32 = 900;
 const POLL_INTERVAL: Duration = Duration::from_secs(30);
 const FULL_BATCH_POLL_INTERVAL: Duration = Duration::from_secs(5);
 const MAX_ACCOUNT_PREFIX_OBJECTS: usize = 20_000;
-const MAX_CIPHERTEXT_SIZE_BYTES: i64 = 545_259_520;
 const STRIPE_DELETE_TIMEOUT: Duration = Duration::from_secs(30);
 
 fn full_batch_poll_delay(full_batch: bool) -> Option<Duration> {
@@ -39,25 +35,6 @@ pub struct CleanupWorker {
     supabase: SupabaseClient,
     storage: anlg_supabase_storage::SupabaseStorage,
     stripe: stripe::Client,
-    cloudsync: Option<CloudsyncCleanupClient>,
-}
-
-#[derive(Serialize)]
-struct ClaimRequest {
-    p_lease_id: String,
-    p_limit: i32,
-    p_lease_seconds: i32,
-}
-
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct AttachmentLeaseRow {
-    object_id: String,
-    owner_user_id: String,
-    object_key: String,
-    ciphertext_size_bytes: i64,
-    gc_lease_id: String,
-    gc_lease_expires_at: String,
 }
 
 #[derive(Deserialize)]
@@ -72,6 +49,13 @@ struct SharedAttachmentLeaseRow {
     gc_lease_expires_at: String,
 }
 
+#[derive(Serialize)]
+struct ClaimRequest {
+    p_lease_id: String,
+    p_limit: i32,
+    p_lease_seconds: i32,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct AccountLeaseRow {
@@ -81,18 +65,8 @@ struct AccountLeaseRow {
     stripe_deleted: bool,
     cleanup_ready: bool,
     prefix_swept: bool,
-    e2ee_workspace_ids: Vec<String>,
-    e2ee_purged: bool,
     lease_id: String,
     lease_expires_at: String,
-}
-
-#[derive(Serialize)]
-struct FinishAttachmentRequest<'a> {
-    p_owner_user_id: &'a str,
-    p_object_id: &'a str,
-    p_object_key: &'a str,
-    p_gc_lease_id: &'a str,
 }
 
 #[derive(Serialize)]
@@ -115,13 +89,6 @@ struct StripeDeleteRequest<'a> {
     p_stripe_customer_id: Option<&'a str>,
 }
 
-#[derive(Serialize)]
-struct E2eePurgeRequest<'a> {
-    p_owner_user_id: &'a str,
-    p_lease_id: &'a str,
-    p_workspace_ids: &'a [String],
-}
-
 impl CleanupWorker {
     pub fn new(config: &SubscriptionConfig) -> Self {
         let supabase = SupabaseClient::new(
@@ -131,15 +98,10 @@ impl CleanupWorker {
         );
         let storage = supabase.storage();
         let stripe = stripe::Client::new(&config.stripe.stripe_secret_key);
-        let cloudsync = config
-            .cloudsync_cleanup
-            .clone()
-            .map(CloudsyncCleanupClient::new);
         Self {
             supabase,
             storage,
             stripe,
-            cloudsync,
         }
     }
 
@@ -161,13 +123,6 @@ impl CleanupWorker {
     }
 
     async fn run_once(&self, cancellation: &CancellationToken) -> bool {
-        let attachment_count = match self.run_attachment_batch(cancellation).await {
-            Ok(count) => count,
-            Err(error) => {
-                tracing::warn!(error = %error, "attachment_backup_gc_batch_failed");
-                0
-            }
-        };
         let shared_attachment_count = match self.run_shared_attachment_batch(cancellation).await {
             Ok(count) => count,
             Err(error) => {
@@ -185,9 +140,7 @@ impl CleanupWorker {
         if let Err(error) = self.run_retention_batch().await {
             tracing::warn!(error = %error, "workspace_retention_batch_failed");
         }
-        attachment_count == ATTACHMENT_BATCH_SIZE
-            || shared_attachment_count == ATTACHMENT_BATCH_SIZE
-            || account_count == ACCOUNT_BATCH_SIZE
+        shared_attachment_count == ATTACHMENT_BATCH_SIZE || account_count == ACCOUNT_BATCH_SIZE
     }
 
     async fn run_retention_batch(&self) -> Result<i32> {
@@ -199,72 +152,6 @@ impl CleanupWorker {
             return Err(invalid_upstream("workspace retention deleted count"));
         }
         Ok(deleted)
-    }
-
-    async fn run_attachment_batch(&self, cancellation: &CancellationToken) -> Result<usize> {
-        if cancellation.is_cancelled() {
-            return Ok(0);
-        }
-        let lease_id = Uuid::now_v7().to_string();
-        let rows: Vec<AttachmentLeaseRow> = self
-            .supabase
-            .admin_rpc(
-                "claim_attachment_backup_gc_leases",
-                &ClaimRequest {
-                    p_lease_id: lease_id.clone(),
-                    p_limit: ATTACHMENT_BATCH_SIZE as i32,
-                    p_lease_seconds: ATTACHMENT_LEASE_SECONDS,
-                },
-            )
-            .await?;
-        if rows.len() > ATTACHMENT_BATCH_SIZE {
-            return Err(invalid_upstream("attachment GC lease count"));
-        }
-        for row in &rows {
-            validate_attachment_lease(row, &lease_id)?;
-        }
-        let count = rows.len();
-        let mut results = stream::iter(rows)
-            .map(|row| {
-                let worker = self.clone();
-                let cancellation = cancellation.clone();
-                async move {
-                    if cancellation.is_cancelled() {
-                        return Ok(());
-                    }
-                    worker.delete_attachment(row).await
-                }
-            })
-            .buffer_unordered(ATTACHMENT_CONCURRENCY);
-        while let Some(result) = results.next().await {
-            if let Err(error) = result {
-                tracing::warn!(error = %error, "attachment_backup_gc_object_failed");
-            }
-        }
-        Ok(count)
-    }
-
-    async fn delete_attachment(&self, row: AttachmentLeaseRow) -> Result<()> {
-        self.storage
-            .delete_file(ATTACHMENT_BACKUP_BUCKET, &row.object_key)
-            .await
-            .map_err(storage_error)?;
-        let finished: bool = self
-            .supabase
-            .admin_rpc(
-                "finish_attachment_backup_deletion",
-                &FinishAttachmentRequest {
-                    p_owner_user_id: &row.owner_user_id,
-                    p_object_id: &row.object_id,
-                    p_object_key: &row.object_key,
-                    p_gc_lease_id: &row.gc_lease_id,
-                },
-            )
-            .await?;
-        if !finished {
-            tracing::info!("attachment_backup_gc_already_finished");
-        }
-        Ok(())
     }
 
     async fn run_shared_attachment_batch(&self, cancellation: &CancellationToken) -> Result<usize> {
@@ -413,37 +300,6 @@ impl CleanupWorker {
             match self
                 .storage
                 .clear_prefix_until(
-                    ATTACHMENT_BACKUP_BUCKET,
-                    &prefix,
-                    MAX_ACCOUNT_PREFIX_OBJECTS,
-                    || cancellation.is_cancelled(),
-                )
-                .await
-            {
-                Ok(_) => {}
-                Err(anlg_supabase_storage::Error::Cancelled) => return Ok(()),
-                Err(error) => return Err(storage_error(error)),
-            }
-            if cancellation.is_cancelled() {
-                return Ok(());
-            }
-            match self
-                .storage
-                .clear_prefix_until(AUDIO_BUCKET, &prefix, MAX_ACCOUNT_PREFIX_OBJECTS, || {
-                    cancellation.is_cancelled()
-                })
-                .await
-            {
-                Ok(_) => {}
-                Err(anlg_supabase_storage::Error::Cancelled) => return Ok(()),
-                Err(error) => return Err(storage_error(error)),
-            }
-            if cancellation.is_cancelled() {
-                return Ok(());
-            }
-            match self
-                .storage
-                .clear_prefix_until(
                     SHARED_ATTACHMENT_BUCKET,
                     &prefix,
                     MAX_ACCOUNT_PREFIX_OBJECTS,
@@ -470,33 +326,6 @@ impl CleanupWorker {
                 .await?;
             if !marked {
                 return Err(invalid_upstream("account deletion sweep checkpoint"));
-            }
-        }
-
-        if !row.e2ee_purged {
-            if cancellation.is_cancelled() {
-                return Ok(());
-            }
-            let cloudsync = self.cloudsync.as_ref().ok_or_else(|| {
-                SubscriptionError::Internal("CloudSync cleanup is not configured".to_string())
-            })?;
-            cloudsync.purge_and_confirm(&row.e2ee_workspace_ids).await?;
-            if cancellation.is_cancelled() {
-                return Ok(());
-            }
-            let marked: bool = self
-                .supabase
-                .admin_rpc(
-                    "mark_account_deletion_e2ee_purged",
-                    &E2eePurgeRequest {
-                        p_owner_user_id: &row.owner_user_id,
-                        p_lease_id: &row.lease_id,
-                        p_workspace_ids: &row.e2ee_workspace_ids,
-                    },
-                )
-                .await?;
-            if !marked {
-                return Err(invalid_upstream("account deletion E2EE checkpoint"));
             }
         }
 
@@ -592,23 +421,6 @@ impl CleanupWorker {
     }
 }
 
-fn validate_attachment_lease(row: &AttachmentLeaseRow, expected_lease_id: &str) -> Result<()> {
-    let object_id = canonical_uuid(&row.object_id, Some(Version::Random))?;
-    let owner_user_id = canonical_uuid(&row.owner_user_id, None)?;
-    let object_key = validate_backup_object_key(&row.object_key, &owner_user_id)?;
-    let lease_id = canonical_uuid(&row.gc_lease_id, Some(Version::SortRand))?;
-    let lease_expires_at = validate_lease_expiry(&row.gc_lease_expires_at)?;
-    if object_id != row.object_id
-        || object_key != row.object_key
-        || lease_id != expected_lease_id
-        || !(1..=MAX_CIPHERTEXT_SIZE_BYTES).contains(&row.ciphertext_size_bytes)
-        || lease_expires_at <= Utc::now()
-    {
-        return Err(invalid_upstream("attachment GC lease"));
-    }
-    Ok(())
-}
-
 fn validate_account_lease(row: &AccountLeaseRow, expected_lease_id: &str) -> Result<()> {
     let owner_user_id = canonical_uuid(&row.owner_user_id, None)?;
     let lease_id = canonical_uuid(&row.lease_id, Some(Version::SortRand))?;
@@ -621,25 +433,11 @@ fn validate_account_lease(row: &AccountLeaseRow, expected_lease_id: &str) -> Res
     {
         return Err(invalid_upstream("account deletion Stripe customer"));
     }
-    let mut previous_workspace_id = None;
-    for workspace_id in &row.e2ee_workspace_ids {
-        let workspace_id = canonical_uuid(workspace_id, None)?;
-        if previous_workspace_id
-            .as_ref()
-            .is_some_and(|previous| previous >= &workspace_id)
-        {
-            return Err(invalid_upstream("account deletion E2EE workspace scope"));
-        }
-        previous_workspace_id = Some(workspace_id);
-    }
     let now = Utc::now();
     if lease_id != expected_lease_id
         || (row.cleanup_ready && horizon > now)
         || (!row.cleanup_ready && row.stripe_deleted)
         || lease_expires_at <= now
-        || row.e2ee_workspace_ids.is_empty()
-        || row.e2ee_workspace_ids.len() > 1_000
-        || !row.e2ee_workspace_ids.contains(&owner_user_id)
     {
         return Err(invalid_upstream("account deletion lease"));
     }
@@ -699,28 +497,6 @@ fn canonical_uuid(value: &str, version: Option<Version>) -> Result<String> {
         return Err(invalid_upstream("cleanup UUID"));
     }
     Ok(canonical)
-}
-
-fn validate_backup_object_key(value: &str, owner_user_id: &str) -> Result<String> {
-    let (owner, filename) = value
-        .split_once('/')
-        .ok_or_else(|| invalid_upstream("attachment object key"))?;
-    let object_id = filename
-        .strip_suffix(".anb1")
-        .ok_or_else(|| invalid_upstream("attachment object key"))?;
-    let object_uuid =
-        Uuid::parse_str(object_id).map_err(|_| invalid_upstream("attachment object key"))?;
-    if owner != owner_user_id
-        || filename.contains('/')
-        || object_uuid.to_string() != object_id
-        || !matches!(
-            object_uuid.get_version(),
-            Some(Version::Random | Version::SortRand)
-        )
-    {
-        return Err(invalid_upstream("attachment object key"));
-    }
-    Ok(value.to_string())
 }
 
 fn validate_shared_attachment_object_key(

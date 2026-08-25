@@ -50,23 +50,16 @@ mod tests {
     use anlg_db_core::{DbOpenOptions, DbStorage};
 
     fn empty_schema() -> DbSchema {
-        DbSchema {
-            steps: &[],
-            validate_cloudsync_table: |_table| false,
-        }
+        DbSchema { steps: &[] }
     }
 
     fn schema_of(steps: &'static [MigrationStep]) -> DbSchema {
-        DbSchema {
-            steps,
-            validate_cloudsync_table: |_table| false,
-        }
+        DbSchema { steps }
     }
 
     async fn open_memory_db() -> Db {
         Db::open(DbOpenOptions {
             storage: DbStorage::Memory,
-            cloudsync_enabled: false,
             journal_mode_wal: true,
             foreign_keys: true,
             max_connections: Some(1),
@@ -262,7 +255,6 @@ mod tests {
     async fn migrate_bootstraps_migration_history() {
         let db = Db::open(DbOpenOptions {
             storage: DbStorage::Memory,
-            cloudsync_enabled: false,
             journal_mode_wal: true,
             foreign_keys: true,
             max_connections: Some(1),

@@ -69,7 +69,6 @@ anlg-calendar = { path = "crates/calendar", package = "calendar" }
 anlg-calendar-interface = { path = "crates/calendar-interface", package = "calendar-interface" }
 anlg-claude = { path = "crates/claude", package = "claude" }
 anlg-cli-process = { path = "crates/cli-process", package = "cli-process" }
-anlg-cloudsync = { path = "crates/cloudsync", package = "cloudsync" }
 anlg-codex = { path = "crates/codex", package = "codex" }
 anlg-data = { path = "crates/data", package = "data" }
 anlg-db-app = { path = "crates/db-app", package = "db-app" }
@@ -78,14 +77,12 @@ anlg-db-core = { path = "crates/db-core", package = "db-core" }
 anlg-db-execute = { path = "crates/db-execute", package = "db-execute" }
 anlg-db-migrate = { path = "crates/db-migrate", package = "db-migrate" }
 anlg-db-reactive = { path = "crates/db-reactive", package = "db-reactive" }
-anlg-db-sync = { path = "crates/db-sync", package = "db-sync" }
 anlg-denoise = { path = "crates/denoise", package = "denoise" }
 anlg-detect = { path = "crates/detect", package = "detect" }
 anlg-device-monitor = { path = "crates/device-monitor", package = "device-monitor" }
 anlg-dictation-ui-macos = { path = "crates/dictation-ui-macos", package = "dictation-ui-macos" }
 anlg-docs = { path = "crates/docs", package = "docs" }
 anlg-download-interface = { path = "crates/download-interface", package = "download-interface" }
-anlg-e2ee = { path = "crates/e2ee", package = "e2ee" }
 anlg-embedding = { path = "crates/embedding", package = "embedding" }
 anlg-exa = { path = "crates/exa", package = "exa" }
 anlg-export-core = { path = "crates/export-core", package = "export-core" }
@@ -137,7 +134,6 @@ anlg-pyannote-local = { path = "crates/pyannote-local", package = "pyannote-loca
 anlg-resampler = { path = "crates/resampler", package = "resampler" }
 anlg-s3 = { path = "crates/s3", package = "s3" }
 anlg-screen-core = { path = "crates/screen-core", package = "screen-core" }
-anlg-session-ingest = { path = "crates/session-ingest", package = "session-ingest" }
 anlg-shortcut-macos = { path = "crates/shortcut-macos", package = "shortcut-macos" }
 anlg-slack-web = { path = "crates/slack-web", package = "slack-web" }
 anlg-storage = { path = "crates/storage", package = "storage" }

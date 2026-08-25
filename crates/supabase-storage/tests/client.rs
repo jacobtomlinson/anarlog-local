@@ -11,23 +11,23 @@ async fn creates_an_origin_and_path_bound_signed_download() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
         .and(path(
-            "/storage/v1/object/sign/attachment-backups/user-id/object.anb1",
+            "/storage/v1/object/sign/shared-note-attachments/user-id/object.sna1",
         ))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-            "signedURL": "/object/sign/attachment-backups/user-id/object.anb1?token=download-token"
+            "signedURL": "/object/sign/shared-note-attachments/user-id/object.sna1?token=download-token"
         })))
         .mount(&server)
         .await;
 
     let url = storage(&server)
-        .create_signed_url("attachment-backups", "user-id/object.anb1", 300)
+        .create_signed_url("shared-note-attachments", "user-id/object.sna1", 300)
         .await
         .unwrap();
 
     assert_eq!(
         url,
         format!(
-            "{}/storage/v1/object/sign/attachment-backups/user-id/object.anb1?token=download-token",
+            "{}/storage/v1/object/sign/shared-note-attachments/user-id/object.sna1?token=download-token",
             server.uri()
         )
     );
@@ -37,7 +37,7 @@ async fn creates_an_origin_and_path_bound_signed_download() {
 async fn rejects_a_signed_download_for_another_origin_or_object() {
     for returned_url in [
         "https://attacker.example/object?token=stolen",
-        "/object/sign/attachment-backups/user-id/other.anb1?token=valid",
+        "/object/sign/shared-note-attachments/user-id/other.sna1?token=valid",
     ] {
         let server = MockServer::start().await;
         Mock::given(method("POST"))
@@ -48,7 +48,7 @@ async fn rejects_a_signed_download_for_another_origin_or_object() {
             .await;
 
         let error = storage(&server)
-            .create_signed_url("attachment-backups", "user-id/object.anb1", 300)
+            .create_signed_url("shared-note-attachments", "user-id/object.sna1", 300)
             .await
             .unwrap_err();
 
@@ -69,7 +69,7 @@ async fn bounds_and_redacts_storage_responses() {
         .await;
 
     let error = storage(&server)
-        .create_signed_url("attachment-backups", "user-id/object.anb1", 300)
+        .create_signed_url("shared-note-attachments", "user-id/object.sna1", 300)
         .await
         .unwrap_err();
 
@@ -82,19 +82,19 @@ async fn creates_an_immutable_signed_upload() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
         .and(path(
-            "/storage/v1/object/upload/sign/attachment-backups/user-id/object.anb1",
+            "/storage/v1/object/upload/sign/shared-note-attachments/user-id/object.sna1",
         ))
         .and(header("authorization", "Bearer service-secret"))
         .and(header("apikey", "service-secret"))
         .and(body_json(serde_json::json!({})))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-            "url": "/object/upload/sign/attachment-backups/user-id/object.anb1?token=upload-token"
+            "url": "/object/upload/sign/shared-note-attachments/user-id/object.sna1?token=upload-token"
         })))
         .mount(&server)
         .await;
 
     let upload = storage(&server)
-        .create_signed_upload("attachment-backups", "user-id/object.anb1")
+        .create_signed_upload("shared-note-attachments", "user-id/object.sna1")
         .await
         .unwrap();
 
@@ -106,7 +106,7 @@ async fn creates_an_immutable_signed_upload() {
     assert_eq!(
         upload.signed_url,
         format!(
-            "{}/storage/v1/object/upload/sign/attachment-backups/user-id/object.anb1?token=upload-token",
+            "{}/storage/v1/object/upload/sign/shared-note-attachments/user-id/object.sna1?token=upload-token",
             server.uri()
         )
     );
@@ -117,13 +117,13 @@ async fn rejects_a_signed_upload_without_a_token() {
     let server = MockServer::start().await;
     Mock::given(method("POST"))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
-            "url": "/object/upload/sign/attachment-backups/user-id/object.anb1"
+            "url": "/object/upload/sign/shared-note-attachments/user-id/object.sna1"
         })))
         .mount(&server)
         .await;
 
     let error = storage(&server)
-        .create_signed_upload("attachment-backups", "user-id/object.anb1")
+        .create_signed_upload("shared-note-attachments", "user-id/object.sna1")
         .await
         .unwrap_err();
 
@@ -141,7 +141,7 @@ async fn rejects_a_signed_upload_from_an_unexpected_origin() {
         .await;
 
     let error = storage(&server)
-        .create_signed_upload("attachment-backups", "user-id/object.anb1")
+        .create_signed_upload("shared-note-attachments", "user-id/object.sna1")
         .await
         .unwrap_err();
 
@@ -157,7 +157,7 @@ async fn reads_storage_object_metadata() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .and(path(
-            "/storage/v1/object/info/attachment-backups/user-id/object.anb1",
+            "/storage/v1/object/info/shared-note-attachments/user-id/object.sna1",
         ))
         .respond_with(ResponseTemplate::new(200).set_body_json(serde_json::json!({
             "id": "object-id",
@@ -172,7 +172,7 @@ async fn reads_storage_object_metadata() {
         .await;
 
     let info = storage(&server)
-        .object_info("attachment-backups", "user-id/object.anb1")
+        .object_info("shared-note-attachments", "user-id/object.sna1")
         .await
         .unwrap();
 
@@ -200,7 +200,7 @@ async fn reads_legacy_storage_object_metadata() {
         .await;
 
     let info = storage(&server)
-        .object_info("attachment-backups", "user-id/object.anb1")
+        .object_info("shared-note-attachments", "user-id/object.sna1")
         .await
         .unwrap();
 
@@ -241,7 +241,7 @@ async fn reads_storage_object_metadata_split_across_response_fields() {
             .await;
 
         let info = storage(&server)
-            .object_info("attachment-backups", "user-id/object.anb1")
+            .object_info("shared-note-attachments", "user-id/object.sna1")
             .await
             .unwrap();
 
@@ -343,7 +343,7 @@ async fn rejects_missing_or_malformed_private_object_metadata() {
             .await;
 
         let error = storage(&server)
-            .object_info("attachment-backups", "user-id/object.anb1")
+            .object_info("shared-note-attachments", "user-id/object.sna1")
             .await
             .unwrap_err();
 
@@ -356,14 +356,14 @@ async fn streams_a_trusted_storage_object_checksum() {
     let server = MockServer::start().await;
     Mock::given(method("GET"))
         .and(path(
-            "/storage/v1/object/authenticated/attachment-backups/user-id/object.anb1",
+            "/storage/v1/object/authenticated/shared-note-attachments/user-id/object.sna1",
         ))
         .respond_with(ResponseTemplate::new(200).set_body_bytes(vec![0_u8; 1_234]))
         .mount(&server)
         .await;
 
     let checksum = storage(&server)
-        .object_sha256("attachment-backups", "user-id/object.anb1", 1_234)
+        .object_sha256("shared-note-attachments", "user-id/object.sna1", 1_234)
         .await
         .unwrap();
 
@@ -382,7 +382,7 @@ async fn rejects_storage_object_size_mismatches_while_hashing() {
         .await;
 
     let error = storage(&server)
-        .object_sha256("attachment-backups", "user-id/object.anb1", 4)
+        .object_sha256("shared-note-attachments", "user-id/object.sna1", 4)
         .await
         .unwrap_err();
 
@@ -394,14 +394,14 @@ async fn percent_encodes_object_path_segments() {
     let server = MockServer::start().await;
     Mock::given(method("DELETE"))
         .and(path(
-            "/storage/v1/object/attachment-backups/user-id/object%20name.anb1",
+            "/storage/v1/object/shared-note-attachments/user-id/object%20name.sna1",
         ))
         .respond_with(ResponseTemplate::new(200))
         .mount(&server)
         .await;
 
     storage(&server)
-        .delete_file("attachment-backups", "user-id/object name.anb1")
+        .delete_file("shared-note-attachments", "user-id/object name.sna1")
         .await
         .unwrap();
 }
@@ -419,7 +419,7 @@ async fn deleting_a_missing_object_is_idempotent() {
         .await;
 
     storage(&server)
-        .delete_file("attachment-backups", "user-id/missing.anb1")
+        .delete_file("shared-note-attachments", "user-id/missing.sna1")
         .await
         .unwrap();
 }
@@ -437,7 +437,7 @@ async fn does_not_hide_other_not_found_errors() {
         .await;
 
     let error = storage(&server)
-        .delete_file("attachment-backups", "user-id/object.anb1")
+        .delete_file("shared-note-attachments", "user-id/object.sna1")
         .await
         .unwrap_err();
 
@@ -449,7 +449,7 @@ async fn does_not_hide_other_not_found_errors() {
 async fn rejects_traversal_before_sending_a_request() {
     let server = MockServer::start().await;
     let error = storage(&server)
-        .delete_file("attachment-backups", "user-id/../object.anb1")
+        .delete_file("shared-note-attachments", "user-id/../object.sna1")
         .await
         .unwrap_err();
 

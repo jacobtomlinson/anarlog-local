@@ -1,10 +1,10 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import { act } from "react";
+import { act, type ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   useStoredSettingValuesQuery: vi.fn(),
-  mutateCloudSync: vi.fn(),
   setSettingValues: vi.fn(),
   meetingSettingsProps: vi.fn(),
 }));
@@ -13,28 +13,12 @@ vi.mock("@anlg/plugin-analytics", () => ({
   commands: { event: vi.fn() },
 }));
 
-vi.mock("@tanstack/react-query", () => ({
-  useQuery: () => ({
-    data: { configured: true },
-    isLoading: false,
-  }),
-  useMutation: () => ({
-    isPending: false,
-    variables: undefined,
-    mutate: mocks.mutateCloudSync,
-  }),
-}));
-
 vi.mock("~/auth", () => ({
   useAuth: () => ({ session: null, signOut: vi.fn() }),
 }));
 
 vi.mock("~/auth/billing-context", () => ({
   useBillingAccess: () => ({ isPro: true }),
-}));
-
-vi.mock("~/auth/cloudsync", () => ({
-  applyCloudsyncPreference: vi.fn(),
 }));
 
 vi.mock("~/settings/queries", () => ({
@@ -72,6 +56,14 @@ vi.mock("./week-start", () => ({ WeekStartSelector: () => null }));
 import { SettingsApp, SettingsMeetings } from "./index";
 
 describe("SettingsApp", () => {
+  function renderWithQueryClient(ui: ReactNode) {
+    return render(
+      <QueryClientProvider client={new QueryClient()}>
+        {ui}
+      </QueryClientProvider>,
+    );
+  }
+
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -84,7 +76,7 @@ describe("SettingsApp", () => {
       error: null,
     });
 
-    render(<SettingsApp />);
+    renderWithQueryClient(<SettingsApp />);
 
     expect(screen.getByLabelText("Loading settings")).toBeTruthy();
   });
@@ -102,7 +94,7 @@ describe("SettingsApp", () => {
       error: null,
     });
 
-    render(<SettingsApp />);
+    renderWithQueryClient(<SettingsApp />);
 
     expect(screen.getByTestId("main-language").textContent).toBe("ko");
   });
@@ -117,7 +109,7 @@ describe("SettingsApp", () => {
       error: null,
     });
 
-    render(<SettingsMeetings />);
+    renderWithQueryClient(<SettingsMeetings />);
 
     const props = mocks.meetingSettingsProps.mock.lastCall?.[0] as {
       autoStartScheduledMeetings: {
@@ -146,7 +138,7 @@ describe("SettingsApp", () => {
       error: null,
     });
 
-    render(<SettingsMeetings />);
+    renderWithQueryClient(<SettingsMeetings />);
 
     expect(screen.getByText("Meetings")).toBeTruthy();
     expect(screen.getByText("Meeting settings")).toBeTruthy();

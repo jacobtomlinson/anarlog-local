@@ -1,7 +1,6 @@
 import { getDocumentAsync } from "expo-document-picker";
 import { Directory, File, FileMode, Paths } from "expo-file-system";
 
-import { requestMobileAttachmentUploads } from "@/attachment-sync/upload-runner";
 import { hashFileSha256 } from "@/data/file-sha256";
 import {
   portableNoteAttachmentMarkdown,
@@ -66,18 +65,17 @@ export async function pickAndCatalogNoteAttachment(
       ? asset.mimeType
       : "application/octet-stream";
     const now = nowIso();
-    const transferJobId = id();
     const [inserted = 0, localized = 0, queued = 0] = await executeTransaction([
       {
         sql: `
             INSERT INTO session_attachments (
               id, workspace_id, session_id, filename, relative_path,
               content_type, size_bytes, sha256, storage_kind,
-              cloud_object_key, source_type, source_id, metadata_json,
-              cloud_sync_enabled, created_at, updated_at, deleted_at
+              source_type, source_id, metadata_json, created_at, updated_at,
+              deleted_at
             )
-            SELECT ?, workspace_id, id, ?, ?, ?, ?, ?, 'local_file', '',
-              'note_upload', ?, '{}', 1, ?, ?, NULL
+            SELECT ?, workspace_id, id, ?, ?, ?, ?, ?, 'local_file',
+              'note_upload', ?, '{}', ?, ?, NULL
             FROM sessions
             WHERE id = ? AND deleted_at IS NULL
           `,
@@ -107,25 +105,10 @@ export async function pickAndCatalogNoteAttachment(
         params: [now, attachmentId, sessionId],
         expectedRowsAffected: 1,
       },
-      {
-        sql: `
-            INSERT INTO attachment_transfer_jobs (
-              id, attachment_id, session_id, workspace_id, direction,
-              expected_sha256, expected_size_bytes
-            )
-            SELECT ?, id, session_id, workspace_id, 'upload', sha256, size_bytes
-            FROM session_attachments
-            WHERE id = ? AND session_id = ? AND cloud_sync_enabled = 1
-              AND deleted_at IS NULL
-          `,
-        params: [transferJobId, attachmentId, sessionId],
-        expectedRowsAffected: 1,
-      },
     ]);
-    if (inserted !== 1 || localized !== 1 || queued !== 1) {
+    if (inserted !== 1 || localized !== 1) {
       throw new Error("The attachment could not be added to this meeting.");
     }
-    requestMobileAttachmentUploads();
     return {
       status: "attached",
       attachmentId,

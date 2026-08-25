@@ -158,9 +158,7 @@ describe("session SQLite operations", () => {
       params: unknown[];
     }>;
     expect(statements[0].sql).toContain("event_json");
-    expect(statements[0].sql).toContain("cloudsync_workspace_binding");
-    expect(statements[0].sql).toContain("NULLIF((");
-    expect(statements[0].sql).not.toContain("COALESCE((");
+    expect(statements[0].sql).toContain("owner_user_id");
     expect(statements[0].params).toContain('{"tracking_id":"welcome"}');
     expect(statements[1].sql).toContain("session_documents");
     expect(statements[1].sql).toContain("workspace_id");
@@ -168,23 +166,16 @@ describe("session SQLite operations", () => {
     expect(statements[1].params).toContain('{"type":"doc"}');
   });
 
-  it("derives the default self identity from the bound workspace", async () => {
+  it("derives the default self identity from the local owner", async () => {
     await createSession("Local note");
 
     const statements = mocks.executeTransaction.mock.calls[0][0] as Array<{
       sql: string;
       params: unknown[];
     }>;
-    expect(statements[0].sql).toContain("NULLIF(NULLIF(?, '')");
-    expect(statements[0].sql).toContain("00000000-0000-0000-0000-000000000000");
+    expect(statements[0].sql).toContain("COALESCE(NULLIF(?, '')");
     expect(statements[2].sql).toContain("SELECT session.owner_user_id");
-    expect(statements[2].params).not.toContain(
-      "00000000-0000-0000-0000-000000000000",
-    );
     expect(statements[3].sql).toContain("session.owner_user_id");
-    expect(statements[3].params).not.toContain(
-      "00000000-0000-0000-0000-000000000000",
-    );
   });
 
   it("links a human to a session without creating duplicate active mappings", async () => {

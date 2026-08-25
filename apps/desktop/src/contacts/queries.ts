@@ -423,22 +423,10 @@ export function createHuman({
             phone, job_title, linkedin_username, memo, pinned, pin_order,
             metadata_json, created_at, updated_at, deleted_at
           ) VALUES (
-            ?, NULLIF((
-              SELECT json_extract(value_json, '$.workspace_id')
-              FROM app_settings
-              WHERE id = 'cloudsync_workspace_binding'
-            ), ''), COALESCE(
-              NULLIF(NULLIF(?, ''), '${DEFAULT_USER_ID}'),
-              NULLIF((
-                SELECT json_extract(value_json, '$.workspace_id')
-                FROM app_settings
-                WHERE id = 'cloudsync_workspace_binding'
-              ), ''),
-              '${DEFAULT_USER_ID}'
-            ), '', ?, ?, '', '', '', '', 0, NULL, '{}', ?, ?, NULL
+            ?, ?, ?, '', ?, ?, '', '', '', '', 0, NULL, '{}', ?, ?, NULL
           )
         `,
-        params: [humanId, ownerUserId, name, email, now, now],
+        params: [humanId, ownerUserId, ownerUserId, name, email, now, now],
       },
     ]);
     trackAnalyticsEvent("contact_created", {
@@ -467,22 +455,10 @@ export function createOrganization({
             id, workspace_id, owner_user_id, name, memo, pinned, pin_order,
             metadata_json, created_at, updated_at, deleted_at
           ) VALUES (
-            ?, NULLIF((
-              SELECT json_extract(value_json, '$.workspace_id')
-              FROM app_settings
-              WHERE id = 'cloudsync_workspace_binding'
-            ), ''), COALESCE(
-              NULLIF(NULLIF(?, ''), '${DEFAULT_USER_ID}'),
-              NULLIF((
-                SELECT json_extract(value_json, '$.workspace_id')
-                FROM app_settings
-                WHERE id = 'cloudsync_workspace_binding'
-              ), ''),
-              '${DEFAULT_USER_ID}'
-            ), ?, '', 0, NULL, '{}', ?, ?, NULL
+            ?, ?, ?, ?, '', 0, NULL, '{}', ?, ?, NULL
           )
         `,
-        params: [organizationId, ownerUserId, name, now, now],
+        params: [organizationId, ownerUserId, ownerUserId, name, now, now],
       },
     ]);
     return organizationId;
@@ -797,11 +773,7 @@ export function applyContactEnhancement({
             id, workspace_id, owner_user_id, name, memo, pinned, pin_order,
             metadata_json, created_at, updated_at, deleted_at
           )
-          SELECT ?, NULLIF((
-            SELECT json_extract(value_json, '$.workspace_id')
-            FROM app_settings
-            WHERE id = 'cloudsync_workspace_binding'
-          ), ''), ?, ?, '', 0, NULL, '{}', ?, ?, NULL
+          SELECT ?, ?, ?, ?, '', 0, NULL, '{}', ?, ?, NULL
           WHERE NOT EXISTS (
             SELECT 1
             FROM organizations
@@ -810,6 +782,7 @@ export function applyContactEnhancement({
         `,
         params: [
           organizationId,
+          ownerUserId,
           ownerUserId,
           changes.companyName,
           now,

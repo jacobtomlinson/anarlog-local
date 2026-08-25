@@ -39,7 +39,7 @@ export function useLegacyMigrationCleanup() {
       return { status, report };
     },
     // The status commands can fail transiently while the database is busy
-    // (e.g. during CloudSync enablement); keep retrying instead of parking
+    // (e.g. while the local database is reopening); keep retrying instead of parking
     // the row in an error state.
     refetchInterval: (q) => (q.state.status === "error" ? 15_000 : false),
   });

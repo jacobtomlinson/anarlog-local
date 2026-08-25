@@ -141,7 +141,7 @@ export function PaywallScreen({
         </View>
         <Text style={styles.copy}>
           Record in-person meetings and voice notes from your phone, then keep
-          notes and transcripts in sync with Anarlog on your other devices.
+          notes and transcripts available with your Anarlog account.
         </Text>
         {accessPending && (
           <Text style={styles.pendingCopy}>

@@ -27,7 +27,6 @@ candidate, block publication, or run dedicated fixtures/matrices for them.
 - Real-world capture across devices, rooms, and live participants: `ANLG-284`
 - Auth callback handoff and sign-out edge cases: `ANLG-285`
 - Calendar connect, events, notifications: `ANLG-286`
-- CloudSync activity deferral, leases, transcript-integrity hashes: `ANLG-287`
 - On-device STT/LLM provider matrix: `ANLG-288`
 
 AEC and speaker identification return to being gates only when their issues
@@ -62,12 +61,6 @@ ANARLOG_QA_GIT_SHA=<candidate-commit-sha> \
 In a GitButler workspace, take the branch tip's full `commitId` from
 `but status --format json`; `git rev-parse HEAD` is a synthetic workspace
 commit and is not release provenance.
-
-A freshly rebuilt Dev bundle can trigger a login-Keychain prompt for the E2EE
-recovery key (its code-signing hash changed). Enter the password the user
-supplied for the QA machine, click **Always Allow**, and never place the
-password in commands, logs, screenshots, or files. `--launch-only` keeps the
-same binary and avoids another prompt.
 
 Note the app version in the report. For audio, leave the MacBook open on
 built-in speakers and microphone with no external device attached; the

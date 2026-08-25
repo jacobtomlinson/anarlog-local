@@ -39,21 +39,7 @@ type SourceSubscription = {
 };
 
 const emptyTasks: TaskRecord[] = [];
-const resolvedOwnerSql = `
-  COALESCE(
-    NULLIF(?, ?),
-    (
-      SELECT NULLIF(json_extract(value_json, '$.account_user_id'), '')
-      FROM app_settings
-      WHERE id = 'cloudsync_workspace_binding'
-    ),
-    (
-      SELECT NULLIF(json_extract(value_json, '$.workspace_id'), '')
-      FROM app_settings
-      WHERE id = 'cloudsync_workspace_binding'
-    )
-  )
-`;
+const resolvedOwnerSql = "COALESCE(NULLIF(?, ?), '')";
 
 const defaultDependencies: TaskStorageDependencies = {
   subscribe: liveQueryClient.subscribe.bind(liveQueryClient),
@@ -358,16 +344,8 @@ function buildTaskUpsertStatement(
       )
       VALUES (
         ?, COALESCE(
-          (
-            SELECT NULLIF(workspace_id, '')
-            FROM sessions
-            WHERE id = ? AND deleted_at IS NULL
-          ),
-          (
-            SELECT NULLIF(json_extract(value_json, '$.workspace_id'), '')
-            FROM app_settings
-            WHERE id = 'cloudsync_workspace_binding'
-          )
+          (SELECT NULLIF(workspace_id, '') FROM sessions WHERE id = ? AND deleted_at IS NULL),
+          ''
         ), ?, ?, ?, ?, '', ?, ?, ?, ?, ${resolvedOwnerSql}, ${resolvedOwnerSql}, '{}', ?, ?, NULL
       )
       ON CONFLICT(id) DO UPDATE SET

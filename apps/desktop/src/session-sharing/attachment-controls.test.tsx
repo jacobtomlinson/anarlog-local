@@ -12,12 +12,8 @@ const audio: SessionShareAttachment = {
   sha256: "a".repeat(64),
   sourceType: "session_audio",
   sourceId: "session-1",
-  cloudSyncEnabled: false,
-  cloudObjectKey: "",
+  remoteObjectKey: "",
   localAvailability: "present",
-  transferDirection: null,
-  transferPhase: null,
-  transferError: "",
 };
 
 afterEach(cleanup);

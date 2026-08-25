@@ -4,7 +4,7 @@ title: "Privacy Policy"
 summary: "What we collect, what stays on your device, and the choices you have."
 ---
 
-> **The short version:** Anarlog is local-first. Your notes live on your device, and you can use the app entirely offline. Cloud features are optional, and this policy tells you exactly what each one sends off your device. Encrypted sync is built so we can't read your notes. We don't sell your data. The full policy below is the one that governs.
+> **The short version:** Anarlog is local-first. Your notes live on your device, and you can use the app entirely offline. Cloud features are optional, and this policy tells you exactly what each one sends off your device. We don't sell your data. The full policy below is the one that governs.
 
 ## 1. Who we are
 
@@ -14,7 +14,7 @@ Anarlog is made by Fastrepl, Inc. ("we," "our," or "us"). This policy explains w
 
 Your notes, transcripts, and meeting data are stored locally, on your device. You can use Anarlog entirely offline with local transcription and a local language model — nothing leaves your computer.
 
-Cloud features — cloud transcription, AI summaries, Cloud Sync, sharing, and the Cloud API — are optional and require an account. Each one is described below, so you can see exactly what it sends and decide for yourself. If you no longer want an account, you can delete it at any time (see Section 9.2).
+Cloud features — cloud transcription, AI summaries, sharing, and the Cloud API — are optional and require an account. Each one is described below, so you can see exactly what it sends and decide for yourself. If you no longer want an account, you can delete it at any time (see Section 9.2).
 
 ## 3. What we collect
 
@@ -60,19 +60,15 @@ If you connect an issue tracker like Linear or GitHub, we access the issues, pul
 - **Cloud AI.** If you use cloud summaries or chat, the text and instructions needed for the request go through our AI gateway to the model providers listed in Section 8.2. This can include event context associated with a note when you deliberately invoke AI on that note. If you use AI chat with web search, your search queries go to our search providers. We never use your notes, transcripts, audio, or connected calendar data to train AI models.
 - **Your own providers.** If you bring your own API key or a local endpoint, content goes directly to the provider you chose, under your agreement with them.
 
-## 5. Cloud Sync, sharing, and the Cloud API
+## 5. Sharing and the Cloud API
 
-### 5.1 Cloud Sync is end-to-end encrypted
-
-Synced notes, transcripts, and attachments are encrypted on your device before upload, with keys derived from a recovery key that lives in your operating system's keychain and never reaches us. **We cannot read your synced content, and we cannot recover it if you lose your recovery key.** Our sync servers see only encrypted records plus limited operational metadata — your account and workspace identifier, record timestamps and sizes, and your device names. Not content, not titles, not field names.
-
-### 5.2 Shared notes are different
+### 5.1 Shared notes
 
 When you share a note or create a share link, a server-readable copy of that note — title, content, attachments — is stored on our servers so recipients can open it in a browser. We also collect view metadata (like when a shared note is opened) to power features like view tracking. When you stop sharing, recipients lose access.
 
-### 5.3 Cloud API & Connectors is opt-in
+### 5.2 Cloud API & Connectors is opt-in
 
-Off by default. If you turn it on, Anarlog uploads a separate server-readable copy of your meeting titles, notes, summaries, participants, action items, and transcripts, so agents and API clients you authorize can reach them while your desktop is offline. It doesn't weaken Cloud Sync's encryption. Turn it off and the server-readable copies are deleted.
+Off by default. If you turn it on, Anarlog uploads a separate server-readable copy of your meeting titles, notes, summaries, participants, action items, and transcripts, so agents and API clients you authorize can reach them while your desktop is offline. Turn it off and the server-readable copies are deleted.
 
 ## 6. How we use your information
 
@@ -90,7 +86,7 @@ We use your information to:
 
 ## 7. Storage and security
 
-We use appropriate technical and organizational measures to protect your information from unauthorized access, alteration, disclosure, or destruction. Data in transit is protected with HTTPS/TLS, and Cloud Sync content is additionally end-to-end encrypted as described in Section 5.1. Data on your device is protected by your operating system, including any device-level encryption you've turned on.
+We use appropriate technical and organizational measures to protect your information from unauthorized access, alteration, disclosure, or destruction. Data in transit is protected with HTTPS/TLS. Data on your device is protected by your operating system, including any device-level encryption you've turned on.
 
 For connected calendars, calendar and event data lives primarily in Anarlog's local database on your device. Nango, our integration provider, stores the OAuth tokens needed to keep the connection alive — encrypted at rest with AES-256-GCM and in transit with TLS. On our backend we keep only the connection metadata needed to operate the integration securely: integration ID, connection ID, status, error state, and timestamps.
 
@@ -107,7 +103,6 @@ We don't sell, trade, or rent your personal information — including connected 
 We share information with providers who do work on our behalf:
 
 - **Hosting and infrastructure** (e.g., Fly.io, Netlify, Supabase, Render, Amazon Web Services, Cloudflare) for running the service, storing data securely, and delivering downloads
-- **Sync storage** (SQLite Cloud) for storing end-to-end encrypted Cloud Sync records
 - **Integrations** (e.g., Nango) for encrypted OAuth credential storage, token refresh, and the proxy that retrieves connected-account data
 - **Payments** (e.g., Stripe)
 - **Analytics** (e.g., PostHog, Google Analytics, Microsoft Clarity) for understanding how people use Anarlog, including website session replay
@@ -123,7 +118,7 @@ When you connect Google Calendar or Microsoft Outlook Calendar, we may share con
 
 - With service providers directly involved in authenticating the connection, syncing calendars and events, and delivering the calendar features you enable
 - With the language-model provider you select, only when you deliberately invoke AI on a note that includes event context; local models process that context on your device
-- Through encrypted Cloud Sync or content you choose to share when event context has been associated with a note and you enable that user-facing feature
+- Through content you choose to share when event context has been associated with a note and you enable that user-facing feature
 - For security purposes, such as investigating abuse, preventing fraud, or fixing integration failures
 - To comply with applicable law, regulation, legal process, or enforceable governmental request
 - As part of a merger, acquisition, or asset sale, only after obtaining your explicit prior consent
@@ -149,7 +144,7 @@ Delete your account yourself from the Account page in the web app (`anarlog.so/a
 ### 9.3 How long we keep things
 
 - **Local data** stays on your device until you remove it.
-- **Cloud data we control** — Cloud Sync records, transcription results, shared notes, Cloud API copies — is deleted within 30 days of account deletion, unless the law requires us to keep it.
+- **Cloud data we control** — transcription results, shared notes, and Cloud API copies — is deleted within 30 days of account deletion, unless the law requires us to keep it.
 - **Audio uploaded for cloud transcription** is deleted from our storage once the job completes.
 - **Cloud API & Connectors copies** are deleted when you turn the feature off.
 - **Shared notes** stay available until you stop sharing them or delete your account.

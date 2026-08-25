@@ -1,6 +1,6 @@
 import type { SessionEvent } from "@anlg/store";
 
-import { executeTransaction, liveQueryClient } from "~/db";
+import { executeTransaction } from "~/db";
 import { enqueueDatabaseWrite } from "~/db/write-queue";
 import {
   buildPastSessionNotes,
@@ -99,7 +99,7 @@ export async function populateRecurringMeetingNotes({
   userId: string | null | undefined;
   now?: Date;
 }): Promise<string> {
-  const workspaceId = await loadCloudsyncWorkspaceId();
+  const workspaceId = normalizeUserId(userId, DEFAULT_USER_ID);
   const ownerUserId = normalizeUserId(userId, workspaceId);
   const currentSessionId = namespacedId(workspaceId, CURRENT_SESSION_ID);
   const participants = PARTICIPANTS.map((participant) => ({
@@ -422,23 +422,6 @@ function buildSessionEvent(startedAt: Date): SessionEvent {
     description: "Seeded from devtools to exercise the Insights tab.",
     recurrence_series_id: SERIES_ID,
   };
-}
-
-async function loadCloudsyncWorkspaceId(): Promise<string> {
-  const [binding] = await liveQueryClient.execute<{
-    workspace_id: string | null;
-  }>(
-    `
-      SELECT NULLIF(json_extract(value_json, '$.workspace_id'), '') AS workspace_id
-      FROM app_settings
-      WHERE id = 'cloudsync_workspace_binding'
-      LIMIT 1
-    `,
-  );
-  if (!binding?.workspace_id) {
-    throw new Error("CloudSync workspace binding is missing");
-  }
-  return binding.workspace_id;
 }
 
 function normalizeUserId(

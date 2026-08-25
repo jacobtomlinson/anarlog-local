@@ -309,13 +309,7 @@ export function buildMeetingStatements({
           id, workspace_id, owner_user_id, title, created_at, updated_at,
           started_at, ended_at, external_event_id, external_provider,
           metadata_json, deleted_at
-        ) VALUES (?, NULLIF((
-          SELECT json_extract(value_json, '$.workspace_id')
-          FROM app_settings WHERE id = 'cloudsync_workspace_binding'
-        ), ''), COALESCE(NULLIF((
-          SELECT json_extract(value_json, '$.workspace_id')
-          FROM app_settings WHERE id = 'cloudsync_workspace_binding'
-        ), ''), ?), ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+        ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
       `,
       params: [
         sessionId,

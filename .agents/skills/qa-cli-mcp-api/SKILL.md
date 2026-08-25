@@ -204,8 +204,7 @@ Begin with **Cloud API & Connectors** disabled.
    complete. No snapshot from the first account may appear in the second.
 7. Disable the feature.
    - PASS when all server-readable snapshots are purged, the cloud key returns
-     `cloud_api_not_enabled`, local data remains, and normal encrypted sync
-     data is unchanged.
+     `cloud_api_not_enabled`, and local data remains intact.
 8. Re-enable and confirm a fresh backfill restores only currently existing
    meetings. Revoke the QA key when finished.
 

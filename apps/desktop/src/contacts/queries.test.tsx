@@ -152,24 +152,19 @@ describe("contact SQLite queries", () => {
 
     const statement = mocks.executeTransaction.mock.calls[0][0][0];
     expect(statement.sql).toContain("INSERT INTO humans");
-    expect(statement.sql).toContain("cloudsync_workspace_binding");
-    expect(statement.sql).toContain("NULLIF((");
-    expect(statement.sql).not.toContain("COALESCE((");
+    expect(statement.sql).toContain("owner_user_id");
     expect(statement.params).toContain("human-new");
     expect(statement.params).toContain("alice@example.com");
   });
 
-  it("defaults new contact ownership to the bound workspace", async () => {
+  it("defaults new contact ownership to the local user", async () => {
     await createHuman({ name: "Alice" });
     await createOrganization({ name: "Example" });
 
     const humanStatement = mocks.executeTransaction.mock.calls[0][0][0];
     const organizationStatement = mocks.executeTransaction.mock.calls[1][0][0];
     for (const statement of [humanStatement, organizationStatement]) {
-      expect(statement.sql).toContain(
-        "NULLIF(NULLIF(?, ''), '00000000-0000-0000-0000-000000000000')",
-      );
-      expect(statement.sql).toContain("cloudsync_workspace_binding");
+      expect(statement.sql).toContain("owner_user_id");
       expect(statement.params[1]).toBe("00000000-0000-0000-0000-000000000000");
     }
   });
@@ -615,7 +610,6 @@ describe("contact SQLite queries", () => {
     const statements = mocks.executeTransaction.mock.calls[0][0];
     expect(statements).toHaveLength(2);
     expect(statements[0]?.sql).toContain("INSERT INTO organizations");
-    expect(statements[0]?.sql).toContain("cloudsync_workspace_binding");
     expect(statements[0]?.sql).toContain("NOT EXISTS");
     expect(statements[1]?.sql).toContain("UPDATE humans");
     expect(statements[1]?.sql).toContain("organization_id = CASE");

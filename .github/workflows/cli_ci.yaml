@@ -19,7 +19,6 @@ on:
       - apps/web/netlify.toml
       - apps/web/public/llms.txt
       - crates/agent-access/**
-      - crates/cloudsync/**
       - crates/cli-docs/**
       - crates/db-app/**
       - crates/db-change/**
@@ -50,7 +49,6 @@ on:
       - apps/web/netlify.toml
       - apps/web/public/llms.txt
       - crates/agent-access/**
-      - crates/cloudsync/**
       - crates/cli-docs/**
       - crates/db-app/**
       - crates/db-change/**

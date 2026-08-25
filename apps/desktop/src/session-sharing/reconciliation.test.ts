@@ -77,13 +77,9 @@ const localAttachment: SessionShareAttachment = {
   sha256: sharedAttachment.sha256,
   sourceType: "note_upload",
   sourceId: LOCAL_ATTACHMENT_SOURCE_ID,
-  cloudSyncEnabled: true,
-  cloudObjectKey:
-    "11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.anb1",
+  remoteObjectKey:
+    "11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.sna1",
   localAvailability: "present",
-  transferDirection: null,
-  transferPhase: "completed",
-  transferError: "",
 };
 const localImageAttrs = {
   attachmentId: LOCAL_ATTACHMENT_SOURCE_ID,

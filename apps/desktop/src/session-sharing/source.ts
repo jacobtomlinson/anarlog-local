@@ -34,7 +34,6 @@ type SessionShareSourceSqlRow = {
   assigned_workspace_kind: string | null;
   assigned_workspace_deleted_at: string | null;
   assigned_workspace_role: string | null;
-  binding_json: string | null;
 };
 
 type AvailableShareWorkspaceSqlRow = {
@@ -117,12 +116,6 @@ const SESSION_SHARE_SOURCE_SQL = `
         AND membership.deleted_at IS NULL
       LIMIT 1
     ) AS assigned_workspace_role,
-    (
-      SELECT value_json
-      FROM app_settings
-      WHERE id = 'cloudsync_workspace_binding'
-      LIMIT 1
-    ) AS binding_json
   FROM sessions AS session
   LEFT JOIN session_documents AS share_document
     ON share_document.id = (${SESSION_SHARE_DOCUMENT_ID_SQL})
@@ -260,14 +253,7 @@ function resolveSourceWorkspace(
     ) {
       return accountUserId;
     }
-    if (
-      !row.assigned_workspace_kind &&
-      isLegacyWorkspaceBinding(
-        assignedWorkspaceId,
-        row.binding_json,
-        accountUserId,
-      )
-    ) {
+    if (!row.assigned_workspace_kind) {
       return accountUserId;
     }
     throw new Error("The personal workspace is unavailable for sharing");
@@ -288,13 +274,7 @@ function resolveSourceWorkspace(
     throw new Error("The note belongs to an unavailable workspace");
   }
 
-  if (
-    isLegacyWorkspaceBinding(
-      assignedWorkspaceId,
-      row.binding_json,
-      accountUserId,
-    )
-  ) {
+  if (!assignedWorkspaceId || assignedWorkspaceId === DEFAULT_USER_ID) {
     if (!personalWorkspaceAvailable) {
       throw new Error("The personal workspace is unavailable for sharing");
     }
@@ -302,39 +282,6 @@ function resolveSourceWorkspace(
   }
 
   throw new Error("The note belongs to an unavailable workspace");
-}
-
-function isLegacyWorkspaceBinding(
-  assignedWorkspaceId: string,
-  bindingJson: string | null,
-  accountUserId: string,
-): boolean {
-  if (!assignedWorkspaceId || assignedWorkspaceId === DEFAULT_USER_ID) {
-    return true;
-  }
-  if (!bindingJson) return false;
-
-  let value: unknown;
-  try {
-    value = JSON.parse(bindingJson) as unknown;
-  } catch {
-    return false;
-  }
-  if (!isRecord(value)) return false;
-
-  const workspaceId = value.workspace_id;
-  const boundAccountUserId = value.account_user_id;
-  if (
-    typeof workspaceId !== "string" ||
-    workspaceId.trim() !== assignedWorkspaceId
-  ) {
-    return false;
-  }
-  return (
-    boundAccountUserId == null ||
-    boundAccountUserId === "" ||
-    boundAccountUserId === accountUserId
-  );
 }
 
 function parseShareDocument(body: string, bodyFormat: string): JSONContent {

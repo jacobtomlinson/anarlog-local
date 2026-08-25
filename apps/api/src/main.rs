@@ -78,49 +78,10 @@ fn request_client_address(request: &Request<Body>) -> Option<String> {
 }
 
 fn build_sync_routes(
-    state: Option<anlg_api_sync::AppState>,
-    replica_state: anlg_api_sync::ReplicaState,
-    cloudsync_rate_limit_state: rate_limit::RateLimitState,
+    state: anlg_api_sync::AppState,
     session_share_rate_limit_state: rate_limit::RateLimitState,
-    witness_rate_limit_state: rate_limit::RateLimitState,
     auth_state: AuthState,
 ) -> Router {
-    let replica_routes = anlg_api_sync::replica_router(replica_state.clone())
-        .route_layer(middleware::from_fn_with_state(
-            cloudsync_rate_limit_state.clone(),
-            rate_limit::rate_limit,
-        ))
-        .route_layer(middleware::from_fn(auth::sentry_and_analytics))
-        .route_layer(middleware::from_fn_with_state(
-            auth_state.clone().with_required_entitlement("hyprnote_pro"),
-            auth::require_auth,
-        ));
-    let witness_routes = anlg_api_sync::e2ee_witness_router(replica_state)
-        .route_layer(middleware::from_fn_with_state(
-            witness_rate_limit_state,
-            rate_limit::wait_for_rate_limit,
-        ))
-        .route_layer(middleware::from_fn(auth::sentry_and_analytics))
-        .route_layer(middleware::from_fn_with_state(
-            auth_state.clone().with_required_entitlement("hyprnote_pro"),
-            auth::require_auth,
-        ));
-    let replica_routes = replica_routes.merge(witness_routes);
-
-    let Some(state) = state else {
-        return replica_routes;
-    };
-
-    let cloudsync_routes = anlg_api_sync::cloudsync_router(state.clone())
-        .route_layer(middleware::from_fn_with_state(
-            cloudsync_rate_limit_state,
-            rate_limit::rate_limit,
-        ))
-        .route_layer(middleware::from_fn(auth::sentry_and_analytics))
-        .route_layer(middleware::from_fn_with_state(
-            auth_state.clone().with_required_entitlement("hyprnote_pro"),
-            auth::require_auth,
-        ));
     let session_share_routes = anlg_api_sync::session_share_router(state.clone())
         .route_layer(middleware::from_fn_with_state(
             session_share_rate_limit_state.clone(),
@@ -142,10 +103,7 @@ fn build_sync_routes(
             auth::require_auth,
         ));
 
-    replica_routes
-        .merge(cloudsync_routes)
-        .merge(session_share_routes)
-        .merge(web_edit_routes)
+    session_share_routes.merge(web_edit_routes)
 }
 
 async fn app() -> Router {
@@ -197,20 +155,7 @@ async fn app_with_env(env: &'static crate::env::RuntimeConfig) -> Router {
             .free(quota())
             .build()
     };
-    let cloudsync_rate_limit = build_sync_rate_limit();
     let session_share_rate_limit = build_sync_rate_limit();
-    let e2ee_witness_rate_limit = rate_limit::RateLimitState::builder()
-        .pro(
-            governor::Quota::with_period(Duration::from_millis(100))
-                .unwrap()
-                .allow_burst(NonZeroU32::new(20).unwrap()),
-        )
-        .free(
-            governor::Quota::with_period(Duration::from_millis(100))
-                .unwrap()
-                .allow_burst(NonZeroU32::new(20).unwrap()),
-        )
-        .build();
     let shared_notes_rate_limit = rate_limit::IpRateLimitState::new(
         governor::Quota::with_period(Duration::from_secs(1))
             .unwrap()
@@ -248,20 +193,13 @@ async fn app_with_env(env: &'static crate::env::RuntimeConfig) -> Router {
     let subscription_config = env.subscription.as_ref().map(|(stripe, loops)| {
         anlg_api_subscription::SubscriptionConfig::new(&env.supabase, stripe, loops)
             .with_analytics(analytics.clone())
-            .with_durable_cleanup_enabled(env.anarlog_attachment_backup_gc_enabled)
+            .with_durable_cleanup_enabled(env.anarlog_durable_cleanup_enabled)
     });
     let research_config = env.research.clone();
     let pyannote_config = env
         .pyannote
         .as_ref()
         .map(anlg_api_pyannote::PyannoteConfig::new);
-    let sync_config = anlg_api_sync::SyncConfig::from_env(
-        &env.sync,
-        &env.supabase.supabase_url,
-        &env.supabase.supabase_anon_key,
-        &env.supabase.supabase_service_role_key,
-    )
-    .unwrap_or_else(|error| panic!("Failed to load environment: {error}"));
     let shared_notes_config = anlg_api_sync::SharedNotesConfig::new(
         &env.supabase.supabase_url,
         &env.supabase.supabase_service_role_key,
@@ -326,21 +264,9 @@ async fn app_with_env(env: &'static crate::env::RuntimeConfig) -> Router {
             ))
     };
 
-    let replica_state = anlg_api_sync::ReplicaState::new(
-        anlg_api_sync::ReplicaConfig::new(
-            &env.supabase.supabase_url,
-            &env.supabase.supabase_anon_key,
-            &env.supabase.supabase_service_role_key,
-        )
-        .unwrap_or_else(|error| panic!("Failed to load environment: {error}")),
-    );
-    let sync_state = sync_config.map(anlg_api_sync::AppState::new);
     let sync_routes = build_sync_routes(
-        sync_state,
-        replica_state,
-        cloudsync_rate_limit,
+        anlg_api_sync::AppState::new(shared_notes_config.clone()),
         session_share_rate_limit,
-        e2ee_witness_rate_limit,
         auth_state.clone(),
     );
     let shared_notes_state = anlg_api_sync::SharedNotesState::new(shared_notes_config);
@@ -687,32 +613,14 @@ fn main() -> std::io::Result<()> {
             let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
             let app = app().await;
             let cancellation = CancellationToken::new();
-            let worker_task = env.anarlog_attachment_backup_gc_enabled.then(|| {
+            let worker_task = env.anarlog_durable_cleanup_enabled.then(|| {
                 let (stripe, loops) = env
                     .subscription
                     .as_ref()
                     .expect("cleanup requires Stripe and Loops configuration");
-                let cloudsync_cleanup = anlg_api_subscription::CloudsyncCleanupConfig::new(
-                    env.sync
-                        .sqlitecloud_project_url
-                        .as_deref()
-                        .unwrap_or_default(),
-                    env.sync
-                        .sqlitecloud_token_issuer_api_key
-                        .as_deref()
-                        .unwrap_or_default(),
-                    env.sync
-                        .anarlog_cloudsync_e2ee_database_id
-                        .as_deref()
-                        .unwrap_or_default(),
-                    env.sqlitecloud_cloudsync_management_api_key
-                        .as_deref()
-                        .unwrap_or_default(),
-                )
-                .unwrap_or_else(|error| panic!("Failed to load environment: {error}"));
                 let config =
                     anlg_api_subscription::SubscriptionConfig::new(&env.supabase, stripe, loops)
-                        .with_cloudsync_cleanup(cloudsync_cleanup);
+                        .with_durable_cleanup_enabled(true);
                 let worker = anlg_api_subscription::CleanupWorker::new(&config);
                 let worker_cancellation = cancellation.clone();
                 tokio::spawn(worker.run(worker_cancellation))

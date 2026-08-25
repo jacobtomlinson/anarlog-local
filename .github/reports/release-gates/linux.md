@@ -55,7 +55,7 @@ different artifact hash.
 | Cell ID              | Environment                                                               | Release role                                                                    | Required | Current status | Evidence              |
 | -------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- | -------------- | --------------------- |
 | L-ENV-X64-PHYSICAL   | Physical or trusted-community Ubuntu 24.04 x86_64, GNOME/Wayland/PipeWire | Real x86_64 audio, credential, lifecycle, and desktop-integration gate          | Yes      | DEFERRED       | 1.4.0 VM-first waiver |
-| L-ENV-ARM64-PHYSICAL | Physical or trusted-community Ubuntu 24.04 ARM64, GNOME/Wayland/PipeWire  | Real ARM64 audio, credential, lifecycle, and CloudSync gate                     | Yes      | DEFERRED       | 1.4.0 VM-first waiver |
+| L-ENV-ARM64-PHYSICAL | Physical or trusted-community Ubuntu 24.04 ARM64, GNOME/Wayland/PipeWire  | Real ARM64 audio, credential, lifecycle, and desktop-integration gate          | Yes      | DEFERRED       | 1.4.0 VM-first waiver |
 | L-ENV-ARM64-VM       | Full Ubuntu 24.04 ARM64 GNOME/Wayland VM                                  | Daily package, UI, credential, updater, and guest-audio smoke                   | Yes      | NOT RUN        | TBD                   |
 | L-ENV-X64-CLEAN      | Clean Ubuntu 24.04 x86_64 local machine or local VM                       | AppImage and .deb install, core app, credential, updater, and guest-audio smoke | Yes      | NOT RUN        | TBD                   |
 | L-ENV-KDE-WAYLAND    | KDE Plasma on Wayland                                                     | Additional desktop confidence                                                   | No       | NOT RUN        | TBD                   |
@@ -123,8 +123,8 @@ architectures.
 For this candidate only, the following tests are required for **VM-FIRST BETA SHIP**:
 L-ENV-X64-CLEAN; L-ENV-ARM64-VM; every published required package cell; L-ART-01 through
 L-ART-03; L-INS-01 through L-INS-03; L-UPD-01 and L-UPD-02; L-UNINS-01 and
-L-UNINS-02; L-CORE-01 and L-CORE-02; L-CRED-01 through L-CRED-03; L-SYNC-01 through
-L-SYNC-03; L-AUD-06 through L-AUD-08; L-AUD-11 through L-AUD-14; L-PERM-01 and
+L-UNINS-02; L-CORE-01 and L-CORE-02; L-CRED-01 through L-CRED-03; L-AUD-06 through
+L-AUD-08; L-AUD-11 through L-AUD-14; L-PERM-01 and
 L-PERM-02; and L-DESK-01 through L-DESK-04. Conditional desktop rows remain required
 when advertised.
 
@@ -143,7 +143,7 @@ unsupported rows keep their existing scope.
 | L-ART-03   | Yes      | Inspect AppImage and .deb contents for the expected binary, icon, desktop file, resources, and libraries. | The installed identity is Anarlog, the main binary is anarlog, and required shared libraries are declared or bundled correctly. | NOT RUN             |
 | L-INS-01   | Yes      | Launch the x86_64 AppImage on L-ENV-X64-CLEAN from a fresh download.                                      | It launches without an undeclared host dependency, reaches the main shell, and creates no duplicate app identity.               | NOT RUN             |
 | L-INS-02   | Yes      | Install the x86_64 .deb with apt on L-ENV-X64-CLEAN, then launch from the desktop and terminal.           | apt resolves declared dependencies, the launcher and icon work, and the app reaches the main shell.                             | NOT RUN             |
-| L-INS-03   | Yes      | Install and launch L-PKG-ARM64-DEB on the required ARM64 environment.                                     | The artifact is native ARM64, launches successfully, opens SQLite, and extracts the ARM64 CloudSync library.                    | NOT RUN             |
+| L-INS-03   | Yes      | Install and launch L-PKG-ARM64-DEB on the required ARM64 environment.                                     | The artifact is native ARM64, launches successfully, opens SQLite, and preserves local data.                                    | NOT RUN             |
 | L-UPD-01   | Yes      | Start from the prior AppImage release with local data, then use the advertised updater or replace it.     | The candidate launches with the existing data and the documented AppImage update path matches actual behavior.                  | NOT RUN             |
 | L-UPD-02   | Yes      | Install the prior .deb, create local data, then install the candidate .deb with apt.                      | apt reports a successful upgrade, version changes, launcher remains valid, and local data survives.                             | NOT RUN             |
 | L-UNINS-01 | Yes      | Remove the .deb with apt remove, verify package files, then reinstall.                                    | Package-owned files are removed; user data is neither unexpectedly deleted nor duplicated; reinstall opens the expected data.   | NOT RUN             |
@@ -152,7 +152,7 @@ unsupported rows keep their existing scope.
 Do not use apt purge for L-UNINS-01. Purging is a separate destructive test and requires
 an explicit data-backup plan.
 
-### Core application, credentials, and CloudSync
+### Core application and credentials
 
 | Test ID   | Required | Procedure                                                                                                       | Pass criteria                                                                                                                                          | Result and evidence |
 | --------- | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
@@ -161,10 +161,6 @@ an explicit data-backup plan.
 | L-CRED-01 | Yes      | With Secret Service unlocked, save, read, update, and delete a provider secret through normal app flows.        | Each operation succeeds through Secret Service and no secret appears in plaintext settings, app data, or logs.                                         | NOT RUN             |
 | L-CRED-02 | Yes      | Save a provider secret, then repeat its use after app restart, desktop lock/unlock, logout/login, and reboot.   | The secret remains usable through every required lifecycle transition on both 1.4.0 VM cells; repeat on the physical cells before hardware validation. | NOT RUN             |
 | L-CRED-03 | Yes      | Lock or make Secret Service unavailable, attempt a secret-backed action, restore the service, and retry.        | The unavailable state is actionable, existing credentials are not overwritten or lost, and retry succeeds after restoration.                           | NOT RUN             |
-| L-SYNC-01 | Yes      | Enable CloudSync, create and edit a session, observe it on a second client, restart Linux, and edit again.      | Sync completes in both directions before and after restart without duplicate or missing sessions on x86_64 and ARM64.                                  | NOT RUN             |
-| L-SYNC-02 | Yes      | Start once without network, edit existing local data, restore network, and trigger or wait for sync.            | The app remains usable offline and later syncs without losing the offline edit.                                                                        | NOT RUN             |
-| L-SYNC-03 | Yes      | Sign out, attempt an account mismatch, then sign back into the original account.                                | Sync access is suspended or cleared according to product policy; another account cannot silently reuse the existing CloudSync workspace.               | NOT RUN             |
-
 Do not attach app.db, Secret Service exports, or credential values as evidence. Record
 only file metadata, service availability, and observable product behavior.
 
@@ -207,7 +203,7 @@ hypervisor preprocessing means VM results cannot count as AEC evidence.
 | L-DESK-06 | Conditional | Exercise dictation, floating controls, or live captions only if they are advertised to Linux.                    | Advertised controls are usable; unsupported controls are gated and cannot silently no-op.                                            | NOT RUN             |
 
 L-DESK-05 and L-DESK-06 may be DEFERRED only when the unavailable feature is hidden or
-clearly disabled and is absent from beta claims. Package, audio, credentials, CloudSync,
+clearly disabled and is absent from beta claims. Package, audio, credentials, local data,
 permission accuracy, notification, tray, autostart, deep-link, and single-instance tests
 remain required.
 
@@ -368,14 +364,12 @@ if [ -z "$cache_dir" ]; then
   cache_dir="$HOME/.cache"
 fi
 
-find "$cache_dir/char/cloudsync" -type f -name "cloudsync.so" -exec file {} \;
 busctl --user list | grep -F "org.freedesktop.secrets"
 ```
 
 The Secret Service command proves only service availability. Verify Anarlog credential
 metadata through the desktop credential manager or Seahorse without exposing values. The
-current secure-store service name is com.anarlog.stable.secure-store. The CloudSync
-cache path intentionally still uses char/cloudsync.
+current secure-store service name is com.anarlog.stable.secure-store.
 
 For a desktop or audio-service failure, collect a bounded journal slice:
 
@@ -470,10 +464,10 @@ Mark the candidate **VM-FIRST BETA SHIP** only when all of the following are tru
 - Every test in the 1.4.0 VM-first scope is PASS for the exact published artifact hashes.
 - Version and commit exactly match the macOS and Windows 1.4.0 candidate reports.
 - L-ENV-ARM64-VM and L-ENV-X64-CLEAN pass their assigned package, UI, credential,
-  CloudSync, lifecycle, and virtual-audio tests.
+  local-data, lifecycle, and virtual-audio tests.
 - x86_64 AppImage and .deb install, launch, update, and removal paths pass.
 - The published ARM64 .deb is correctly labeled, launches natively, opens SQLite, and
-  loads the ARM64 CloudSync extension.
+  preserves local data with its declared ARM64 package dependencies.
 - PipeWire and the PulseAudio fallback either work or fail with an actionable visible
   state; neither can silently record empty system audio.
 - Permission copy and feature gating match Linux capabilities, and declared GNOME/Wayland
@@ -487,7 +481,7 @@ Mark the candidate **HARDWARE-VALIDATED BETA SHIP** only after VM-FIRST BETA SHI
 of the following:
 
 - L-ENV-X64-PHYSICAL and L-ENV-ARM64-PHYSICAL each contain a physical or
-  trusted-community core audio, credential, CloudSync, and lifecycle run.
+  trusted-community core audio, credential, local-data, and lifecycle run.
 - The evidence collectively covers built-in/default, USB, and Bluetooth audio hardware.
 - L-AUD-01 through L-AUD-04, L-AUD-09, L-AUD-10, and L-AEC-01 pass.
 
@@ -499,8 +493,7 @@ Mark the candidate NO SHIP when any of these conditions is present:
   environment.
 - Credentials disappear, are written to plaintext, or cannot recover after Secret
   Service becomes available again.
-- CloudSync fails to load the correct architecture library or loses, duplicates, or
-  crosses account data.
+- Local data is lost, duplicated, or crosses account data.
 - Upgrade or removal corrupts or unexpectedly deletes user data.
 - The UI advertises macOS-only permission flows, models, shortcuts, overlays, or
   integrations that silently no-op on Linux.
@@ -518,7 +511,7 @@ say so explicitly:
 
 For the 1.4.0 VM-first beta only, the explicit physical and AEC rows above may be
 deferred. It may not defer x86_64 AppImage and .deb packaging, a declared ARM64 package,
-VM microphone and system-audio capture, durable local data, Secret Service, CloudSync, or
+VM microphone and system-audio capture, durable local data, Secret Service, or
 GNOME/Wayland desktop behaviors advertised to beta users.
 
 ## Hardware purchase decision

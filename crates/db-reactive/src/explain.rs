@@ -138,7 +138,6 @@ mod tests {
     fn live_query_test_schema() -> anlg_db_migrate::DbSchema {
         anlg_db_migrate::DbSchema {
             steps: LIVE_QUERY_TEST_MIGRATION_STEPS,
-            validate_cloudsync_table: |_| false,
         }
     }
 

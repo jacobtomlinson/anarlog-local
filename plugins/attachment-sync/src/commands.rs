@@ -1,31 +1,4 @@
-use crate::models::{
-    PreparedDeleteGuard, PreparedSharedUpload, PreparedUpload, RestoredAttachment,
-    SharedAttachmentCacheResult, SharedUploadVersion, UploadDescriptor,
-};
-use tauri::Manager;
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn begin_attachment_download(
-    control: tauri::State<'_, crate::control::DownloadControl>,
-    operation_id: String,
-    scope_id: Option<String>,
-) -> Result<(), String> {
-    control
-        .begin(&operation_id, scope_id.as_deref())
-        .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn cancel_attachment_download(
-    control: tauri::State<'_, crate::control::DownloadControl>,
-    operation_id: String,
-) -> Result<bool, String> {
-    control
-        .cancel(&operation_id)
-        .map_err(|error| error.to_string())
-}
+use crate::models::{PreparedSharedUpload, SharedAttachmentCacheResult, SharedUploadVersion};
 
 #[tauri::command]
 #[specta::specta]
@@ -51,64 +24,6 @@ pub(crate) async fn cancel_shared_upload_operation(
 
 #[tauri::command]
 #[specta::specta]
-pub(crate) async fn describe_upload(
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    job_id: String,
-    attempt_count: i64,
-) -> Result<UploadDescriptor, String> {
-    crate::runtime::describe_upload(state.inner(), &job_id, attempt_count)
-        .await
-        .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn prepare_upload<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    job_id: String,
-    attempt_count: i64,
-    object_id: String,
-    object_key: String,
-) -> Result<PreparedUpload, String> {
-    crate::runtime::prepare_upload(
-        &app,
-        state.inner(),
-        &job_id,
-        attempt_count,
-        &object_id,
-        &object_key,
-    )
-    .await
-    .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn read_upload_range<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    job_id: String,
-    attempt_count: i64,
-    cache_id: String,
-    start: u64,
-    end: u64,
-) -> Result<Vec<u8>, String> {
-    crate::runtime::read_upload_range(
-        &app,
-        state.inner(),
-        &job_id,
-        attempt_count,
-        &cache_id,
-        start,
-        end,
-    )
-    .await
-    .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
 #[allow(clippy::too_many_arguments)]
 pub(crate) async fn prepare_shared_upload<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
@@ -126,11 +41,7 @@ pub(crate) async fn prepare_shared_upload<R: tauri::Runtime>(
         state.inner(),
         &operation,
         &attachment_id,
-        &expected.sha256,
-        expected.size_bytes,
-        &expected.filename,
-        &expected.content_type,
-        &expected.cloud_object_key,
+        &expected,
     )
     .await
     .map_err(|error| error.to_string())
@@ -153,11 +64,7 @@ pub(crate) async fn read_shared_upload_range<R: tauri::Runtime>(
         state.inner(),
         &attachment_id,
         &cache_id,
-        &expected.sha256,
-        expected.size_bytes,
-        &expected.filename,
-        &expected.content_type,
-        &expected.cloud_object_key,
+        &expected,
         start,
         end,
     )
@@ -167,7 +74,6 @@ pub(crate) async fn read_shared_upload_range<R: tauri::Runtime>(
 
 #[tauri::command]
 #[specta::specta]
-#[allow(clippy::too_many_arguments)]
 pub(crate) async fn validate_shared_upload<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     control: tauri::State<'_, crate::control::DownloadControl>,
@@ -186,11 +92,7 @@ pub(crate) async fn validate_shared_upload<R: tauri::Runtime>(
         &operation,
         &attachment_id,
         &cache_id,
-        &expected.sha256,
-        expected.size_bytes,
-        &expected.filename,
-        &expected.content_type,
-        &expected.cloud_object_key,
+        &expected,
     )
     .await
     .map_err(|error| error.to_string())
@@ -205,124 +107,6 @@ pub(crate) async fn cleanup_shared_upload<R: tauri::Runtime>(
     crate::runtime::cleanup_shared_upload(&app, &cache_id)
         .await
         .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn prepare_delete_guard<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    control: tauri::State<'_, crate::control::DownloadControl>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    operation_id: String,
-    job_id: String,
-    attempt_count: i64,
-    create_guard: bool,
-) -> Result<PreparedDeleteGuard, String> {
-    let operation = control
-        .start(&operation_id, None)
-        .map_err(|error| error.to_string())?;
-    crate::runtime::prepare_delete_guard(
-        &app,
-        state.inner(),
-        &operation,
-        &job_id,
-        attempt_count,
-        create_guard,
-    )
-    .await
-    .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn commit_delete_guard<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    control: tauri::State<'_, crate::control::DownloadControl>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    operation_id: String,
-    job_id: String,
-    attempt_count: i64,
-    guard_id: Option<String>,
-) -> Result<(), String> {
-    let operation = control
-        .start(&operation_id, None)
-        .map_err(|error| error.to_string())?;
-    crate::runtime::commit_delete_guard(
-        &app,
-        state.inner(),
-        &operation,
-        &job_id,
-        attempt_count,
-        guard_id.as_deref(),
-    )
-    .await
-    .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn reconcile_delete_guards<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-) -> Result<u64, String> {
-    crate::runtime::reconcile_delete_guards(&app, state.inner())
-        .await
-        .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-#[allow(clippy::too_many_arguments)]
-pub(crate) async fn download_and_restore<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    operation_id: String,
-    job_id: String,
-    attempt_count: i64,
-    object_id: String,
-    signed_url: String,
-    ciphertext_sha256: String,
-    ciphertext_size_bytes: u64,
-    format_version: i16,
-) -> Result<RestoredAttachment, String> {
-    let control = app.state::<crate::control::DownloadControl>();
-    let operation = control
-        .start(&operation_id, None)
-        .map_err(|error| error.to_string())?;
-    crate::runtime::download_and_restore(
-        &app,
-        state.inner(),
-        &operation,
-        &job_id,
-        attempt_count,
-        &object_id,
-        &signed_url,
-        &ciphertext_sha256,
-        ciphertext_size_bytes,
-        format_version,
-    )
-    .await
-    .map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-#[specta::specta]
-pub(crate) async fn cleanup_transfer_cache<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
-    state: tauri::State<'_, tauri_plugin_db::ManagedState>,
-    job_id: String,
-    attempt_count: i64,
-    expected_cache_id: String,
-) -> Result<bool, String> {
-    crate::runtime::cleanup_transfer_cache(
-        &app,
-        state.inner(),
-        &job_id,
-        attempt_count,
-        &expected_cache_id,
-    )
-    .await
-    .map_err(|error| error.to_string())
 }
 
 #[tauri::command]
@@ -384,11 +168,6 @@ pub(crate) async fn clear_shared_attachment_scope<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     scope_id: String,
 ) -> Result<u64, String> {
-    let control = app.state::<crate::control::DownloadControl>();
-    let clear = control
-        .begin_scope_clear(&scope_id)
-        .map_err(|error| error.to_string())?;
-    clear.wait().await;
     crate::runtime::clear_shared_attachment_scope(&app, &scope_id)
         .await
         .map_err(|error| error.to_string())
@@ -399,11 +178,6 @@ pub(crate) async fn clear_shared_attachment_scope<R: tauri::Runtime>(
 pub(crate) async fn clear_shared_attachment_preview_scopes<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
 ) -> Result<bool, String> {
-    let control = app.state::<crate::control::DownloadControl>();
-    let clear = control
-        .begin_scope_prefix_clear(crate::runtime::SHARED_PREVIEW_SCOPE_PREFIX)
-        .map_err(|error| error.to_string())?;
-    clear.wait().await;
     crate::runtime::clear_shared_attachment_preview_scopes(&app)
         .await
         .map_err(|error| error.to_string())

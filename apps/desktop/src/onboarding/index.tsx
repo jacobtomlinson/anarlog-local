@@ -250,8 +250,8 @@ function OnboardingScreenContent({
             title={<Trans>Create account</Trans>}
             description={
               <Trans>
-                Sign in to unlock powerful AI models, sync across devices, and
-                personalization.
+                Sign in to unlock powerful AI models, personalization, and
+                sharing.
               </Trans>
             }
             completedTitle={
