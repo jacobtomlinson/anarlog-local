@@ -132,7 +132,6 @@ export function SettingsNav() {
           id: "dictionary",
           label: t`Dictionary`,
           icon: BookOpen,
-          requiresPro: true,
         },
       ],
     },
