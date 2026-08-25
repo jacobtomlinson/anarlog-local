@@ -52,15 +52,14 @@ different artifact hash.
 | ------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------ | -------------- | --------------------- |
 | W-ENV-X64-AMD      | Physical Windows 11 x64 on AMD                    | Primary real-hardware release gate                                                   | Yes                            | DEFERRED       | 1.4.0 VM-first waiver |
 | W-ENV-X64-INTEL    | Physical Windows 11 x64 on Intel                  | Additional x64 confidence; status must be explicit                                   | No independent block           | DEFERRED       | 1.4.0 VM-first waiver |
-| W-ENV-X64-CLEAN    | Clean Windows 11 x64 local machine or local VM    | Installer, core app, guest audio, credentials, CloudSync, updater, and uninstall     | Yes                            | NOT RUN        | TBD                   |
-| W-ENV-ARM-EMU      | Windows 11 ARM running the published x64 artifact | Optional x64-emulation install, launch, auth, SQLite, CloudSync, and recording smoke | No                             | NOT RUN        | TBD                   |
+| W-ENV-X64-CLEAN    | Clean Windows 11 x64 local machine or local VM    | Installer, core app, guest audio, credentials, local data, updater, and uninstall   | Yes                            | NOT RUN        | TBD                   |
+| W-ENV-ARM-EMU      | Windows 11 ARM running the published x64 artifact | Optional x64-emulation install, launch, auth, SQLite, local data, and recording smoke | No                           | NOT RUN        | TBD                   |
 | W-ENV-ARM-PHYSICAL | Physical Windows ARM                              | Community confidence only                                                            | No                             | DEFERRED       | 1.4.0 VM-first waiver |
-| W-ENV-ARM64-NATIVE | Native Windows ARM64 artifact                     | Not supported until a native CloudSync DLL and release artifact exist                | No                             | NOT SUPPORTED  | TBD                   |
+| W-ENV-ARM64-NATIVE | Native Windows ARM64 artifact                     | Not supported until a native ARM64 release artifact exists                           | No                             | NOT SUPPORTED  | TBD                   |
 
 AMD and Intel are both Windows x64. A passing AMD run is the initial physical x64 gate;
 Intel remains a recorded confidence cell, not a separate architecture. Native ARM64 is a
-different target. The repository currently bundles CloudSync only for
-windows/x86_64.
+different target and is not part of the current release artifact.
 
 ### Audio and meeting applications
 
@@ -95,7 +94,7 @@ release notes, and do not claim mixed-DPI overlay support.
 For this candidate only, the following tests are required for **VM-FIRST BETA SHIP**:
 W-ENV-X64-CLEAN; W-DSP-01; W-ART-01 through W-ART-03; W-INS-01 and W-INS-02;
 W-UPD-01 and W-UPD-02; W-UNINS-01; W-CORE-01 and W-CORE-02; W-CRED-01 and
-W-CRED-02; W-SYNC-01 and W-SYNC-02; W-AUD-05, W-AUD-06, W-AUD-09, and W-AUD-11;
+W-CRED-02; W-AUD-05, W-AUD-06, W-AUD-09, and W-AUD-11;
 W-NOT-01; W-PERM-01; and W-DESK-01.
 
 W-ENV-X64-AMD, W-ENV-X64-INTEL, W-ENV-ARM-PHYSICAL, W-AUD-01 through W-AUD-03,
@@ -119,16 +118,14 @@ rows keep their existing scope.
 | W-UPD-02   | Yes      | Interrupt or reject one update attempt, then retry normally.                                          | The installed version remains launchable after the rejected attempt and a later retry succeeds without data loss.                          | NOT RUN             |
 | W-UNINS-01 | Yes      | Uninstall from Windows Settings, then reinstall the same candidate.                                   | Executables and shortcuts are removed; user data is neither unexpectedly deleted nor duplicated; reinstall opens the expected local data.  | NOT RUN             |
 
-### Core application, credentials, and sync
+### Core application and credentials
 
 | Test ID   | Required | Procedure                                                                                                       | Pass criteria                                                                                                                              | Result and evidence |
 | --------- | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
 | W-CORE-01 | Yes      | Launch, sign in, reach the main shell, open settings, create a session, edit its title and notes, then restart. | No platform-only crash occurs; the session and edits remain present after restart.                                                         | NOT RUN             |
 | W-CORE-02 | Yes      | Lock and unlock Windows, minimize and restore the app, then reboot and launch from the Start menu.              | Main-window state is usable after each transition and no duplicate background instance remains.                                            | NOT RUN             |
 | W-CRED-01 | Yes      | Sign in, restart twice, and inspect only auth-store file metadata after migration.                              | The session remains usable, current-user DPAPI storage owns auth.dpapi, and no plaintext auth.json fallback remains.                       | NOT RUN             |
-| W-CRED-02 | Yes      | Sign out and back in, including one canceled sign-in, then repeat the provider and sync checks.                 | Auth state follows the sign-in lifecycle, durable provider secrets follow declared product policy, and existing secrets are not corrupted. | NOT RUN             |
-| W-SYNC-01 | Yes      | Enable CloudSync, create and edit a session, observe it on a second client, restart Windows, and edit again.    | Sync completes in both directions before and after restart without duplicate or missing sessions.                                          | NOT RUN             |
-| W-SYNC-02 | Yes      | Start once without network, edit existing local data, restore network, and trigger or wait for sync.            | The app remains usable offline and later syncs without losing the offline edit.                                                            | NOT RUN             |
+| W-CRED-02 | Yes      | Sign out and back in, including one canceled sign-in, then repeat the provider checks.                            | Auth state follows the sign-in lifecycle, durable provider secrets follow declared product policy, and existing secrets are not corrupted. | NOT RUN             |
 
 Do not attach app.db or credential exports as evidence. Record only file metadata and
 observable behavior.
@@ -289,9 +286,6 @@ $dbCandidates |
   ForEach-Object { Get-Item $_ } |
   Select-Object FullName, Length, LastWriteTime
 
-Get-ChildItem (Join-Path $env:LOCALAPPDATA "char\cloudsync") -Recurse -Filter "cloudsync.dll" -ErrorAction SilentlyContinue |
-  Select-Object FullName, Length, LastWriteTime
-
 $authCandidates = @(
   (Join-Path $env:LOCALAPPDATA "anarlog\auth.dpapi"),
   (Join-Path $env:LOCALAPPDATA "hyprnote\auth.dpapi"),
@@ -317,8 +311,7 @@ $plaintextAuthCandidates |
 ```
 
 The auth.dpapi listing records only metadata, and the final command must produce no
-auth.json paths. Never print the encrypted payload or credential values. The CloudSync
-cache path intentionally still uses char/cloudsync.
+auth.json paths. Never print the encrypted payload or credential values.
 
 For an application crash, also collect a bounded Windows event-log slice:
 
@@ -377,7 +370,7 @@ Mark the candidate **VM-FIRST BETA SHIP** only when all of the following are tru
   pass.
 - W-AUD-11 proves non-silent concurrent guest microphone and WASAPI system audio; it is
   not reported as AEC evidence.
-- DPAPI-protected auth persistence, local SQLite durability, CloudSync, basic
+- DPAPI-protected auth persistence, local SQLite durability, basic
   notifications, and W-PERM-01 capability gating pass.
 - The download page and release notes label Windows as beta and list the deferred
   physical-device, AEC, suspend/resume, and multi-display coverage.
@@ -400,8 +393,8 @@ Mark the candidate NO SHIP when any of these conditions is present:
 - Install, launch, update, or uninstall can corrupt or unexpectedly remove user data.
 - Microphone or system audio is silent, stalls, or fails to finalize in a required
   environment.
-- Credentials disappear unexpectedly, are written to plaintext, or CloudSync loses or
-  duplicates user data.
+- Credentials disappear unexpectedly, are written to plaintext, or local data is lost or
+  duplicated.
 - An advertised notification, recording control, meeting-detection path, or overlay
   behavior is absent or silently no-ops.
 - A platform capability is advertised even though it is unavailable.
@@ -409,7 +402,7 @@ Mark the candidate NO SHIP when any of these conditions is present:
 The first Windows release may defer all of the following if the product and release notes
 say so explicitly:
 
-- A native Windows ARM64 artifact and native ARM64 CloudSync.
+- A native Windows ARM64 artifact.
 - Physical Windows ARM validation.
 - Structured Windows UI Automation meeting context.
 - Microsoft Teams-specific confidence coverage.
@@ -420,7 +413,7 @@ say so explicitly:
 
 For the 1.4.0 VM-first beta only, the explicit physical and AEC rows above may be
 deferred. It may not defer signed x64 artifacts, clean install/update/uninstall, VM mic
-and system-audio capture, durable local data, secure credentials, CloudSync, or desktop
+and system-audio capture, durable local data, secure credentials, or desktop
 behaviors advertised to Windows beta users.
 
 ## Run ledger

@@ -3781,8 +3781,8 @@ msgid "Sign in to get the most out of Anarlog"
 msgstr "Sign in to get the most out of Anarlog"
 
 #: src/onboarding/index.tsx
-msgid "Sign in to unlock powerful AI models, sync across devices, and personalization."
-msgstr "Sign in to unlock powerful AI models, sync across devices, and personalization."
+msgid "Sign in to unlock powerful AI models, personalization, and sharing."
+msgstr "Sign in to unlock powerful AI models, personalization, and sharing."
 
 #: src/shared-notes/index.tsx
 msgid "Sign in to view this shared note"
@@ -4069,17 +4069,9 @@ msgstr "Sunday"
 msgid "Symbols"
 msgstr "Symbols"
 
-#: src/sidebar/settings.tsx
-msgid "Sync"
-msgstr "Sync"
-
 #: src/imports/screen.tsx
 msgid "Sync now"
 msgstr "Sync now"
-
-#: src/settings/general/account.tsx
-msgid "Sync your changes before signing out."
-msgstr "Sync your changes before signing out."
 
 #: src/settings/appearance/theme.tsx
 msgid "System"

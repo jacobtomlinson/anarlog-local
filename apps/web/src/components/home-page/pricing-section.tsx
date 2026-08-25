@@ -20,7 +20,7 @@ export function PricingSection({
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#4f4940]">
           Start with local meeting notes for free. Upgrade when you want hosted
-          transcription, AI, sync, and sharing.
+          transcription, AI, and sharing.
         </p>
       </div>
 

@@ -80,11 +80,8 @@ export function SettingsAccount() {
         },
       });
     },
-    onError: (error) => {
-      const message = String(error).includes("unsent local changes")
-        ? t`Sync your changes before signing out.`
-        : t`Anarlog couldn't sign you out. Try again.`;
-      sonnerToast.error(message);
+    onError: () => {
+      sonnerToast.error(t`Anarlog couldn't sign you out. Try again.`);
     },
   });
   const openAccountMutation = useMutation({
