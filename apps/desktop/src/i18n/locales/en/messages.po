@@ -695,10 +695,6 @@ msgstr "Brought in {0} new meetings. {1} were already here."
 msgid "Browser handoff not working? Paste the callback link instead"
 msgstr "Browser handoff not working? Paste the callback link instead"
 
-#: src/settings/dictionary/index.tsx
-msgid "Build a custom dictionary with Anarlog Pro"
-msgstr "Build a custom dictionary with Anarlog Pro"
-
 #: src/settings/general/audio-settings.tsx
 msgid "Build voiceprints from meeting audio so speakers you name in a transcript are recognized in later meetings. Voiceprints never leave this device, and unnamed ones are deleted after 45 days."
 msgstr "Build voiceprints from meeting audio so speakers you name in a transcript are recognized in later meetings. Voiceprints never leave this device, and unnamed ones are deleted after 45 days."
@@ -2121,10 +2117,6 @@ msgstr "Help Anarlog read meeting activity"
 #: src/settings/general/app-settings.tsx
 msgid "Help improve Anarlog with anonymous usage data."
 msgstr "Help improve Anarlog with anonymous usage data."
-
-#: src/settings/dictionary/index.tsx
-msgid "Help transcription recognize names, jargon, and product terms."
-msgstr "Help transcription recognize names, jargon, and product terms."
 
 #: src/chat/components/body/empty.tsx
 msgid "Hi, I'm Anarlog AI. Set up a language model and I'll be ready to help."
@@ -4856,7 +4848,6 @@ msgstr "Upgrade to enable"
 #: src/calendar/components/sidebar.tsx
 #: src/session-sharing/index.tsx
 #: src/settings/developers/cloud-api.tsx
-#: src/settings/dictionary/index.tsx
 #: src/settings/team/index.tsx
 #: src/sidebar/settings.tsx
 msgid "Upgrade to Pro"

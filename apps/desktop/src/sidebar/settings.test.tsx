@@ -289,7 +289,7 @@ describe("SettingsNav", () => {
     expect(mocks.updateSettingsTabState).not.toHaveBeenCalled();
   });
 
-  it.each(["Team", "Automations", "Dictionary", "Sync"])(
+  it.each(["Team", "Automations", "Sync"])(
     "does not open locked %s navigation",
     (label) => {
       mocks.isPro = false;
