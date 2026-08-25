@@ -2,7 +2,6 @@ import { hostname } from "@tauri-apps/plugin-os";
 
 import {
   getE2eeIdentityStatus,
-  type CloudsyncWorkspaceKeyGrant,
   type CloudsyncWorkspaceProjection,
 } from "@anlg/plugin-db";
 import { commands as miscCommands } from "@anlg/plugin-misc";
@@ -34,9 +33,7 @@ type LegacyCloudsyncCredentials = CloudsyncCredentialCore & {
 };
 
 export type ProjectedCloudsyncCredentials = CloudsyncCredentialCore &
-  CloudsyncWorkspaceProjection & {
-    workspaceKeyGrants?: CloudsyncWorkspaceKeyGrant[];
-  };
+  CloudsyncWorkspaceProjection;
 
 export type CloudsyncCredentials =
   | LegacyCloudsyncCredentials
@@ -44,7 +41,6 @@ export type CloudsyncCredentials =
   | ReplicaCredentials;
 
 export const DEVICE_NAME_HEADER = "x-anarlog-device-name";
-export const E2EE_MEMBER_PUBLIC_KEY_HEADER = "x-anarlog-e2ee-member-public-key";
 export const DEVICE_LIMIT_ERROR_CODE = "sync_device_limit_reached";
 export const DEVICE_LIMIT_TOAST_ID = "cloudsync-device-limit";
 
@@ -274,7 +270,6 @@ export function isCredentials(value: unknown): value is CloudsyncCredentials {
   }
 
   const workspaceIds = new Set<string>();
-  const sharedWorkspaceIds = new Set<string>();
   const membershipIds = new Set<string>();
   for (const value of candidate.workspaces) {
     if (!value || typeof value !== "object") {
@@ -288,7 +283,7 @@ export function isCredentials(value: unknown): value is CloudsyncCredentials {
       typeof workspace.ownerUserId !== "string" ||
       workspace.ownerUserId.length === 0 ||
       typeof workspace.kind !== "string" ||
-      !["personal", "shared"].includes(workspace.kind) ||
+      workspace.kind !== "personal" ||
       typeof workspace.name !== "string" ||
       typeof workspace.membershipId !== "string" ||
       workspace.membershipId.length === 0 ||
@@ -309,61 +304,14 @@ export function isCredentials(value: unknown): value is CloudsyncCredentials {
     }
 
     workspaceIds.add(workspace.id);
-    if (workspace.kind === "shared") {
-      sharedWorkspaceIds.add(workspace.id);
-    }
     membershipIds.add(workspace.membershipId);
   }
 
-  const workspaceKeyGrants = candidate.workspaceKeyGrants;
-  if (workspaceKeyGrants !== undefined && !Array.isArray(workspaceKeyGrants)) {
-    return false;
-  }
-  if (workspaceKeyGrants === undefined && sharedWorkspaceIds.size > 0) {
-    return false;
-  }
-  const grantIds = new Set<string>();
-  const activeGrantWorkspaceIds = new Set<string>();
-  for (const value of workspaceKeyGrants ?? []) {
-    if (!value || typeof value !== "object") {
-      return false;
-    }
-    const grant = value as Record<string, unknown>;
-    if (
-      typeof grant.workspaceId !== "string" ||
-      !sharedWorkspaceIds.has(grant.workspaceId) ||
-      typeof grant.keyId !== "string" ||
-      !/^[A-Za-z0-9_-]{22}$/.test(grant.keyId) ||
-      typeof grant.ephemeralPublicKey !== "string" ||
-      !/^[A-Za-z0-9_-]{43}$/.test(grant.ephemeralPublicKey) ||
-      typeof grant.nonce !== "string" ||
-      !/^[A-Za-z0-9_-]{32}$/.test(grant.nonce) ||
-      typeof grant.ciphertext !== "string" ||
-      !/^[A-Za-z0-9_-]{64}$/.test(grant.ciphertext) ||
-      typeof grant.isActive !== "boolean"
-    ) {
-      return false;
-    }
-    const grantId = `${grant.workspaceId}:${grant.keyId}`;
-    if (
-      grantIds.has(grantId) ||
-      (grant.isActive && activeGrantWorkspaceIds.has(grant.workspaceId))
-    ) {
-      return false;
-    }
-    grantIds.add(grantId);
-    if (grant.isActive) {
-      activeGrantWorkspaceIds.add(grant.workspaceId);
-    }
-  }
-  const personalWorkspaces = candidate.workspaces.filter(
-    (workspace) => workspace.kind === "personal",
-  );
-  if (personalWorkspaces.length !== 1) {
+  if (candidate.workspaces.length !== 1) {
     return false;
   }
 
-  const personalWorkspace = personalWorkspaces[0]!;
+  const personalWorkspace = candidate.workspaces[0]!;
   return (
     personalWorkspace.id === candidate.personalWorkspaceId &&
     personalWorkspace.ownerUserId === candidate.accountUserId &&

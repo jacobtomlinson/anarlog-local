@@ -142,12 +142,6 @@ impl SharedNotesConfig {
         self.loops_api_key = Some(loops_api_key);
         Ok(self)
     }
-
-    #[cfg(test)]
-    pub(crate) fn with_invitation_email_api_base(mut self, api_base: reqwest::Url) -> Self {
-        self.loops_api_base = Some(api_base);
-        self
-    }
 }
 
 fn is_email_address(value: &str) -> bool {

@@ -27,7 +27,6 @@ import {
 } from "./delivery-management";
 import { type DraftShareAction, SessionShareDraftContent } from "./draft-panel";
 import { flushCanonicalSessionEditorChanges } from "./editor-activity";
-import { generalAccessWorkspaceId } from "./general-access";
 import {
   deliverSessionShareInvitations,
   getSessionShareSenderName,
@@ -43,7 +42,6 @@ import {
   ShareOperationAbortedError,
   type SharePanelIdentity,
   type SharePreparationIdentity,
-  withoutSignal,
 } from "./management";
 import { SessionSharePopoverContent } from "./management-panel";
 import {
@@ -51,7 +49,7 @@ import {
   hashSessionShareProjection,
   recordPublishedSessionShareState,
 } from "./reconciliation";
-import { loadSessionShareSource, useAvailableShareWorkspaces } from "./source";
+import { loadSessionShareSource } from "./source";
 
 import { trackAnalyticsEvent } from "~/analytics";
 import { useAuth } from "~/auth";
@@ -165,7 +163,6 @@ export function SessionShareButton({ sessionId }: { sessionId: string }) {
     accountUserId,
     sessionId,
   );
-  const workspaces = useAvailableShareWorkspaces(accountUserId);
   const activeSharePreparationIdentity =
     sharePreparationIdentity?.ownerUserId === accountUserId &&
     sharePreparationIdentity.sessionId === sessionId &&
@@ -328,7 +325,7 @@ export function SessionShareButton({ sessionId }: { sessionId: string }) {
             channelName: action.channel.name,
           };
         } else if (action.type === "copy-link") {
-          await copySessionShareUrl(context, share.shareId, () =>
+          await copySessionShareUrl(share.shareId, () =>
             requireActivePrepareContext(identity, signal),
           );
           actionResult = { type: "copy-link" };
@@ -347,26 +344,7 @@ export function SessionShareButton({ sessionId }: { sessionId: string }) {
           });
           actionResult = { type: "scope", copied: true };
         } else {
-          const workspaceId = generalAccessWorkspaceId(
-            action.target,
-            workspaces,
-          );
-          if (!workspaceId) throw new ShareManagementError();
-          try {
-            await setSessionShareScope(context, {
-              shareId: share.shareId,
-              scope: "workspace",
-              workspaceId,
-            });
-            requireActivePrepareContext(identity, signal);
-          } catch {
-            await setSessionShareScope(withoutSignal(context), {
-              shareId: share.shareId,
-              scope: "restricted",
-            }).catch(() => undefined);
-            throw new ShareManagementError();
-          }
-          actionResult = { type: "scope", copied: false };
+          throw new ShareManagementError();
         }
         requireActivePrepareContext(identity, signal);
         await markSessionShareActivated(
@@ -614,7 +592,6 @@ export function SessionShareButton({ sessionId }: { sessionId: string }) {
           sharedAttachments={sharedAttachments}
           sharedSnapshot={durableNoteQuery.data ?? null}
           sharedAttachmentsReady={sharedAttachmentsReady}
-          workspaces={workspaces}
           pendingRef={sharePanelPendingRef}
           onRetry={() => void shareQuery.refetch()}
           onActivated={() =>
@@ -647,7 +624,6 @@ export function SessionShareButton({ sessionId }: { sessionId: string }) {
               ? (activationMutation.variables?.action ?? null)
               : null
           }
-          workspaces={workspaces}
           onAction={handleDraftAction}
         />
       ) : null}

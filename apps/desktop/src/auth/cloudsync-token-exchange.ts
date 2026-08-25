@@ -1,6 +1,5 @@
 import {
   DEVICE_NAME_HEADER,
-  E2EE_MEMBER_PUBLIC_KEY_HEADER,
   getDeviceIdentity,
   raceWithAbort,
   readCredentialErrorCode,
@@ -13,14 +12,12 @@ export async function requestCloudsyncCredentials({
   accessToken,
   cloudsyncExtensionAvailable,
   encryptionKeyId,
-  memberPublicKey,
   shouldStop,
   signal,
 }: {
   accessToken: string;
   cloudsyncExtensionAvailable: boolean;
   encryptionKeyId: string;
-  memberPublicKey: string;
   shouldStop: () => boolean;
   signal: AbortSignal;
 }) {
@@ -34,7 +31,6 @@ export async function requestCloudsyncCredentials({
     const headers: Record<string, string> = {
       Authorization: `Bearer ${accessToken}`,
       "X-Anarlog-E2EE-Key-Id": encryptionKeyId,
-      [E2EE_MEMBER_PUBLIC_KEY_HEADER]: memberPublicKey,
     };
     if (device.fingerprint) {
       headers[DEVICE_FINGERPRINT_HEADER] = device.fingerprint;

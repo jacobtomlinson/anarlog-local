@@ -148,7 +148,6 @@ pub enum SessionIngestApplyResult {
 pub struct E2eeIdentityStatus {
     pub configured: bool,
     pub key_id: Option<String>,
-    pub member_public_key: Option<String>,
 }
 
 #[derive(Debug, Clone, serde::Serialize, specta::Type, PartialEq, Eq)]
@@ -169,51 +168,6 @@ pub struct E2eeDeviceEnrollmentPackage {
     pub ephemeral_public_key: String,
     pub nonce: String,
     pub ciphertext: String,
-}
-
-#[derive(Debug, Clone, serde::Deserialize, specta::Type, PartialEq, Eq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct CloudsyncWorkspaceKeyGrant {
-    pub workspace_id: String,
-    pub key_id: String,
-    pub ephemeral_public_key: String,
-    pub nonce: String,
-    pub ciphertext: String,
-    pub is_active: bool,
-}
-
-#[derive(Debug, Clone, serde::Deserialize, specta::Type, PartialEq, Eq)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct WorkspaceE2eeKeyRecipient {
-    pub user_id: String,
-    pub public_key: String,
-}
-
-#[derive(Debug, Clone, serde::Serialize, specta::Type, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct WorkspaceE2eeKeyGrantUpload {
-    pub user_id: String,
-    pub ephemeral_public_key: String,
-    pub nonce: String,
-    pub ciphertext: String,
-}
-
-#[derive(Debug, Clone, serde::Serialize, specta::Type, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct SealedWorkspaceE2eeKey {
-    pub key_id: String,
-    pub grants: Vec<WorkspaceE2eeKeyGrantUpload>,
-}
-
-impl From<CloudsyncWorkspaceKeyGrant> for anlg_e2ee::WorkspaceKeyGrant {
-    fn from(value: CloudsyncWorkspaceKeyGrant) -> Self {
-        Self {
-            key_id: value.key_id,
-            ephemeral_public_key: value.ephemeral_public_key,
-            nonce: value.nonce,
-            ciphertext: value.ciphertext,
-        }
-    }
 }
 
 impl From<anlg_e2ee::DeviceEnrollmentPackage> for E2eeDeviceEnrollmentPackage {
@@ -343,7 +297,6 @@ fn make_specta_builder<R: tauri::Runtime>() -> tauri_specta::Builder<R> {
             commands::import_e2ee_identity<tauri::Wry>,
             commands::get_or_create_e2ee_device_identity<tauri::Wry>,
             commands::seal_e2ee_recovery_key_for_device<tauri::Wry>,
-            commands::seal_workspace_e2ee_key_for_recipients<tauri::Wry>,
             commands::import_e2ee_device_enrollment<tauri::Wry>,
             commands::subscribe,
             commands::unsubscribe,

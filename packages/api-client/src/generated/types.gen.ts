@@ -226,7 +226,6 @@ export type CloudsyncCredentials = {
     personalWorkspaceId: string;
     token: string;
     workspaceId: string;
-    workspaceKeyGrants: Array<WorkspaceE2EeKeyGrant>;
     workspaces: Array<CloudsyncWorkspace>;
 };
 
@@ -1499,16 +1498,6 @@ export type SessionResponse = {
     token: string;
 };
 
-export type SetWorkspaceE2EeKeyRequest = {
-    grants: Array<WorkspaceE2EeKeyGrantUpload>;
-    keyId: string;
-};
-
-export type SetWorkspaceE2EeKeyResult = {
-    grantedMemberCount: number;
-    keyId: string;
-};
-
 export type SharedAttachmentDownload = {
     contentType: string;
     expiresAt: string;
@@ -1617,6 +1606,11 @@ export type SnapshotReceipt = {
     published_at: string;
     revision: number;
     session_id: string;
+};
+
+export type StableSharedNoteSnapshot = {
+    accessScope: string;
+    snapshot: SharedNoteSnapshot;
 };
 
 export type StartTrialReason = 'started' | 'not_eligible';
@@ -1918,30 +1912,6 @@ export type WorkingLocationProperties = {
 };
 
 export type WorkingLocationType = 'homeOffice' | 'officeLocation' | 'customLocation' | 'unknown';
-
-export type WorkspaceE2EeKeyGrant = {
-    ciphertext: string;
-    ephemeralPublicKey: string;
-    isActive: boolean;
-    keyId: string;
-    nonce: string;
-    workspaceId: string;
-};
-
-export type WorkspaceE2EeKeyGrantUpload = {
-    ciphertext: string;
-    ephemeralPublicKey: string;
-    nonce: string;
-    userId: string;
-};
-
-export type WorkspaceE2EeKeyRecipient = {
-    grantedKeyIds: Array<string>;
-    publicKey?: string | null;
-    role: string;
-    userEmail: string;
-    userId: string;
-};
 
 export type ZoomImportMeetingsRequest = {
     connection_id: string;
@@ -3466,6 +3436,138 @@ export type ReadPublicSharedNotePreviewResponses = {
 
 export type ReadPublicSharedNotePreviewResponse = ReadPublicSharedNotePreviewResponses[keyof ReadPublicSharedNotePreviewResponses];
 
+export type ReadStableSharedNoteData = {
+    body?: never;
+    path: {
+        /**
+         * Stable session share ID
+         */
+        share_id: string;
+    };
+    query?: never;
+    url: '/shared-notes/share/{share_id}';
+};
+
+export type ReadStableSharedNoteErrors = {
+    /**
+     * Shared note unavailable
+     */
+    404: unknown;
+    /**
+     * Shared note service unavailable
+     */
+    502: unknown;
+};
+
+export type ReadStableSharedNoteResponses = {
+    /**
+     * Stable shared note
+     */
+    200: StableSharedNoteSnapshot;
+};
+
+export type ReadStableSharedNoteResponse = ReadStableSharedNoteResponses[keyof ReadStableSharedNoteResponses];
+
+export type DownloadStableSharedAttachmentData = {
+    body?: never;
+    path: {
+        /**
+         * Stable session share ID
+         */
+        share_id: string;
+        /**
+         * Published attachment ID
+         */
+        attachment_id: string;
+    };
+    query?: never;
+    url: '/shared-notes/share/{share_id}/attachments/{attachment_id}/download';
+};
+
+export type DownloadStableSharedAttachmentErrors = {
+    /**
+     * Shared attachment unavailable
+     */
+    404: unknown;
+    /**
+     * Shared attachment service unavailable
+     */
+    502: unknown;
+};
+
+export type DownloadStableSharedAttachmentResponses = {
+    /**
+     * Short-lived stable-link attachment download
+     */
+    200: SharedAttachmentDownload;
+};
+
+export type DownloadStableSharedAttachmentResponse = DownloadStableSharedAttachmentResponses[keyof DownloadStableSharedAttachmentResponses];
+
+export type CreateStableSharedNoteHandoffData = {
+    body?: never;
+    path: {
+        /**
+         * Stable session share ID
+         */
+        share_id: string;
+    };
+    query?: never;
+    url: '/shared-notes/share/{share_id}/handoff';
+};
+
+export type CreateStableSharedNoteHandoffErrors = {
+    /**
+     * Shared note unavailable
+     */
+    404: unknown;
+    /**
+     * Shared note service unavailable
+     */
+    502: unknown;
+};
+
+export type CreateStableSharedNoteHandoffResponses = {
+    /**
+     * One-time desktop handoff
+     */
+    200: SharedNoteHandoff;
+};
+
+export type CreateStableSharedNoteHandoffResponse = CreateStableSharedNoteHandoffResponses[keyof CreateStableSharedNoteHandoffResponses];
+
+export type ReadStableSharedNotePreviewData = {
+    body?: never;
+    path: {
+        /**
+         * Stable session share ID
+         */
+        share_id: string;
+    };
+    query?: never;
+    url: '/shared-notes/share/{share_id}/preview';
+};
+
+export type ReadStableSharedNotePreviewErrors = {
+    /**
+     * Shared note unavailable
+     */
+    404: unknown;
+    /**
+     * Shared note service unavailable
+     */
+    502: unknown;
+};
+
+export type ReadStableSharedNotePreviewResponses = {
+    /**
+     * Stable shared note preview
+     */
+    200: SharedNotePreview;
+};
+
+export type ReadStableSharedNotePreviewResponse = ReadStableSharedNotePreviewResponses[keyof ReadStableSharedNotePreviewResponses];
+
 export type SendSharedNoteRecapEmailData = {
     body: MeetingRecapEmailRequest;
     path: {
@@ -4501,86 +4603,6 @@ export type WaitE2EeWitnessResponses = {
 
 export type WaitE2EeWitnessResponse = WaitE2EeWitnessResponses[keyof WaitE2EeWitnessResponses];
 
-export type SetWorkspaceE2EeKeyData = {
-    body: SetWorkspaceE2EeKeyRequest;
-    path: {
-        /**
-         * Shared workspace ID
-         */
-        workspace_id: string;
-    };
-    query?: never;
-    url: '/sync/e2ee/workspaces/{workspace_id}/key';
-};
-
-export type SetWorkspaceE2EeKeyErrors = {
-    /**
-     * Invalid workspace key grants
-     */
-    400: unknown;
-    /**
-     * Authentication required
-     */
-    401: unknown;
-    /**
-     * Workspace manager access required
-     */
-    403: unknown;
-    /**
-     * Workspace key service unavailable
-     */
-    502: unknown;
-};
-
-export type SetWorkspaceE2EeKeyResponses = {
-    /**
-     * Wrapped workspace key published
-     */
-    200: SetWorkspaceE2EeKeyResult;
-};
-
-export type SetWorkspaceE2EeKeyResponse = SetWorkspaceE2EeKeyResponses[keyof SetWorkspaceE2EeKeyResponses];
-
-export type GetWorkspaceE2EeKeyRecipientsData = {
-    body?: never;
-    path: {
-        /**
-         * Shared workspace ID
-         */
-        workspace_id: string;
-    };
-    query?: never;
-    url: '/sync/e2ee/workspaces/{workspace_id}/recipients';
-};
-
-export type GetWorkspaceE2EeKeyRecipientsErrors = {
-    /**
-     * Invalid workspace ID
-     */
-    400: unknown;
-    /**
-     * Authentication required
-     */
-    401: unknown;
-    /**
-     * Workspace manager access required
-     */
-    403: unknown;
-    /**
-     * Workspace key service unavailable
-     */
-    502: unknown;
-};
-
-export type GetWorkspaceE2EeKeyRecipientsResponses = {
-    /**
-     * Active workspace key recipients
-     */
-    200: Array<WorkspaceE2EeKeyRecipient>;
-};
-
-export type GetWorkspaceE2EeKeyRecipientsResponse = GetWorkspaceE2EeKeyRecipientsResponses[keyof GetWorkspaceE2EeKeyRecipientsResponses];
-
 export type CreateReplicaCredentialsData = {
     body?: never;
     headers: {
@@ -4588,10 +4610,6 @@ export type CreateReplicaCredentialsData = {
          * Local recovery-key identity
          */
         'x-anarlog-e2ee-key-id': string;
-        /**
-         * Account-level member identity public key
-         */
-        'x-anarlog-e2ee-member-public-key'?: string | null;
     };
     path?: never;
     query?: never;
@@ -4881,10 +4899,6 @@ export type CreateCredentialsData = {
          * Local recovery-key identity
          */
         'x-anarlog-e2ee-key-id'?: string | null;
-        /**
-         * Account-level member identity public key
-         */
-        'x-anarlog-e2ee-member-public-key'?: string | null;
     };
     path?: never;
     query?: never;

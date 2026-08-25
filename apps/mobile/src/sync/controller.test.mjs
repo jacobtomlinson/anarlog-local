@@ -34,7 +34,6 @@ function dependencies(overrides = {}) {
     generateRecoveryKey: async () => "generated-recovery-key",
     inspectRecoveryKey: async () => ({
       keyId: "ABCDEFGHIJKLMNOPQRSTUV",
-      memberPublicKey: "A".repeat(43),
     }),
     claimIdentity: async () => {},
     getDevice: async () => ({ fingerprint: "device-1234" }),

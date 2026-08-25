@@ -75,7 +75,6 @@ vi.mock("@anlg/ui/components/ui/toast", () => ({
 
 const NOW = new Date("2026-07-13T00:00:00Z");
 const E2EE_KEY_ID = "abcdefghijklmnopqrstuv";
-const E2EE_MEMBER_PUBLIC_KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq";
 
 function deferred<T = void>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -203,28 +202,6 @@ function projectedCredentialsPayload() {
         createdAt: "2026-07-01T00:00:00Z",
         updatedAt: "2026-07-16T00:00:00Z",
       },
-      {
-        id: "workspace-shared",
-        ownerUserId: "other-user",
-        kind: "shared",
-        name: "Shared",
-        membershipId: "membership-shared",
-        role: "member",
-        membershipCreatedAt: "2026-07-02T01:00:00Z",
-        membershipUpdatedAt: "2026-07-15T01:00:00Z",
-        createdAt: "2026-07-02T00:00:00Z",
-        updatedAt: "2026-07-15T00:00:00Z",
-      },
-    ],
-    workspaceKeyGrants: [
-      {
-        workspaceId: "workspace-shared",
-        keyId: "AAAAAAAAAAAAAAAAAAAAAA",
-        ephemeralPublicKey: "A".repeat(43),
-        nonce: "B".repeat(32),
-        ciphertext: "C".repeat(64),
-        isActive: true,
-      },
     ],
   };
 }
@@ -257,7 +234,6 @@ describe("CloudSync auth lifecycle", () => {
     vi.mocked(getE2eeIdentityStatus).mockResolvedValue({
       configured: true,
       keyId: E2EE_KEY_ID,
-      memberPublicKey: E2EE_MEMBER_PUBLIC_KEY,
     });
     vi.mocked(getOrCreateE2eeDeviceIdentity).mockResolvedValue({
       publicKey: "A".repeat(43),
@@ -337,7 +313,6 @@ describe("CloudSync auth lifecycle", () => {
     vi.mocked(getE2eeIdentityStatus).mockResolvedValue({
       configured: false,
       keyId: null,
-      memberPublicKey: null,
     });
     vi.mocked(miscCommands.getFingerprint).mockResolvedValue({
       status: "ok",
@@ -365,7 +340,6 @@ describe("CloudSync auth lifecycle", () => {
     vi.mocked(getE2eeIdentityStatus).mockResolvedValue({
       configured: false,
       keyId: null,
-      memberPublicKey: null,
     });
     vi.mocked(miscCommands.getFingerprint).mockResolvedValue({
       status: "ok",
@@ -396,12 +370,10 @@ describe("CloudSync auth lifecycle", () => {
       .mockResolvedValueOnce({
         configured: false,
         keyId: null,
-        memberPublicKey: null,
       })
       .mockResolvedValueOnce({
         configured: true,
         keyId: E2EE_KEY_ID,
-        memberPublicKey: E2EE_MEMBER_PUBLIC_KEY,
       });
     vi.mocked(miscCommands.getFingerprint).mockResolvedValue({
       status: "ok",
@@ -445,7 +417,6 @@ describe("CloudSync auth lifecycle", () => {
     vi.mocked(getE2eeIdentityStatus).mockResolvedValue({
       configured: false,
       keyId: null,
-      memberPublicKey: null,
     });
     vi.mocked(miscCommands.getFingerprint).mockResolvedValue({
       status: "ok",
@@ -612,7 +583,6 @@ describe("CloudSync auth lifecycle", () => {
         headers: {
           Authorization: "Bearer supabase-token",
           "X-Anarlog-E2EE-Key-Id": E2EE_KEY_ID,
-          "x-anarlog-e2ee-member-public-key": E2EE_MEMBER_PUBLIC_KEY,
         },
       }),
     );
@@ -657,7 +627,7 @@ describe("CloudSync auth lifecycle", () => {
     expect(configureCloudsyncToken).not.toHaveBeenCalled();
   });
 
-  test("passes server workspace metadata to the native projection", async () => {
+  test("passes personal workspace metadata to the native projection", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(() => Promise.resolve(projectedCredentialsResponse())),
@@ -681,39 +651,21 @@ describe("CloudSync auth lifecycle", () => {
             membershipCreatedAt: "2026-07-01T01:00:00Z",
             membershipUpdatedAt: "2026-07-16T01:00:00Z",
           }),
-          expect.objectContaining({
-            id: "workspace-shared",
-            membershipId: "membership-shared",
-            role: "member",
-            membershipCreatedAt: "2026-07-02T01:00:00Z",
-            membershipUpdatedAt: "2026-07-15T01:00:00Z",
-          }),
         ],
       },
-      [
-        {
-          workspaceId: "workspace-shared",
-          keyId: "AAAAAAAAAAAAAAAAAAAAAA",
-          ephemeralPublicKey: "A".repeat(43),
-          nonce: "B".repeat(32),
-          ciphertext: "C".repeat(64),
-          isActive: true,
-        },
-      ],
     );
   });
 
-  test("removes a revoked shared workspace on credential refresh", async () => {
-    const revokedCredentials = projectedCredentialsResponse((payload) => {
-      payload.workspaces.splice(1);
-      payload.workspaceKeyGrants = [];
+  test("refreshes the personal workspace projection", async () => {
+    const refreshedCredentials = projectedCredentialsResponse((payload) => {
+      payload.workspaces[0]!.name = "Personal refreshed";
     });
     vi.stubGlobal(
       "fetch",
       vi
         .fn<() => Promise<Response>>()
         .mockResolvedValueOnce(projectedCredentialsResponse())
-        .mockResolvedValueOnce(revokedCredentials),
+        .mockResolvedValueOnce(refreshedCredentials),
     );
 
     await handleCloudsyncAuthChange("SIGNED_IN", session());
@@ -736,25 +688,7 @@ describe("CloudSync auth lifecycle", () => {
           }),
         ],
       },
-      [],
     );
-  });
-
-  test("rejects shared workspace credentials without an active key grant", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(() =>
-        Promise.resolve(
-          projectedCredentialsResponse((payload) => {
-            payload.workspaceKeyGrants[0]!.isActive = false;
-          }),
-        ),
-      ),
-    );
-
-    await handleCloudsyncAuthChange("SIGNED_IN", session());
-
-    expect(configureCloudsyncToken).not.toHaveBeenCalled();
   });
 
   test("deletes queued folders only after native revocation succeeds", async () => {
@@ -854,46 +788,27 @@ describe("CloudSync auth lifecycle", () => {
 
   test.each([
     [
-      "an unknown role",
-      (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[1]!.role = "viewer";
-      },
-    ],
-    [
       "an unknown workspace kind",
-      (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[1]!.kind = "team";
-      },
-    ],
-    [
-      "multiple personal workspaces",
-      (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[1]!.kind = "personal";
-      },
-    ],
-    [
-      "zero personal workspaces",
       (payload: ProjectedCredentialsPayload) => {
         payload.workspaces[0]!.kind = "shared";
       },
     ],
     [
-      "duplicate workspace IDs",
+      "zero personal workspaces",
       (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[1]!.id = payload.workspaces[0]!.id;
+        payload.workspaces.length = 0;
       },
     ],
     [
-      "duplicate membership IDs",
+      "an unknown role",
       (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[1]!.membershipId =
-          payload.workspaces[0]!.membershipId;
+        payload.workspaces[0]!.role = "viewer";
       },
     ],
     [
       "an invalid membership timestamp",
       (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[1]!.membershipCreatedAt = "not-a-timestamp";
+        payload.workspaces[0]!.membershipCreatedAt = "not-a-timestamp";
       },
     ],
   ])("rejects projected credentials with %s", async (_label, mutate) => {
@@ -1891,7 +1806,6 @@ describe("CloudSync auth lifecycle", () => {
     identity.resolve({
       configured: true,
       keyId: E2EE_KEY_ID,
-      memberPublicKey: E2EE_MEMBER_PUBLIC_KEY,
     });
     await identity.promise;
     await vi.advanceTimersByTimeAsync(0);
@@ -1922,7 +1836,6 @@ describe("CloudSync auth lifecycle", () => {
     identity.resolve({
       configured: true,
       keyId: E2EE_KEY_ID,
-      memberPublicKey: E2EE_MEMBER_PUBLIC_KEY,
     });
     await identity.promise;
     await vi.advanceTimersByTimeAsync(0);

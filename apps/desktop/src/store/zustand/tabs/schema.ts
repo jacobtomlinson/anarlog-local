@@ -45,7 +45,6 @@ export type SettingsTab =
   | "audio"
   | "appearance"
   | "sync"
-  | "team"
   | "notifications"
   | "imports"
   | "developers"
@@ -64,7 +63,6 @@ export const normalizeSettingsTab = (
     case "meetings":
     case "appearance":
     case "sync":
-    case "team":
     case "notifications":
     case "imports":
     case "developers":

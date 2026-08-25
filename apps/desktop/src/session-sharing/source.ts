@@ -1,12 +1,11 @@
 import { md2json } from "@anlg/editor/markdown";
 import type { JSONContent } from "@anlg/editor/note";
 
-import { liveQueryClient, useLiveQuery } from "~/db";
+import { liveQueryClient } from "~/db";
 import { flushDatabaseWrites } from "~/db/write-queue";
 import { DEFAULT_USER_ID } from "~/shared/utils";
 
 const EMPTY_DOCUMENT: JSONContent = { type: "doc", content: [] };
-const EMPTY_WORKSPACES: AvailableShareWorkspace[] = [];
 const MAX_DOCUMENT_DEPTH = 64;
 const MAX_DOCUMENT_NODES = 50_000;
 
@@ -32,14 +31,7 @@ type SessionShareSourceSqlRow = {
   body_format: string;
   personal_workspace_available: number | boolean;
   assigned_workspace_kind: string | null;
-  assigned_workspace_deleted_at: string | null;
-  assigned_workspace_role: string | null;
   binding_json: string | null;
-};
-
-type AvailableShareWorkspaceSqlRow = {
-  id: string;
-  name: string;
 };
 
 export type SessionShareSource = {
@@ -52,11 +44,6 @@ export type SessionShareSource = {
   body: JSONContent;
   rawBody: string;
   bodyFormat: string;
-};
-
-export type AvailableShareWorkspace = {
-  id: string;
-  name: string;
 };
 
 const SESSION_SHARE_SOURCE_SQL = `
@@ -104,20 +91,6 @@ const SESSION_SHARE_SOURCE_SQL = `
       LIMIT 1
     ) AS assigned_workspace_kind,
     (
-      SELECT workspace.deleted_at
-      FROM workspaces AS workspace
-      WHERE workspace.id = session.workspace_id
-      LIMIT 1
-    ) AS assigned_workspace_deleted_at,
-    (
-      SELECT membership.role
-      FROM workspace_memberships AS membership
-      WHERE membership.workspace_id = session.workspace_id
-        AND membership.user_id = ?
-        AND membership.deleted_at IS NULL
-      LIMIT 1
-    ) AS assigned_workspace_role,
-    (
       SELECT value_json
       FROM app_settings
       WHERE id = 'cloudsync_workspace_binding'
@@ -129,18 +102,6 @@ const SESSION_SHARE_SOURCE_SQL = `
   WHERE session.id = ?
     AND session.deleted_at IS NULL
   LIMIT 1
-`;
-
-const AVAILABLE_SHARE_WORKSPACES_SQL = `
-  SELECT workspace.id, workspace.name
-  FROM workspaces AS workspace
-  JOIN workspace_memberships AS membership
-    ON membership.workspace_id = workspace.id
-    AND membership.user_id = ?
-    AND membership.deleted_at IS NULL
-  WHERE workspace.kind = 'shared'
-    AND workspace.deleted_at IS NULL
-  ORDER BY workspace.name COLLATE NOCASE, workspace.id
 `;
 
 export async function loadSessionShareSource(
@@ -160,7 +121,6 @@ export async function loadSessionShareSource(
   const [row] = await liveQueryClient.execute<SessionShareSourceSqlRow>(
     SESSION_SHARE_SOURCE_SQL,
     [
-      normalizedAccountUserId,
       normalizedAccountUserId,
       normalizedAccountUserId,
       normalizedAccountUserId,
@@ -221,30 +181,6 @@ function parseParticipantNames(value: string) {
   }
 }
 
-export function useAvailableShareWorkspaces(
-  accountUserId: string | null | undefined,
-): AvailableShareWorkspace[] {
-  const normalizedAccountUserId = accountUserId?.trim() ?? "";
-  const enabled = Boolean(
-    normalizedAccountUserId && normalizedAccountUserId !== DEFAULT_USER_ID,
-  );
-  const { data = EMPTY_WORKSPACES } = useLiveQuery<
-    AvailableShareWorkspaceSqlRow,
-    AvailableShareWorkspace[]
-  >({
-    sql: AVAILABLE_SHARE_WORKSPACES_SQL,
-    params: [normalizedAccountUserId],
-    enabled,
-    mapRows: (rows) =>
-      rows.map((row) => ({
-        id: row.id,
-        name: row.name,
-      })),
-  });
-
-  return enabled ? data : EMPTY_WORKSPACES;
-}
-
 function resolveSourceWorkspace(
   row: SessionShareSourceSqlRow,
   accountUserId: string,
@@ -255,8 +191,7 @@ function resolveSourceWorkspace(
   if (assignedWorkspaceId === accountUserId) {
     if (
       personalWorkspaceAvailable &&
-      row.assigned_workspace_kind === "personal" &&
-      row.assigned_workspace_role === "owner"
+      row.assigned_workspace_kind === "personal"
     ) {
       return accountUserId;
     }
@@ -274,13 +209,6 @@ function resolveSourceWorkspace(
   }
 
   if (row.assigned_workspace_kind === "shared") {
-    if (
-      row.assigned_workspace_deleted_at === null &&
-      (row.assigned_workspace_role === "owner" ||
-        row.assigned_workspace_role === "admin")
-    ) {
-      return assignedWorkspaceId;
-    }
     throw new Error("You can no longer share notes from this workspace");
   }
 

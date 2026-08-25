@@ -55,8 +55,6 @@ import type {
   SettableSessionShareScope,
   ShareManagementContext,
 } from "./client-contract";
-import { isWorkspaceShareSlug } from "./urls";
-
 export {
   ShareManagementError,
   parseSessionShareComment,
@@ -117,23 +115,6 @@ export async function getSessionShareManagement(
   return result;
 }
 
-export async function getSessionShareWorkspaceSlug(
-  context: ShareManagementContext,
-  shareId: string,
-): Promise<string | null> {
-  assertUuid(shareId);
-  const data = await callRpc(context, "get_session_share_workspace_slug", {
-    p_share_id: shareId,
-  });
-  const row = expectRecord(singleRow(data), ["workspace_share_slug"]);
-  const slug = row.workspace_share_slug;
-  if (slug === null) return null;
-  if (typeof slug !== "string" || !isWorkspaceShareSlug(slug)) {
-    throw unavailable();
-  }
-  return slug;
-}
-
 export async function deleteSessionShareBySession(
   context: ShareManagementContext,
   input: { workspaceId: string; sessionId: string },
@@ -158,9 +139,7 @@ export async function setSessionShareScope(
   assertUuid(input.shareId);
   assertOneOf(input.scope, settableScopes);
   const workspaceId = input.workspaceId ?? null;
-  if (input.scope === "workspace") {
-    assertUuid(workspaceId);
-  } else if (workspaceId !== null) {
+  if (workspaceId !== null) {
     throw unavailable();
   }
 

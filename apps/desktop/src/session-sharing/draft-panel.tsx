@@ -23,8 +23,6 @@ import {
   ShareInviteSuggestions,
   useShareInvite,
 } from "./invite-recipients";
-import type { AvailableShareWorkspace } from "./source";
-import { useWorkspaceShareScopes } from "./workspace-policy";
 
 import { useAuth } from "~/auth";
 import { ContactFacehash } from "~/contacts/shared";
@@ -40,13 +38,11 @@ export function SessionShareDraftContent({
   sessionId,
   disabled,
   pendingAction,
-  workspaces,
   onAction,
 }: {
   sessionId: string;
   disabled: boolean;
   pendingAction: DraftShareAction | null;
-  workspaces: AvailableShareWorkspace[];
   onAction: (action: DraftShareAction) => void;
 }) {
   const auth = useAuth();
@@ -61,7 +57,6 @@ export function SessionShareDraftContent({
         : ownerEmail || "You";
   const invite = useShareInvite({ sessionId, ownerEmail, invitedEmails: [] });
   const actionPending = pendingAction !== null;
-  const allowedScopes = useWorkspaceShareScopes(workspaces);
   const generalAccessValue =
     pendingAction?.type === "scope" ? pendingAction.target : "restricted";
 
@@ -154,11 +149,9 @@ export function SessionShareDraftContent({
               </h3>
               <GeneralAccessSelector
                 value={generalAccessValue}
-                workspaces={workspaces}
                 disabled={disabled}
                 canExpand={!disabled}
                 pending={pendingAction?.type === "scope"}
-                allowedScopes={allowedScopes}
                 onValueChange={(target) => {
                   if (target !== "restricted") {
                     onAction({ type: "scope", target });

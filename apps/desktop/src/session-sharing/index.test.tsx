@@ -29,7 +29,6 @@ const mocks = vi.hoisted(() => ({
   createOrReuseSessionShare: vi.fn(),
   publishSessionShareSnapshot: vi.fn(),
   getSessionShareManagement: vi.fn(),
-  getSessionShareWorkspaceSlug: vi.fn().mockResolvedValue(null),
   listSessionShareAccess: vi.fn(),
   enableSessionShareLink: vi.fn(),
   rotateSessionShareLink: vi.fn(),
@@ -65,11 +64,6 @@ const mocks = vi.hoisted(() => ({
   clipboardWriteText: vi.fn().mockResolvedValue(undefined),
   contacts: [] as any[],
   participants: [] as any[],
-  workspaces: [] as { id: string; name: string }[],
-}));
-
-vi.mock("./workspace-policy", () => ({
-  useWorkspaceShareScopes: () => ["restricted", "workspace", "link", "public"],
 }));
 
 vi.mock("~/auth", () => ({
@@ -145,7 +139,6 @@ vi.mock("./attachment-controls", () => ({
 
 vi.mock("./source", () => ({
   loadSessionShareSource: mocks.loadSessionShareSource,
-  useAvailableShareWorkspaces: () => mocks.workspaces,
 }));
 
 vi.mock("./sync-state", () => ({
@@ -173,7 +166,6 @@ vi.mock("./client", async (importOriginal) => {
     createSessionAccessInvitation: mocks.createSessionAccessInvitation,
     enableSessionShareLink: mocks.enableSessionShareLink,
     getSessionShareManagement: mocks.getSessionShareManagement,
-    getSessionShareWorkspaceSlug: mocks.getSessionShareWorkspaceSlug,
     listSessionShareAccess: mocks.listSessionShareAccess,
     publishSessionShareSnapshot: mocks.publishSessionShareSnapshot,
     resendSessionAccessInvitation: mocks.resendSessionAccessInvitation,
@@ -382,7 +374,6 @@ describe("SessionShareButton", () => {
     mocks.createOrReuseSessionShare.mockReset();
     mocks.publishSessionShareSnapshot.mockReset();
     mocks.getSessionShareManagement.mockReset();
-    mocks.getSessionShareWorkspaceSlug.mockReset().mockResolvedValue(null);
     mocks.enableSessionShareLink.mockReset();
     mocks.rotateSessionShareLink.mockReset();
     mocks.setSessionShareScope.mockReset();
@@ -390,7 +381,6 @@ describe("SessionShareButton", () => {
     mocks.access = [];
     mocks.contacts = [];
     mocks.participants = [];
-    mocks.workspaces = [];
     mocks.auth.session = createSession();
     mocks.auth.supabase = {};
     mocks.billing.isReady = true;
@@ -1401,8 +1391,7 @@ describe("SessionShareButton", () => {
     expect(screen.queryByText("Loading access…")).toBeNull();
   });
 
-  it("offers invited, workspace, and link access and can restrict a link share", async () => {
-    mocks.workspaces = [{ id: WORKSPACE_ID, name: "Fastrepl" }];
+  it("offers invited and link access and can restrict a link share", async () => {
     mocks.management = defaultManagement({
       generalScope: "link",
       hasActiveLink: true,
@@ -1412,7 +1401,6 @@ describe("SessionShareButton", () => {
     mocks.setSessionShareScope.mockClear();
 
     expect(screen.getByText("Only people invited")).not.toBeNull();
-    expect(screen.getByText("Everyone in Fastrepl")).not.toBeNull();
     expect(screen.getByText("Anyone with the link")).not.toBeNull();
     expect(screen.queryByText("Public on the web")).toBeNull();
 
@@ -1426,35 +1414,7 @@ describe("SessionShareButton", () => {
     );
   });
 
-  it("publishes before expanding an existing share to a workspace", async () => {
-    mocks.workspaces = [{ id: WORKSPACE_ID, name: "Fastrepl" }];
-    renderShareButton();
-    await openSharePopover();
-    mocks.events = [];
-    mocks.markSessionShareActivated.mockClear();
-
-    fireEvent.click(screen.getByText("Everyone in Fastrepl"));
-
-    await waitFor(() =>
-      expect(mocks.setSessionShareScope).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          shareId: SHARE_ID,
-          scope: "workspace",
-          workspaceId: WORKSPACE_ID,
-        },
-      ),
-    );
-    expect(mocks.events.slice(0, 3)).toEqual(["load", "publish", "set-scope"]);
-    expect(mocks.markSessionShareActivated).toHaveBeenCalledWith(
-      USER_ID,
-      SHARE_ID,
-      "session-1",
-    );
-  });
-
   it("enables link access and copies the stable note URL", async () => {
-    mocks.workspaces = [{ id: WORKSPACE_ID, name: "Fastrepl" }];
     mocks.managedNote = null;
     mocks.loadManagedSharedNoteForSession.mockResolvedValue(null);
     renderShareButton();
@@ -1512,23 +1472,7 @@ describe("SessionShareButton", () => {
     expect(mocks.rotateSessionShareLink).not.toHaveBeenCalled();
   });
 
-  it("copies sharing links from the workspace subdomain", async () => {
-    mocks.getSessionShareWorkspaceSlug.mockResolvedValue("fastrepl");
-    renderShareButton();
-    await openSharePopover();
-    mocks.clipboardWriteText.mockClear();
-
-    fireEvent.click(screen.getByRole("button", { name: "Copy link" }));
-
-    await waitFor(() =>
-      expect(mocks.clipboardWriteText).toHaveBeenCalledWith(
-        `https://fastrepl.anarlog.so/share/${SHARE_ID}/`,
-      ),
-    );
-  });
-
   it("returns link access to invited-only when copying its stable URL fails", async () => {
-    mocks.workspaces = [{ id: WORKSPACE_ID, name: "Fastrepl" }];
     mocks.clipboardWriteText.mockRejectedValueOnce(new Error("clipboard"));
     renderShareButton();
     await openSharePopover();

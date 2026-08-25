@@ -43,9 +43,7 @@ type ControllerDependencies = {
   ) => Promise<void>;
   deleteRecoveryKey: (accountUserId: string) => Promise<void>;
   generateRecoveryKey: () => Promise<string>;
-  inspectRecoveryKey: (
-    recoveryKey: string,
-  ) => Promise<{ keyId: string; memberPublicKey: string }>;
+  inspectRecoveryKey: (recoveryKey: string) => Promise<{ keyId: string }>;
   claimIdentity: (session: MobileSyncSession, keyId: string) => Promise<void>;
   getDevice: () => Promise<{
     fingerprint?: string | null;

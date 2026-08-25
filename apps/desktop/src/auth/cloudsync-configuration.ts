@@ -39,7 +39,6 @@ export function configureCloudsyncCredentials(
           personalWorkspaceId: credentials.personalWorkspaceId,
           workspaces: credentials.workspaces,
         },
-        credentials.workspaceKeyGrants ?? [],
       )
     : configureCloudsyncToken(
         credentials.databaseId,

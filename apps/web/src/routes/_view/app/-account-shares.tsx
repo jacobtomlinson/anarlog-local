@@ -29,7 +29,6 @@ import {
 const SCOPE_LABELS = {
   public: "Public",
   link: "Anyone with the link",
-  workspace: "Workspace",
   restricted: "Invited people only",
 } as const;
 
