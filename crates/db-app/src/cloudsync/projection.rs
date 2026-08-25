@@ -17,11 +17,17 @@ pub struct CloudsyncWorkspaceProjection {
     pub workspaces: Vec<CloudsyncWorkspaceProjectionEntry>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CloudsyncWorkspaceKind {
+    Personal,
+    LegacyShared,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CloudsyncWorkspaceProjectionEntry {
     pub id: String,
     pub owner_user_id: String,
-    pub kind: String,
+    pub kind: CloudsyncWorkspaceKind,
     pub name: String,
     pub membership_id: String,
     pub role: String,
@@ -159,10 +165,14 @@ async fn load_active_workspace_ids_in_batches(
         check_workspace_projection_cancellation(is_cancelled)?;
         let rows: Vec<(String, String)> = if let Some(after_id) = after_id.as_deref() {
             sqlx::query_as(
-                "SELECT id, workspace_id
+                "SELECT workspace_memberships.id, workspace_memberships.workspace_id
                  FROM workspace_memberships
-                 WHERE user_id = ? AND deleted_at IS NULL AND id > ?
-                 ORDER BY id
+                 JOIN workspaces ON workspaces.id = workspace_memberships.workspace_id
+                 WHERE workspace_memberships.user_id = ?
+                   AND workspace_memberships.deleted_at IS NULL
+                   AND workspaces.kind = 'personal'
+                   AND workspace_memberships.id > ?
+                 ORDER BY workspace_memberships.id
                  LIMIT ?",
             )
             .bind(account_user_id)
@@ -172,10 +182,13 @@ async fn load_active_workspace_ids_in_batches(
             .await?
         } else {
             sqlx::query_as(
-                "SELECT id, workspace_id
+                "SELECT workspace_memberships.id, workspace_memberships.workspace_id
                  FROM workspace_memberships
-                 WHERE user_id = ? AND deleted_at IS NULL
-                 ORDER BY id
+                 JOIN workspaces ON workspaces.id = workspace_memberships.workspace_id
+                 WHERE workspace_memberships.user_id = ?
+                   AND workspace_memberships.deleted_at IS NULL
+                   AND workspaces.kind = 'personal'
+                 ORDER BY workspace_memberships.id
                  LIMIT ?",
             )
             .bind(account_user_id)
@@ -443,7 +456,10 @@ async fn write_cloudsync_workspace_projection_in_transaction(
         )
         .bind(&workspace.id)
         .bind(&workspace.owner_user_id)
-        .bind(&workspace.kind)
+        .bind(match workspace.kind {
+            CloudsyncWorkspaceKind::Personal => "personal",
+            CloudsyncWorkspaceKind::LegacyShared => "shared",
+        })
         .bind(&workspace.name)
         .bind(&workspace.created_at)
         .bind(&workspace.updated_at)
@@ -499,9 +515,11 @@ async fn delete_workspace_projection_rows_in_batches(
         "workspace_memberships" => {
             "DELETE FROM workspace_memberships
              WHERE id IN (
-               SELECT id
+               SELECT workspace_memberships.id
                FROM workspace_memberships
-               ORDER BY id
+               JOIN workspaces ON workspaces.id = workspace_memberships.workspace_id
+               WHERE workspaces.kind = 'personal'
+               ORDER BY workspace_memberships.id
                LIMIT ?
              )
              RETURNING id"
@@ -511,6 +529,7 @@ async fn delete_workspace_projection_rows_in_batches(
              WHERE id IN (
                SELECT id
                FROM workspaces
+               WHERE kind = 'personal'
                ORDER BY id
                LIMIT ?
              )
@@ -598,7 +617,7 @@ pub fn validate_cloudsync_workspace_projection(
     for workspace in &projection.workspaces {
         if workspace.id.trim().is_empty()
             || workspace.owner_user_id.trim().is_empty()
-            || !matches!(workspace.kind.as_str(), "personal" | "shared")
+            || !matches!(workspace.kind, CloudsyncWorkspaceKind::Personal)
             || workspace.membership_id.trim().is_empty()
             || !matches!(workspace.role.as_str(), "owner" | "admin" | "member")
             || workspace.membership_created_at.trim().is_empty()
@@ -615,7 +634,7 @@ pub fn validate_cloudsync_workspace_projection(
     let mut personal_workspaces = projection
         .workspaces
         .iter()
-        .filter(|workspace| workspace.kind == "personal");
+        .filter(|workspace| workspace.kind == CloudsyncWorkspaceKind::Personal);
     let Some(personal_workspace) = personal_workspaces.next() else {
         return Err(CloudsyncWorkspaceError::InvalidWorkspaceProjection);
     };

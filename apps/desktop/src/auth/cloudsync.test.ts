@@ -790,7 +790,7 @@ describe("CloudSync auth lifecycle", () => {
     [
       "an unknown workspace kind",
       (payload: ProjectedCredentialsPayload) => {
-        payload.workspaces[0]!.kind = "shared";
+        (payload.workspaces[0] as { kind: string }).kind = "shared";
       },
     ],
     [

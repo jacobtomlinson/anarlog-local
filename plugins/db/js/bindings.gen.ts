@@ -523,6 +523,7 @@ export type CloudsyncE2eeWitness = { endpoint: string; accessToken: string };
 export type CloudsyncTokenConfigurationResult =
   | "configured"
   | "account_mismatch";
+export type CloudsyncWorkspaceKind = "personal";
 export type CloudsyncWorkspaceProjection = {
   accountUserId: string;
   personalWorkspaceId: string;
@@ -531,7 +532,7 @@ export type CloudsyncWorkspaceProjection = {
 export type CloudsyncWorkspaceProjectionEntry = {
   id: string;
   ownerUserId: string;
-  kind: string;
+  kind: CloudsyncWorkspaceKind;
   name: string;
   membershipId: string;
   role: string;

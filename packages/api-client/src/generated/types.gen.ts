@@ -232,7 +232,7 @@ export type CloudsyncCredentials = {
 export type CloudsyncWorkspace = {
     createdAt: string;
     id: string;
-    kind: string;
+    kind: CloudsyncWorkspaceKind;
     membershipCreatedAt: string;
     membershipId: string;
     membershipUpdatedAt: string;
@@ -241,6 +241,8 @@ export type CloudsyncWorkspace = {
     role: string;
     updatedAt: string;
 };
+
+export type CloudsyncWorkspaceKind = 'personal';
 
 export type CollectionPage = {
     items: Array<CollectionRef>;

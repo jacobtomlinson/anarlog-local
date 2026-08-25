@@ -264,7 +264,7 @@ async fn token_refresh_restarts_pending_full_resync_with_new_credentials() {
         workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
             id: "user-a".to_string(),
             owner_user_id: "user-a".to_string(),
-            kind: "personal".to_string(),
+            kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
             name: "Personal".to_string(),
             membership_id: "membership-personal".to_string(),
             role: "owner".to_string(),
@@ -339,7 +339,7 @@ async fn token_configuration_projects_personal_workspace_after_account_claim() {
         workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
             id: "user-a".to_string(),
             owner_user_id: "user-a".to_string(),
-            kind: "personal".to_string(),
+            kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
             name: "Personal".to_string(),
             membership_id: "membership-personal".to_string(),
             role: "owner".to_string(),
@@ -423,7 +423,7 @@ async fn token_configuration_account_mismatch_preserves_workspace_projection() {
             workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
                 id: "user-a".to_string(),
                 owner_user_id: "user-a".to_string(),
-                kind: "personal".to_string(),
+                kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
                 name: "Existing".to_string(),
                 membership_id: "membership-existing".to_string(),
                 role: "owner".to_string(),
@@ -448,7 +448,7 @@ async fn token_configuration_account_mismatch_preserves_workspace_projection() {
                 workspaces: vec![anlg_db_app::CloudsyncWorkspaceProjectionEntry {
                     id: "user-b".to_string(),
                     owner_user_id: "user-b".to_string(),
-                    kind: "personal".to_string(),
+                    kind: anlg_db_app::CloudsyncWorkspaceKind::Personal,
                     name: "Replacement".to_string(),
                     membership_id: "membership-replacement".to_string(),
                     role: "owner".to_string(),

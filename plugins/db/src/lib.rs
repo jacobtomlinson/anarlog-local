@@ -219,12 +219,18 @@ pub struct CloudsyncWorkspaceProjection {
     pub workspaces: Vec<CloudsyncWorkspaceProjectionEntry>,
 }
 
+#[derive(Debug, Clone, Copy, serde::Deserialize, specta::Type, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum CloudsyncWorkspaceKind {
+    Personal,
+}
+
 #[derive(Debug, Clone, serde::Deserialize, specta::Type, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct CloudsyncWorkspaceProjectionEntry {
     pub id: String,
     pub owner_user_id: String,
-    pub kind: String,
+    pub kind: CloudsyncWorkspaceKind,
     pub name: String,
     pub membership_id: String,
     pub role: String,
@@ -261,7 +267,11 @@ impl From<CloudsyncWorkspaceProjection> for anlg_db_app::CloudsyncWorkspaceProje
                 .map(|workspace| anlg_db_app::CloudsyncWorkspaceProjectionEntry {
                     id: workspace.id,
                     owner_user_id: workspace.owner_user_id,
-                    kind: workspace.kind,
+                    kind: match workspace.kind {
+                        CloudsyncWorkspaceKind::Personal => {
+                            anlg_db_app::CloudsyncWorkspaceKind::Personal
+                        }
+                    },
                     name: workspace.name,
                     membership_id: workspace.membership_id,
                     role: workspace.role,

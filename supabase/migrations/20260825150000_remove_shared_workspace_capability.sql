@@ -181,6 +181,10 @@ REVOKE ALL ON FUNCTION public.claim_workspace_domain(uuid, text)
   FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.rotate_workspace_scim_token(uuid, text, text)
   FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.scim_apply_user(text, text, boolean)
+  FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON FUNCTION public.scim_apply_user_id(text, uuid, boolean)
+  FROM PUBLIC, anon, authenticated, service_role;
 
 REVOKE ALL ON FUNCTION private.set_workspace_share_slug(uuid, text)
   FROM PUBLIC, anon, authenticated;

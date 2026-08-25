@@ -31,6 +31,8 @@ use identity::{
     list_sync_devices, remove_sync_device,
 };
 pub use projection::CloudsyncWorkspace;
+#[cfg(test)]
+pub(super) use projection::CloudsyncWorkspaceKind;
 pub(super) use projection::encode_workspace_token_attributes;
 use projection::{fetch_workspace_projection, validate_workspace_projection};
 use token::{E2eeCreateTokenRequest, LegacyCreateTokenRequest, mint_cloudsync_token, token_expiry};
@@ -381,10 +383,7 @@ async fn create_credentials(
     let workspace_rows = fetch_workspace_projection(&state.replica, &auth).await?;
     let (personal_workspace_id, projected_workspaces) =
         validate_workspace_projection(workspace_rows, &auth.claims.sub)?;
-    let workspaces = projected_workspaces
-        .into_iter()
-        .filter(|workspace| workspace.kind == "personal")
-        .collect::<Vec<_>>();
+    let workspaces = projected_workspaces;
     let encryption_key_id =
         claim_personal_e2ee_key(&state.replica, &auth.claims.sub, requested_key_id).await?;
     claim_sync_device(&state.replica, &auth.claims.sub, &headers).await?;

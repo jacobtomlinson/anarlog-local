@@ -12,7 +12,7 @@ pub use binding::{
     ensure_cloudsync_workspace_binding,
 };
 pub use projection::{
-    CloudsyncWorkspaceProjection, CloudsyncWorkspaceProjectionEntry,
+    CloudsyncWorkspaceKind, CloudsyncWorkspaceProjection, CloudsyncWorkspaceProjectionEntry,
     CloudsyncWorkspaceReconciliationPlan, cloudsync_write_filter_installed,
     cloudsync_write_filter_version_current, commit_cloudsync_workspace_projection,
     commit_cloudsync_workspace_projection_cancellable, mark_cloudsync_write_filter_installed,

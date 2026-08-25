@@ -37,28 +37,7 @@ async fn issues_replica_credentials_without_contacting_sqlitecloud() {
 #[tokio::test]
 async fn mints_token_for_verified_supabase_subject() {
     let server = MockServer::start().await;
-    mock_workspace_projection(
-        &server,
-        json!([
-            {
-                "id": "membership-team",
-                "user_id": "user-123",
-                "role": "member",
-                "created_at": "2026-07-16T09:01:00Z",
-                "updated_at": "2026-07-16T10:01:00Z",
-                "workspace": {
-                    "id": "workspace-team",
-                    "owner_user_id": "user-456",
-                    "kind": "shared",
-                    "name": "Acme",
-                    "created_at": "2026-07-16T09:00:00Z",
-                    "updated_at": "2026-07-16T10:00:00Z"
-                }
-            },
-            personal_workspace("user-123")
-        ]),
-    )
-    .await;
+    mock_workspace_projection(&server, json!([personal_workspace("user-123")])).await;
     mock_e2ee_key_claim(&server, TEST_KEY_ID).await;
     Mock::given(method("POST"))
         .and(path("/v2/tokens"))
@@ -379,7 +358,7 @@ fn bounds_workspace_token_attributes() {
     let workspace = |id: String| CloudsyncWorkspace {
         id,
         owner_user_id: "user-123".to_string(),
-        kind: "shared".to_string(),
+        kind: CloudsyncWorkspaceKind::Personal,
         name: "Shared".to_string(),
         membership_id: "membership".to_string(),
         role: "member".to_string(),
@@ -427,6 +406,24 @@ async fn refuses_token_when_workspace_projection_is_invalid() {
     let invalid_projections = [
         json!([]),
         json!([personal_workspace("different-user")]),
+        json!([
+            personal_workspace("user-123"),
+            {
+                "id": "membership-team",
+                "user_id": "user-123",
+                "role": "member",
+                "created_at": "2026-07-16T09:01:00Z",
+                "updated_at": "2026-07-16T10:01:00Z",
+                "workspace": {
+                    "id": "workspace-team",
+                    "owner_user_id": "user-456",
+                    "kind": "shared",
+                    "name": "Acme",
+                    "created_at": "2026-07-16T09:00:00Z",
+                    "updated_at": "2026-07-16T10:00:00Z"
+                }
+            }
+        ]),
         json!([
             personal_workspace("user-123"),
             {
