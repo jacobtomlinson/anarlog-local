@@ -4469,7 +4469,7 @@ export type ReadE2EeWitnessData = {
     body?: never;
     path: {
         /**
-         * Workspace ID
+         * Personal workspace ID
          */
         workspace_id: string;
     };
@@ -4518,7 +4518,7 @@ export type PublishE2EeWitnessData = {
     body: PublishE2EeWitnessRequest;
     path: {
         /**
-         * Workspace ID
+         * Personal workspace ID
          */
         workspace_id: string;
     };
@@ -4562,7 +4562,7 @@ export type WaitE2EeWitnessData = {
     body?: never;
     path: {
         /**
-         * Workspace ID
+         * Personal workspace ID
          */
         workspace_id: string;
     };

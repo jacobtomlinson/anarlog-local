@@ -3231,7 +3231,7 @@
           {
             "name": "workspace_id",
             "in": "path",
-            "description": "Workspace ID",
+            "description": "Personal workspace ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -3299,7 +3299,7 @@
           {
             "name": "workspace_id",
             "in": "path",
-            "description": "Workspace ID",
+            "description": "Personal workspace ID",
             "required": true,
             "schema": {
               "type": "string"
@@ -3360,7 +3360,7 @@
           {
             "name": "workspace_id",
             "in": "path",
-            "description": "Workspace ID",
+            "description": "Personal workspace ID",
             "required": true,
             "schema": {
               "type": "string"
