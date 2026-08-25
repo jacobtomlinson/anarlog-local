@@ -115,7 +115,6 @@ anlg-local-stt-core = { path = "crates/local-stt-core", package = "local-stt-cor
 anlg-loops = { path = "crates/loops", package = "loops" }
 anlg-mac = { path = "crates/mac", package = "mac" }
 anlg-mcp = { path = "crates/mcp", package = "mcp" }
-anlg-meeting-capture = { path = "crates/meeting-capture", package = "meeting-capture" }
 anlg-meeting-import = { path = "crates/meeting-import", package = "meeting-import" }
 anlg-mobile-bridge = { path = "crates/mobile-bridge", package = "mobile-bridge" }
 anlg-model-downloader = { path = "crates/model-downloader", package = "model-downloader" }

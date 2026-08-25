@@ -11,7 +11,7 @@ use sqlx::migrate::{
 use sqlx::{Executor, SqlSafeStr, Sqlite, SqliteConnection};
 
 use crate::error::MigrateError;
-use crate::schema::{DbSchema, MigrationScope, MigrationStep};
+use crate::schema::{DbSchema, MigrationScope, MigrationStep, RetiredMigration};
 
 type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
@@ -44,9 +44,11 @@ impl<'a> DbMigrateConnection<'a> {
 pub(crate) async fn run_migrations(
     db: &Db,
     schema: DbSchema,
+    retired_migrations: &'static [RetiredMigration],
     on_progress: impl FnMut(crate::MigrationProgress) + Send,
 ) -> Result<(), MigrateError> {
     let resolved = resolve_migrations(schema)?;
+    let retired_by_version = retired_migrations_by_version(&resolved, retired_migrations)?;
     let meta_by_version = resolved
         .iter()
         .map(|(step, migration)| {
@@ -66,7 +68,7 @@ pub(crate) async fn run_migrations(
 
     let conn = db.pool().acquire().await?;
     let mut conn = DbMigrateConnection::new(db, conn, meta_by_version);
-    run_direct(&migrations, &mut conn, on_progress).await?;
+    run_direct(&migrations, &retired_by_version, &mut conn, on_progress).await?;
     Ok(())
 }
 
@@ -74,6 +76,7 @@ const MIGRATIONS_TABLE: &str = "_sqlx_migrations";
 
 async fn run_direct(
     migrations: &[Migration],
+    retired_by_version: &HashMap<i64, RetiredMigration>,
     conn: &mut DbMigrateConnection<'_>,
     mut on_progress: impl FnMut(crate::MigrationProgress) + Send,
 ) -> Result<(), MigrateError> {
@@ -90,13 +93,19 @@ async fn run_direct(
         .iter()
         .map(|migration| migration.version)
         .max()
-        .unwrap_or(0);
+        .unwrap_or(0)
+        .max(retired_by_version.keys().copied().max().unwrap_or(0));
     let max_applied_version = applied_migrations
         .iter()
         .map(|migration| migration.version)
         .max()
         .unwrap_or(0);
-    validate_applied_migrations(&applied_migrations, migrations, max_known_version)?;
+    validate_applied_migrations(
+        &applied_migrations,
+        migrations,
+        &retired_by_version,
+        max_known_version,
+    )?;
 
     // A database written by a newer build is fine to keep using as long as
     // none of its extra migrations were marked "-- breaking"; the compat
@@ -167,18 +176,62 @@ async fn run_direct(
     Ok(())
 }
 
+fn retired_migrations_by_version(
+    resolved: &[(&'static MigrationStep, Migration)],
+    retired_migrations: &'static [RetiredMigration],
+) -> Result<HashMap<i64, RetiredMigration>, MigrateError> {
+    let active_versions: HashSet<_> = resolved
+        .iter()
+        .map(|(_, migration)| migration.version)
+        .collect();
+    let mut retired_by_version = HashMap::with_capacity(retired_migrations.len());
+
+    for retired in retired_migrations {
+        if retired.version <= 0 {
+            return Err(MigrateError::InvalidRetiredMigration {
+                version: retired.version,
+            });
+        }
+        if active_versions.contains(&retired.version) {
+            return Err(MigrateError::RetiredMigrationStillActive {
+                version: retired.version,
+            });
+        }
+        if retired_by_version
+            .insert(retired.version, *retired)
+            .is_some()
+        {
+            return Err(MigrateError::DuplicateRetiredMigration {
+                version: retired.version,
+            });
+        }
+    }
+
+    Ok(retired_by_version)
+}
+
 fn validate_applied_migrations(
     applied_migrations: &[AppliedMigration],
     migrations: &[Migration],
+    retired_by_version: &HashMap<i64, RetiredMigration>,
     max_known_version: i64,
 ) -> Result<(), SqlxMigrateError> {
     let versions: HashSet<_> = migrations
         .iter()
         .map(|migration| migration.version)
         .collect();
+    let versions: HashSet<_> = versions
+        .into_iter()
+        .chain(retired_by_version.keys().copied())
+        .collect();
 
     for applied_migration in applied_migrations {
         if versions.contains(&applied_migration.version) {
+            if let Some(retired) = retired_by_version.get(&applied_migration.version)
+                && retired.checksum != applied_migration.checksum.as_ref()
+            {
+                return Err(SqlxMigrateError::VersionMismatch(applied_migration.version));
+            }
             continue;
         }
         // Versions above everything this build knows come from a newer build

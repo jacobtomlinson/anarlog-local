@@ -256,12 +256,6 @@ status = 301
 force = true
 
 [[redirects]]
-from = "https://hyprnote.com/enterprise"
-to = "https://char.com/enterprise"
-status = 301
-force = true
-
-[[redirects]]
 from = "https://hyprnote.com/security"
 to = "https://char.com/security"
 status = 301

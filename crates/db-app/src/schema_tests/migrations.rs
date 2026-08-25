@@ -18,6 +18,46 @@ async fn schema_declares_legacy_migrations_and_cloudsync_registry() {
 }
 
 #[tokio::test]
+async fn retired_migration_does_not_block_existing_databases() {
+    let db = Db::connect_memory_plain().await.unwrap();
+    let later_migrations = APP_MIGRATION_STEPS
+        .iter()
+        .position(|step| step.id == "20260815100000_transcript_content_revision")
+        .unwrap();
+
+    anlg_db_migrate::migrate(
+        &db,
+        anlg_db_migrate::DbSchema {
+            steps: &APP_MIGRATION_STEPS[..later_migrations],
+            validate_cloudsync_table: cloudsync_alter_guard_required,
+        },
+    )
+    .await
+    .unwrap();
+    sqlx::query(
+        "INSERT INTO _sqlx_migrations
+            (version, description, success, checksum, execution_time)
+         VALUES (?1, 'session_delivery', TRUE, ?2, 0)",
+    )
+    .bind(RETIRED_MIGRATIONS[0].version)
+    .bind(RETIRED_MIGRATIONS[0].checksum)
+    .execute(db.pool())
+    .await
+    .unwrap();
+
+    prepare_schema(&db).await.unwrap();
+
+    let retired_table_count: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM sqlite_master
+         WHERE type = 'table' AND name LIKE '%session_delivery%'",
+    )
+    .fetch_one(db.pool())
+    .await
+    .unwrap();
+    assert_eq!(retired_table_count, 0);
+}
+
+#[tokio::test]
 async fn legacy_mobile_schema_adopts_preexisting_alter_migrations() {
     let db = Db::connect_memory_plain().await.unwrap();
     sqlx::raw_sql(
@@ -106,9 +146,6 @@ async fn migrations_apply_cleanly() {
             "e2ee_witness_records",
             "e2ee_witness_repair_pending",
             "e2ee_witness_state",
-            "enterprise_session_completion_outbox",
-            "enterprise_session_delivery_receipts",
-            "enterprise_session_delivery_state",
             "entity_mentions",
             "events",
             "humans",
@@ -526,38 +563,4 @@ async fn prepare_schema_seeds_templates_when_repair_migration_creates_missing_ta
         .await
         .unwrap();
     assert!(row_count > 0);
-}
-
-#[tokio::test]
-async fn enterprise_session_delivery_tables_are_registered() {
-    let migration = APP_MIGRATION_STEPS
-        .iter()
-        .find(|step| step.id == "20260814090000_enterprise_session_delivery")
-        .unwrap();
-    assert_eq!(migration.scope, anlg_db_migrate::MigrationScope::Plain);
-
-    let db = test_db().await;
-    let tables: Vec<String> = sqlx::query_scalar(
-        r#"SELECT name
-           FROM sqlite_master
-           WHERE type = 'table'
-             AND name IN (
-               'enterprise_session_delivery_state',
-               'enterprise_session_delivery_receipts',
-               'enterprise_session_completion_outbox'
-             )
-           ORDER BY name"#,
-    )
-    .fetch_all(db.pool())
-    .await
-    .unwrap();
-
-    assert_eq!(
-        tables,
-        vec![
-            "enterprise_session_completion_outbox",
-            "enterprise_session_delivery_receipts",
-            "enterprise_session_delivery_state",
-        ]
-    );
 }

@@ -5,7 +5,6 @@ import { MARKETING_PLAN_TIERS } from "@anlg/pricing";
 import { cn } from "@anlg/utils";
 
 import { AnarlogLogo } from "@/components/anarlog-logo";
-import { EnterpriseCallout } from "@/components/enterprise-callout";
 import { SiteFooter } from "@/components/site-footer";
 import {
   ANARLOG_ROW,
@@ -120,10 +119,6 @@ function PricingPage() {
                 Anarlog pricing is always current.
               </p>
             </div>
-          </section>
-
-          <section className="pt-8 pb-20 md:pt-10 md:pb-24">
-            <EnterpriseCallout centered />
           </section>
         </div>
       </div>

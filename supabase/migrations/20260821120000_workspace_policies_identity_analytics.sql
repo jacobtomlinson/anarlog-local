@@ -1,4 +1,4 @@
--- Additive enterprise admin controls: workspace policies, usage analytics,
+-- Additive workspace admin controls: workspace policies, usage analytics,
 -- SSO/SCIM identity, and domain capture. Older clients ignore unknown tables.
 
 BEGIN;

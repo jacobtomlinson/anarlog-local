@@ -337,11 +337,6 @@ pub const APP_MIGRATION_STEPS: &[anlg_db_migrate::MigrationStep] = &[
         sql: include_str!("../migrations/20260812100100_e2ee_replica_reconciliation_triggers.sql"),
     },
     anlg_db_migrate::MigrationStep {
-        id: "20260814090000_enterprise_session_delivery",
-        scope: anlg_db_migrate::MigrationScope::Plain,
-        sql: include_str!("../migrations/20260814090000_enterprise_session_delivery.sql"),
-    },
-    anlg_db_migrate::MigrationStep {
         id: "20260815100000_transcript_content_revision",
         scope: anlg_db_migrate::MigrationScope::CloudsyncAlter {
             table_name: "transcripts",
@@ -402,6 +397,17 @@ pub fn schema() -> anlg_db_migrate::DbSchema {
         validate_cloudsync_table: cloudsync_alter_guard_required,
     }
 }
+
+const RETIRED_MIGRATIONS: &[anlg_db_migrate::RetiredMigration] =
+    &[anlg_db_migrate::RetiredMigration {
+        version: 20260814090000,
+        checksum: &[
+            0x2f, 0x22, 0xdb, 0x75, 0x48, 0x12, 0x19, 0x8c, 0xac, 0xf6, 0xee, 0xb5, 0x09, 0x04,
+            0x14, 0xfb, 0x8f, 0xf1, 0x6a, 0x2d, 0x4c, 0x4d, 0xa8, 0x47, 0xd5, 0xaf, 0x5b, 0xf2,
+            0xde, 0xeb, 0x8c, 0x0a, 0x82, 0xdf, 0x12, 0xbe, 0xc8, 0x6d, 0x7b, 0xaf, 0xed, 0xa4,
+            0x1e, 0x67, 0x28, 0xa6, 0x9d, 0x1d,
+        ],
+    }];
 
 const SHARED_SESSION_CACHE_MIGRATION_VERSION: i64 = 20260716173000;
 const LEGACY_SHARED_SESSION_CACHE_CHECKSUM: &str = "4813db532e44e6db8a3ba85e0b248ff99a927ec40b6aa971210452b588bcb2361d3661bd23d045a32ac3a9fcbed99b4a";
@@ -483,7 +489,13 @@ pub async fn prepare_schema_with_progress(
     repair_legacy_shared_session_cache_migration(db.pool()).await?;
     repair_legacy_attachment_transfer_jobs_migration(db.pool()).await?;
     repair_torn_e2ee_payload_hash_local_state_migration(db).await?;
-    anlg_db_migrate::migrate_with_progress(db, schema(), on_migration_progress).await?;
+    anlg_db_migrate::migrate_with_retired_migrations_with_progress(
+        db,
+        schema(),
+        RETIRED_MIGRATIONS,
+        on_migration_progress,
+    )
+    .await?;
     repair_missing_core_tables(db.pool(), templates_missing_before_migration).await?;
     backfill_session_share_activation(db.pool()).await?;
     ensure_cloudsync_workspace_binding(db.pool()).await?;

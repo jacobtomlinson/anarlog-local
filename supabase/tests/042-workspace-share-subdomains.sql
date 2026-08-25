@@ -60,7 +60,7 @@ select results_eq(
     )
   $$,
   $$values ('fastrepl'::text, 'https://fastrepl.anarlog.so'::text)$$,
-  'The setter returns the canonical enterprise sharing origin'
+  'The setter returns the canonical workspace sharing origin'
 );
 
 select throws_ok(
