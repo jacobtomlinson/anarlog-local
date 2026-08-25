@@ -61,7 +61,7 @@ Anarlog is the open-source AI meeting notetaker. It runs on your machine, keeps 
 - Search across all meetings
 - Import existing recordings/transcripts
 - 45+ language support
-- Optional end-to-end encrypted CloudSync and note sharing for Pro users
+- Optional note sharing for Pro users
 
 ## What Makes Anarlog Different
 
@@ -77,7 +77,7 @@ Anarlog is the open-source AI meeting notetaker. It runs on your machine, keeps 
 
 - Canonical meeting data lives locally by default
 - Users choose on-device, bring-your-own-key, or hosted AI
-- CloudSync encrypts data before it leaves a device; sharing and hosted features have their own explicit data paths
+- Sharing and hosted features have their own explicit data paths
 - Do not claim that data never leaves a device unless the configuration is explicitly local-only
 - No data used for AI training
 

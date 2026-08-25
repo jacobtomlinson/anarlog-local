@@ -52,7 +52,7 @@ It is built for people who want AI meeting notes without handing their conversat
 - **Your data, in a format you can read.** Sessions, notes, and transcripts live in local SQLite. Recordings and attachments are plain local files. Export Markdown whenever it fits your workflow.
 - **Bring your own AI.** Use a supported hosted provider, your own API key, or an OpenAI-compatible local server such as Ollama, LM Studio, or Unsloth.
 - **Readable source, MIT.** The community application is MIT-licensed. Fork it, audit it, sell it, or build it yourself.
-- **Cloud is opt-in, not required.** Hosted AI, encrypted CloudSync, and sharing exist when you want them. Nothing depends on them.
+- **Cloud is opt-in, not required.** Hosted AI and sharing are available when you want them. Nothing depends on them.
 
 ## What runs where
 
@@ -62,7 +62,7 @@ It is built for people who want AI meeting notes without handing their conversat
 | Transcription | Your device with an on-device model, or the provider you select |
 | Notes and transcript storage | Local SQLite plus local files |
 | AI summaries and chat | Your choice: local model, your own API key, or optional hosted AI |
-| Sync and sharing | Off by default, opt-in encrypted CloudSync |
+| Sharing | Off by default, opt-in shared notes and links |
 
 ## How AI works
 
@@ -90,7 +90,7 @@ Product docs live at [docs.anarlog.so](https://docs.anarlog.so). To build the de
 | --- | --- |
 | `apps/desktop` | Tauri v2 desktop app: React and TypeScript UI, Rust backend |
 | `apps/web` | anarlog.so website, account portal, and shared-note pages; not the desktop notepad |
-| `apps/api` | Optional hosted services for AI, sync, sharing, and integrations |
+| `apps/api` | Optional hosted services for AI, sharing, and integrations |
 | `apps/cli` | Local CLI and MCP server |
 | `apps/mobile` | Mobile client source; no mobile app is currently distributed |
 | `apps/stripe` | Billing integration |
@@ -98,12 +98,12 @@ Product docs live at [docs.anarlog.so](https://docs.anarlog.so). To build the de
 | `plugins/*` | Tauri capabilities such as local STT, database access, calendar, export, and notifications |
 | `crates/*` | Rust libraries for audio capture, transcription, diarization, storage, and services |
 | `packages/*` | Shared TypeScript packages for the editor, database, UI, and plugin SDK |
-| `supabase/` | Hosted authentication, sharing, sync, billing, and Cloud API data |
+| `supabase/` | Hosted authentication, sharing, billing, and Cloud API data |
 | `skills/anarlog` | Published agent skill for the CLI and MCP server |
 
 ## Local development
 
-The local-first desktop app and website start without secrets. Hosted AI, CloudSync, authentication, billing, and connected integrations need their optional local services and configuration.
+The local-first desktop app and website start without secrets. Hosted AI, authentication, billing, and connected integrations need their optional local services and configuration.
 
 You need Node.js 22 or later, pnpm 11.1.1, Rust 1.94.0, and the [Tauri v2 system dependencies](https://v2.tauri.app/start/prerequisites/). On Debian or Ubuntu, the repository can install the required toolchains and system packages:
 

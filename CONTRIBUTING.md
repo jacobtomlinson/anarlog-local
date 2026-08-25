@@ -44,7 +44,7 @@ pnpm exec turbo dev:web
 
 Turbo builds shared UI packages before starting either app.
 
-CloudSync, hosted AI, authentication, billing, and connected integrations require the optional local services:
+Hosted AI, authentication, billing, and connected integrations require the optional local services:
 
 ```bash
 task supabase-start
