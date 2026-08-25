@@ -91,6 +91,7 @@ async fn mock_workspace_projection(server: &MockServer, body: Value) {
         .and(query_param("user_id", "eq.user-123"))
         .and(query_param("deleted_at", "is.null"))
         .and(query_param("workspace.deleted_at", "is.null"))
+        .and(query_param("workspace.kind", "eq.personal"))
         .respond_with(ResponseTemplate::new(200).set_body_json(body))
         .mount(server)
         .await;

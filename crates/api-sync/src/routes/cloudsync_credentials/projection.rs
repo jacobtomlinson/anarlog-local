@@ -73,6 +73,7 @@ pub(super) async fn fetch_workspace_projection(
             ("user_id", user_filter.as_str()),
             ("deleted_at", "is.null"),
             ("workspace.deleted_at", "is.null"),
+            ("workspace.kind", "eq.personal"),
         ])
         .send()
         .await
