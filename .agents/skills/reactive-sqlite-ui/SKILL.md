@@ -71,4 +71,4 @@ Do not add manual invalidation unless the write affects data outside the subscri
 - Can the detail view render from the parent snapshot?
 - Does entity change reset the form, while ordinary reactive updates do not?
 - Is loading UI limited to initial load or truly missing data?
-- Are writes relying on the live-query loop instead of manual sync?
+- Are writes relying on the live-query loop instead of manual cache invalidation?

@@ -36,17 +36,17 @@ Write a product email, not an essay. Keep it crisp, concrete, and easy to scan.
   to take` or `It folds in four releases`.
 - If encouraging an update, use explicit loss framing tied to named features: `If you aren't
   updating, you're missing out on Automations that run after every meeting, editable transcripts,
-  meeting imports, and near-instant sync.` Do not use vague hype, guilt, or blame.
+  meeting imports, and near-instant local updates.` Do not use vague hype, guilt, or blame.
 - Lead with outcomes and specific numbers: `30 assistants`, `eight connect directly`, `about a
   second`. Cut adjectives when a fact can do the work.
 - Use short, active H3 headings such as `Automations do the work now`, `Transcripts you can fix`,
-  and `Sync you stop thinking about`.
+  and `Updates you stop thinking about`.
 - Keep most paragraphs to one to three sentences. Split long chains, remove repeated setup, and do
   not restate the same framing in both the intro and fixes paragraph.
 - Use contractions and direct verbs. `Last week ... This week ...` is a useful cadence when it
   connects one update to the next. Avoid cutesy transitions such as `Now they earn it` and vague
   phrases such as `Accuracy got quieter improvements`.
-- Keep subjects compact and noun-led: `Anarlog 1.4.8: automations, meeting imports, instant sync`.
+- Keep subjects compact and noun-led: `Anarlog 1.4.8: automations, meeting imports, instant updates`.
   Preview text should front-load concrete outcomes and stay near 90 to 140 characters.
 - Self-critical language belongs only when Anarlog or the company was actually at fault. Never add
   an apology merely to sound personal.
