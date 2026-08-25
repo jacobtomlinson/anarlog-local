@@ -12,7 +12,6 @@ const mocks = vi.hoisted(() => ({
   )),
   chat: {
     groupId: "group-1",
-    scope: "general" as "general" | "automations",
     sessionId: "session-1",
     startNewChat: vi.fn(),
     selectChat: vi.fn(),
@@ -98,7 +97,6 @@ describe("ChatView", () => {
   beforeEach(() => {
     cleanup();
     mocks.chatSession.mockClear();
-    mocks.chat.scope = "general";
     mocks.hasAvailableTranscript = false;
     mocks.sessionMode = "inactive";
     mocks.requestedLiveTranscription = null;
@@ -135,25 +133,6 @@ describe("ChatView", () => {
         isBatchTranscriptionPending: true,
       }),
     );
-  });
-
-  it("does not inherit note context in the automations scope", () => {
-    mocks.chat.scope = "automations";
-    mocks.hasAvailableTranscript = true;
-    mocks.sessionMode = "active";
-
-    const { container } = render(<ChatView layout="right-panel" />);
-
-    expect(mocks.chatSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        currentSessionId: undefined,
-        hasAvailableTranscript: false,
-        isBatchTranscriptionPending: false,
-      }),
-    );
-    expect(screen.queryByTestId("chat-toolbar")).toBeNull();
-    expect(mocks.toolbarControls).not.toHaveBeenCalled();
-    expect(container.firstElementChild?.className).not.toContain("pb-3");
   });
 
   it("uses the sidebar card shell in the right panel layout", () => {

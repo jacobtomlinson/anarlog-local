@@ -49,8 +49,7 @@ export function ChatSessionHost({
   const { chat } = useShell();
   const { groupId, sessionId } = chat;
   const { currentSessionId } = useSessionTab();
-  const contextSessionId =
-    chat.scope === "automations" ? undefined : currentSessionId;
+  const contextSessionId = currentSessionId;
   const ownerUserId = useOwnerUserId();
   const hasAvailableTranscript = useSessionHasTranscript(
     contextSessionId ?? "",
@@ -118,7 +117,6 @@ export function ChatPanelFrame({
   );
 
   const { handleSendMessage } = useChatActions({
-    chatScope: chat.scope,
     groupId,
     onGroupCreated: handleGroupCreated,
     onGroupCreateFailed: handleGroupCreateFailed,
@@ -132,27 +130,24 @@ export function ChatPanelFrame({
         isFloating ? chatFloatingPanelClassNames() : panelClassName,
       ])}
     >
-      {chat.scope === "automations" ? null : (
-        <div
-          data-tauri-drag-region={!isFloating || undefined}
-          className={cn([
-            "flex shrink-0 pr-0 pl-0",
-            isFloating ? "h-11 items-center" : "h-9 items-start pt-[9px]",
-          ])}
-        >
-          <ChatToolbarControls
-            chatScope={chat.scope}
-            currentChatGroupId={groupId}
-            layout={layout}
-            onClose={() => chat.sendEvent({ type: "CLOSE" })}
-            onNewChat={chat.startNewChat}
-            onOpenFloating={onOpenFloating}
-            onOpenRightPanel={onOpenRightPanel}
-            onSelectChat={chat.selectChat}
-            surface={toolbarSurface}
-          />
-        </div>
-      )}
+      <div
+        data-tauri-drag-region={!isFloating || undefined}
+        className={cn([
+          "flex shrink-0 pr-0 pl-0",
+          isFloating ? "h-11 items-center" : "h-9 items-start pt-[9px]",
+        ])}
+      >
+        <ChatToolbarControls
+          currentChatGroupId={groupId}
+          layout={layout}
+          onClose={() => chat.sendEvent({ type: "CLOSE" })}
+          onNewChat={chat.startNewChat}
+          onOpenFloating={onOpenFloating}
+          onOpenRightPanel={onOpenRightPanel}
+          onSelectChat={chat.selectChat}
+          surface={toolbarSurface}
+        />
+      </div>
       {sessionProps && (
         <ChatContent
           {...sessionProps}

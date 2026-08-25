@@ -5,7 +5,6 @@ import {
   rowToPersistedChatMessage,
 } from "./persisted-messages";
 
-import type { ChatScope } from "~/chat/types";
 import { executeTransaction, liveQueryClient, useLiveQuery } from "~/db";
 import { enqueueDatabaseWrite } from "~/db/write-queue";
 
@@ -28,21 +27,11 @@ export type ChatGroupRecord = {
 const EMPTY_CHAT_GROUPS: ChatGroupRecord[] = [];
 const EMPTY_CHAT_MESSAGES: PersistedChatMessage[] = [];
 
-export function useRecentChatGroups(
-  chatScope: ChatScope,
-  limit = 5,
-): ChatGroupRecord[] {
-  return useChatGroupsQuery(chatScope, limit);
+export function useRecentChatGroups(limit = 5): ChatGroupRecord[] {
+  return useChatGroupsQuery(limit);
 }
 
-export function useChatGroups(chatScope: ChatScope): ChatGroupRecord[] {
-  return useChatGroupsQuery(chatScope);
-}
-
-function useChatGroupsQuery(
-  chatScope: ChatScope,
-  limit?: number,
-): ChatGroupRecord[] {
+function useChatGroupsQuery(limit?: number): ChatGroupRecord[] {
   const { data = EMPTY_CHAT_GROUPS } = useLiveQuery<
     ChatGroupSqlRow,
     ChatGroupRecord[]
@@ -51,7 +40,14 @@ function useChatGroupsQuery(
       SELECT g.id, g.owner_user_id, g.title, g.created_at, g.updated_at
       FROM chat_groups AS g
       WHERE g.deleted_at IS NULL
-        AND ${chatGroupScopePredicate(chatScope)}
+        AND NOT EXISTS (
+          SELECT 1
+          FROM chat_messages AS m
+          WHERE m.chat_group_id = g.id
+            AND m.deleted_at IS NULL
+            AND json_valid(m.metadata_json)
+            AND json_extract(m.metadata_json, '$.chatScope') = 'automations'
+        )
       ORDER BY g.created_at DESC, g.id DESC
       ${limit === undefined ? "" : "LIMIT ?"}
     `,
@@ -64,7 +60,6 @@ function useChatGroupsQuery(
 
 export function useChatGroup(
   chatGroupId: string | null | undefined,
-  chatScope: ChatScope,
 ): ChatGroupRecord | null {
   const { data = null } = useLiveQuery<ChatGroupSqlRow, ChatGroupRecord | null>(
     {
@@ -73,7 +68,14 @@ export function useChatGroup(
       FROM chat_groups AS g
       WHERE g.id = ?
         AND g.deleted_at IS NULL
-        AND ${chatGroupScopePredicate(chatScope)}
+        AND NOT EXISTS (
+          SELECT 1
+          FROM chat_messages AS m
+          WHERE m.chat_group_id = g.id
+            AND m.deleted_at IS NULL
+            AND json_valid(m.metadata_json)
+            AND json_extract(m.metadata_json, '$.chatScope') = 'automations'
+        )
       LIMIT 1
     `,
       params: [chatGroupId ?? ""],
@@ -299,26 +301,6 @@ function mapChatGroupRow(row: ChatGroupSqlRow): ChatGroupRecord {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
-}
-
-function chatGroupScopePredicate(chatScope: ChatScope) {
-  const automationsScopeExists = `
-    EXISTS (
-      SELECT 1
-      FROM chat_messages AS m
-      WHERE m.chat_group_id = g.id
-        AND m.deleted_at IS NULL
-        AND CASE
-          WHEN json_valid(m.metadata_json)
-            THEN json_extract(m.metadata_json, '$.chatScope')
-          ELSE NULL
-        END = 'automations'
-    )
-  `;
-
-  return chatScope === "automations"
-    ? automationsScopeExists
-    : `NOT ${automationsScopeExists}`;
 }
 
 function buildUpsertChatMessageStatement(

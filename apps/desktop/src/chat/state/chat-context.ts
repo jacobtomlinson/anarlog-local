@@ -1,6 +1,5 @@
 import { create } from "zustand";
 
-import type { ChatScope } from "~/chat/types";
 import { id } from "~/shared/utils";
 
 type ChatSelection = {
@@ -9,59 +8,36 @@ type ChatSelection = {
 };
 
 interface ChatContextState {
-  chatByScope: Record<ChatScope, ChatSelection>;
+  chat: ChatSelection;
 }
 
 interface ChatContextActions {
-  setGroupId: (scope: ChatScope, groupId: string | undefined) => void;
-  rollbackFailedGroup: (scope: ChatScope, failedGroupId: string) => void;
-  startNewChat: (scope: ChatScope) => void;
-  selectChat: (scope: ChatScope, groupId: string) => void;
+  setGroupId: (groupId: string | undefined) => void;
+  rollbackFailedGroup: (failedGroupId: string) => void;
+  startNewChat: () => void;
+  selectChat: (groupId: string) => void;
 }
 
 export const useChatContext = create<ChatContextState & ChatContextActions>(
   (set) => ({
-    chatByScope: {
-      general: createChatSelection(),
-      automations: createChatSelection(),
-    },
-    setGroupId: (scope, groupId) =>
-      set((state) => ({
-        chatByScope: {
-          ...state.chatByScope,
-          [scope]: { ...state.chatByScope[scope], groupId },
-        },
-      })),
+    chat: createChatSelection(),
+    setGroupId: (groupId) =>
+      set((state) => ({ chat: { ...state.chat, groupId } })),
     // Compares against the live groupId, not a value captured when the send
     // started — the failure lands after onGroupCreated already updated it.
-    rollbackFailedGroup: (scope, failedGroupId) =>
+    rollbackFailedGroup: (failedGroupId) =>
       set((state) => {
-        const selection = state.chatByScope[scope];
+        const selection = state.chat;
         if (selection.groupId !== failedGroupId) {
           return state;
         }
 
         return {
-          chatByScope: {
-            ...state.chatByScope,
-            [scope]: { ...selection, groupId: undefined },
-          },
+          chat: { ...selection, groupId: undefined },
         };
       }),
-    startNewChat: (scope) =>
-      set((state) => ({
-        chatByScope: {
-          ...state.chatByScope,
-          [scope]: createChatSelection(),
-        },
-      })),
-    selectChat: (scope, groupId) =>
-      set((state) => ({
-        chatByScope: {
-          ...state.chatByScope,
-          [scope]: { groupId, sessionId: groupId },
-        },
-      })),
+    startNewChat: () => set({ chat: createChatSelection() }),
+    selectChat: (groupId) => set({ chat: { groupId, sessionId: groupId } }),
   }),
 );
 

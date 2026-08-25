@@ -22,7 +22,6 @@ import { id } from "~/shared/utils";
 import { listenerStore } from "~/store/zustand/listener/instance";
 
 const RETURN_ORIGIN_TAB_TYPES: Tab["type"][] = [
-  "automations",
   "calendar",
   "contacts",
   "settings",

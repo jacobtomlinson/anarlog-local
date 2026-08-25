@@ -145,64 +145,6 @@ mod test {
     }
 
     #[tokio::test]
-    async fn note_enhanced_reexports_markdown_and_records_the_run() {
-        let pool = seeded_pool().await;
-        let directory = std::env::temp_dir().join(format!("anlg-md-auto-{}", uuid::Uuid::new_v4()));
-        for (id, value) in [
-            (
-                "automation_markdown_export_enabled",
-                serde_json::json!(true),
-            ),
-            (
-                "automation_markdown_export_directory",
-                serde_json::json!(directory.to_string_lossy()),
-            ),
-        ] {
-            sqlx::query("INSERT INTO app_settings (id, value_json) VALUES (?, ?)")
-                .bind(id)
-                .bind(value.to_string())
-                .execute(&pool)
-                .await
-                .unwrap();
-        }
-
-        commands::run_markdown_export_automation(&pool, "meeting-1").await;
-
-        let exported = directory.join("2026-07-13 Planning [meeting-].md");
-        assert!(exported.exists());
-        let last_run: String = sqlx::query_scalar(
-            "SELECT value_json FROM app_settings \
-             WHERE id = 'automation_markdown_export_last_run'",
-        )
-        .fetch_one(&pool)
-        .await
-        .unwrap();
-        // Stored the way the desktop settings layer writes string settings:
-        // a JSON-encoded string containing the record JSON.
-        let record: String = serde_json::from_str(&last_run).unwrap();
-        let record: serde_json::Value = serde_json::from_str(&record).unwrap();
-        assert_eq!(record["status"], "success");
-        assert_eq!(record["detail"], exported.to_string_lossy().into_owned());
-        assert!(record["at"].as_str().is_some_and(|at| at.ends_with('Z')));
-        std::fs::remove_dir_all(&directory).ok();
-    }
-
-    #[tokio::test]
-    async fn note_enhanced_export_skips_silently_without_configuration() {
-        let pool = seeded_pool().await;
-
-        commands::run_markdown_export_automation(&pool, "meeting-1").await;
-
-        let row: Option<String> = sqlx::query_scalar(
-            "SELECT value_json FROM app_settings \
-             WHERE id = 'automation_markdown_export_last_run'",
-        )
-        .fetch_optional(&pool)
-        .await
-        .unwrap();
-        assert!(row.is_none());
-    }
-
     #[tokio::test]
     async fn oversized_cloud_snapshot_keeps_text_and_drops_word_payloads() {
         let pool = seeded_pool().await;

@@ -149,7 +149,6 @@ describe("SettingsNav", () => {
       "Calendar",
       "Contacts",
       "Templates",
-      "Automations",
       "AI",
       "Transcription",
       "Intelligence",
@@ -170,7 +169,6 @@ describe("SettingsNav", () => {
     ["Calendar", { type: "calendar" }],
     ["Contacts", { type: "contacts" }],
     ["Templates", { type: "templates" }],
-    ["Automations", { type: "automations" }],
   ] as const)("opens the %s workspace", (label, destination) => {
     render(<SettingsNav />);
 
@@ -289,7 +287,7 @@ describe("SettingsNav", () => {
     expect(mocks.updateSettingsTabState).not.toHaveBeenCalled();
   });
 
-  it.each(["Team", "Automations", "Dictionary", "Sync"])(
+  it.each(["Team", "Dictionary", "Sync"])(
     "does not open locked %s navigation",
     (label) => {
       mocks.isPro = false;
@@ -379,11 +377,9 @@ describe("SettingsNav", () => {
       target: { value: "workspace" },
     });
 
-    ["Meetings", "Calendar", "Contacts", "Templates", "Automations"].forEach(
-      (label) => {
-        expect(screen.getByText(label)).toBeTruthy();
-      },
-    );
+    ["Meetings", "Calendar", "Contacts", "Templates"].forEach((label) => {
+      expect(screen.getByText(label)).toBeTruthy();
+    });
     expect(screen.queryByText("Appearance")).toBeNull();
   });
 

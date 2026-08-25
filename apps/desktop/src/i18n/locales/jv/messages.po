@@ -107,20 +107,8 @@ msgstr ""
 msgid "3 days"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "A dated Notion update with the meeting summary."
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "A Markdown file with the note, summary, and transcript."
-msgstr ""
-
 #: src/sidebar/timeline/utils/index.ts
 msgid "a month ago"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "A Slack message with the meeting title and recap."
 msgstr ""
 
 #: src/templates/template-sidebar.tsx
@@ -164,11 +152,6 @@ msgstr ""
 msgid "Acme"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-#: src/settings/automations/workflow-builder.tsx
-msgid "Action"
-msgstr ""
-
 #: src/templates/template-icon-picker.tsx
 msgid "Activity"
 msgstr ""
@@ -195,28 +178,8 @@ msgstr ""
 msgid "Add {0} in System Settings > General > Language & Region to transcribe with {model}, or choose another model."
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Add a dated update to the selected Notion page."
-msgstr ""
-
 #: src/billing/trial-payment-reminder-dialog.tsx
 msgid "Add a payment method before it ends to keep using Pro without an interruption."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Add a trigger and actions. Chat on the right can help you refine the workflow."
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Add a trigger, then stack actions like Zapier."
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Add an action"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Add and configure at least one action first."
 msgstr ""
 
 #: src/onboarding/calendar.tsx
@@ -229,10 +192,6 @@ msgstr ""
 
 #: src/session/components/note-input/enhanced/config-error.tsx
 msgid "Add API key"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Add at least one configured action before enabling."
 msgstr ""
 
 #: src/templates/auto-format-examples-dialog.tsx
@@ -250,10 +209,6 @@ msgstr ""
 #: src/settings/general/spoken-languages.tsx
 msgid "Add language"
 msgstr "Tambah basa"
-
-#: src/automations/starters.tsx
-msgid "Add meeting decisions and follow-ups to a Notion project."
-msgstr ""
 
 #: src/settings/dictionary/index.tsx
 msgid "Add names, jargon, or product terms to prefer"
@@ -288,10 +243,6 @@ msgstr ""
 msgid "Add spoken language"
 msgstr "Tambahake basa lisan"
 
-#: src/settings/automations/workflow-builder.tsx
-msgid "Add step"
-msgstr ""
-
 #: src/settings/developers/webhooks.tsx
 msgid "Add webhook"
 msgstr ""
@@ -313,20 +264,8 @@ msgstr ""
 msgid "After recording"
 msgstr ""
 
-#: src/settings/automations/workflow-builder.tsx
-msgid "After the meeting ends"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "After the meeting summary is ready"
-msgstr ""
-
 #: src/settings/developers/skills.tsx
 msgid "Agent skills"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "AI step"
 msgstr ""
 
 #: src/contacts/details.tsx
@@ -505,14 +444,6 @@ msgstr ""
 msgid "Appearance"
 msgstr ""
 
-#: src/settings/automations/workflow-builder.tsx
-msgid "Append an update to Notion"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Append the meeting update"
-msgstr ""
-
 #: src/calendar/components/apple/permission.tsx
 msgid "Apple Calendar access is off"
 msgstr ""
@@ -604,41 +535,8 @@ msgstr ""
 msgid "Auto summary format"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "Automate what happens before, during, or after meetings based on the conditions you choose."
-msgstr ""
-
 #: src/settings/general/app-settings.tsx
 msgid "Automatically install updates"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Automation actions"
-msgstr ""
-
-#: src/automations/actions.ts
-msgid "Automation deleted"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Automation disabled"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Automation draft saved"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Automation enabled"
-msgstr ""
-
-#: src/automations/actions.ts
-msgid "Automation removed"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-#: src/sidebar/settings.tsx
-msgid "Automations"
 msgstr ""
 
 #: src/calendar/components/apple/permission.tsx
@@ -712,10 +610,6 @@ msgstr ""
 msgid "Calendar connected"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Calendar-scheduled capture jobs. Canceling stops the bot from joining."
-msgstr ""
-
 #: src/session-sharing/access-management.tsx
 msgid "Can comment"
 msgstr ""
@@ -742,10 +636,6 @@ msgstr ""
 #: src/shared/ui/destructive-confirmation-dialog.tsx
 #: src/templates/auto-format-examples-dialog.tsx
 msgid "Cancel"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "Cancel bot"
 msgstr ""
 
 #: src/session/components/outer-header/metadata/date.tsx
@@ -793,10 +683,6 @@ msgstr ""
 msgid "Checking connection"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "Checking connection…"
-msgstr ""
-
 #: src/settings/sync/index.tsx
 msgid "Checking for changes"
 msgstr ""
@@ -823,7 +709,6 @@ msgid "Choose {0} export files"
 msgstr ""
 
 #: src/session-sharing/delivery-panel.tsx
-#: src/settings/automations/starter-config.tsx
 msgid "Choose a channel"
 msgstr ""
 
@@ -839,26 +724,6 @@ msgstr ""
 msgid "Choose a language model for summaries and chat."
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "Choose a Linear team first."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Choose a Notion page first."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Choose a Slack channel first."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Choose a starter from the sidebar, or create a workflow and add steps like Zapier."
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Choose a team"
-msgstr ""
-
 #: src/settings/ai/stt/select.tsx
 msgid "Choose a transcription model to start listening."
 msgstr ""
@@ -867,15 +732,11 @@ msgstr ""
 msgid "Choose an AI model before generating a format."
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "Choose an export folder first."
-msgstr ""
-
 #: src/templates/template-icon-picker.tsx
 msgid "Choose custom color"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
+#: src/settings/general/markdown-export.tsx
 msgid "Choose export folder"
 msgstr ""
 
@@ -887,7 +748,7 @@ msgstr ""
 msgid "Choose files exported from this app."
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
+#: src/settings/general/markdown-export.tsx
 msgid "Choose folder"
 msgstr ""
 
@@ -923,6 +784,10 @@ msgstr ""
 msgid "Choose the microphone that captures your voice."
 msgstr ""
 
+#: src/settings/general/markdown-export.tsx
+msgid "Choose where completed meetings are saved."
+msgstr ""
+
 #: src/settings/general/week-start.tsx
 msgid "Choose which day begins your calendar week."
 msgstr ""
@@ -946,7 +811,6 @@ msgstr ""
 #: src/contacts/related-notes.tsx
 #: src/contacts/shared.tsx
 #: src/settings/ai/shared/provider-search.tsx
-#: src/sidebar/automations.tsx
 #: src/sidebar/settings.tsx
 #: src/templates/template-icon-picker.tsx
 #: src/templates/template-sidebar.tsx
@@ -1082,16 +946,8 @@ msgstr ""
 msgid "Collaborator"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Collect action items"
-msgstr ""
-
 #: src/settings/appearance/theme.tsx
 msgid "Color theme"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Combine metadata, summary, notes, and transcript."
 msgstr ""
 
 #: src/task/resource-view.tsx
@@ -1201,14 +1057,6 @@ msgstr ""
 msgid "Connect Google Calendar"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "Connect Linear"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Connect Notion"
-msgstr ""
-
 #. placeholder {0}: provider.name
 #: src/imports/screen.tsx
 msgid "Connect once to bring over your {0} history and keep new meetings coming in while you switch."
@@ -1219,7 +1067,6 @@ msgid "Connect Outlook"
 msgstr ""
 
 #: src/session-sharing/delivery-panel.tsx
-#: src/settings/automations/starter-config.tsx
 msgid "Connect Slack"
 msgstr ""
 
@@ -1340,10 +1187,6 @@ msgstr ""
 msgid "Could not create this invitation."
 msgstr ""
 
-#: src/automations/actions.ts
-msgid "Could not delete the automation"
-msgstr ""
-
 #: src/session/hooks/useDeleteSession.ts
 msgid "Could not delete this note. Please try again."
 msgstr ""
@@ -1380,20 +1223,8 @@ msgstr ""
 msgid "Could not publish the desktop edits. Check the latest web copy and try again."
 msgstr ""
 
-#: src/automations/actions.ts
-msgid "Could not remove the automation"
-msgstr ""
-
 #: src/sidebar/toast/undo-delete-toast.tsx
 msgid "Could not restore deleted note"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Could not save the automation draft"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Could not save the automation setting"
 msgstr ""
 
 #: src/session-sharing/delivery-management.ts
@@ -1428,12 +1259,11 @@ msgstr ""
 msgid "Could not update general access."
 msgstr ""
 
-#: src/settings/automations/index.tsx
-#: src/settings/automations/workflow-builder.tsx
-msgid "Could not update the automation"
+#: src/settings/general/markdown-export.tsx
+msgid "Could not update Markdown export"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
+#: src/settings/general/markdown-export.tsx
 msgid "Could not update the export folder"
 msgstr ""
 
@@ -1473,14 +1303,6 @@ msgstr ""
 msgid "Create key"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Create Linear issues"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Create Linear issues from action items"
-msgstr ""
-
 #: src/session/components/note-input/transcript/renderer/speaker-assign.tsx
 msgid "Create new speaker"
 msgstr ""
@@ -1500,10 +1322,6 @@ msgstr ""
 #. placeholder {0}: apiKey.created_at.slice(0, 10)
 #: src/settings/developers/api-key-row.tsx
 msgid "Created {0}"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Created {createdAt}"
 msgstr ""
 
 #: src/session/components/note-input/raw.tsx
@@ -1545,7 +1363,6 @@ msgstr ""
 
 #: src/contacts/contact-page-header.tsx
 #: src/session/components/outer-header/overflow/delete.tsx
-#: src/sidebar/automations.tsx
 #: src/sidebar/timeline/index.tsx
 #: src/templates/sections-editor.tsx
 #: src/templates/template-form.tsx
@@ -1566,10 +1383,6 @@ msgstr ""
 
 #: src/sidebar/timeline/item.tsx
 msgid "Delete All Recurring Events"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Delete automation"
 msgstr ""
 
 #: src/session-sharing/comments.tsx
@@ -1672,10 +1485,6 @@ msgstr ""
 msgid "Direct connection is not available yet. You can still bring your history over with files."
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "Disable"
-msgstr ""
-
 #: src/calendar/components/oauth/provider-content.tsx
 #: src/calendar/components/sidebar.tsx
 #: src/imports/screen.tsx
@@ -1729,12 +1538,6 @@ msgstr ""
 msgid "Downloading model"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-#: src/settings/automations/workflow-builder.tsx
-#: src/sidebar/automations.tsx
-msgid "Draft"
-msgstr ""
-
 #: src/chat/components/body/empty.tsx
 msgid "Draft a follow-up email to the participants"
 msgstr ""
@@ -1758,7 +1561,6 @@ msgstr ""
 
 #: src/main/windows-title-bar.tsx
 #: src/session/components/note-input/transcript/index.tsx
-#: src/sidebar/automations.tsx
 msgid "Edit"
 msgstr ""
 
@@ -1803,12 +1605,6 @@ msgstr ""
 
 #: src/settings/developers/cloud-api.tsx
 msgid "Enable Cloud API & Connectors"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-#: src/settings/automations/workflow-builder.tsx
-#: src/sidebar/automations.tsx
-msgid "Enabled"
 msgstr ""
 
 #: src/settings/sync/index.tsx
@@ -1884,25 +1680,17 @@ msgstr ""
 msgid "Exclude apps from detection"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "Expected output"
-msgstr ""
-
 #: src/session/components/outer-header/overflow/export-modal.tsx
 #: src/session/components/outer-header/overflow/index.tsx
 msgid "Export"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Export every meeting as Markdown"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
+#: src/settings/general/markdown-export.tsx
 msgid "Export folder"
 msgstr ""
 
-#: src/settings/automations/workflow-builder.tsx
-msgid "Export the meeting as Markdown"
+#: src/settings/general/markdown-export.tsx
+msgid "Export meetings automatically"
 msgstr ""
 
 #: src/session/components/outer-header/overflow/export-modal.tsx
@@ -1940,10 +1728,6 @@ msgstr ""
 
 #: src/main/windows-title-bar.tsx
 msgid "File"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "File each action item as an issue in the selected team."
 msgstr ""
 
 #: src/session/components/outer-header/overflow/export-modal.tsx
@@ -2049,7 +1833,6 @@ msgstr ""
 
 #: src/onboarding/account/before-login.tsx
 #: src/settings/general/account.tsx
-#: src/sidebar/automations.tsx
 msgid "Get started"
 msgstr ""
 
@@ -2132,10 +1915,6 @@ msgstr ""
 
 #: src/sidebar/timeline/index.tsx
 msgid "Hide Deleted Events"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Hide preview"
 msgstr ""
 
 #: src/main/windows-title-bar.tsx
@@ -2357,20 +2136,22 @@ msgstr ""
 msgid "Last delivery {0}"
 msgstr ""
 
+#. placeholder {0}: formatDistanceToNow(new Date(lastRun.at), { addSuffix: true })
+#. placeholder {1}: lastRun.detail
+#: src/settings/general/markdown-export.tsx
+msgid "Last export failed {0}: {1}"
+msgstr ""
+
+#. placeholder {0}: formatDistanceToNow(new Date(lastRun.at), { addSuffix: true })
+#. placeholder {1}: lastRun.detail
+#: src/settings/general/markdown-export.tsx
+msgid "Last exported {0}: {1}"
+msgstr ""
+
 #. placeholder {0}: lastRun.imported
 #. placeholder {1}: lastRun.matched
 #: src/imports/screen.tsx
 msgid "Last import: {0} added, {1} unchanged"
-msgstr ""
-
-#. placeholder {0}: lastRun.detail
-#: src/settings/automations/starter-config.tsx
-msgid "Last run {relative}: {0}"
-msgstr ""
-
-#. placeholder {0}: lastRun.detail
-#: src/settings/automations/starter-config.tsx
-msgid "Last run failed {relative}: {0}"
 msgstr ""
 
 #. placeholder {0}: formatDistanceToNow(new Date(device.lastSeenAt))
@@ -2417,18 +2198,6 @@ msgstr ""
 msgid "Light"
 msgstr ""
 
-#: src/settings/automations/workflow-builder.tsx
-msgid "Linear issues"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Linear issues created from meeting follow-ups."
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Linear team"
-msgstr ""
-
 #: src/contacts/details.tsx
 msgid "LinkedIn"
 msgstr ""
@@ -2450,7 +2219,6 @@ msgid "Loading calendars..."
 msgstr ""
 
 #: src/session-sharing/delivery-panel.tsx
-#: src/settings/automations/starter-config.tsx
 msgid "Loading channels…"
 msgstr ""
 
@@ -2466,10 +2234,6 @@ msgstr ""
 msgid "Loading models..."
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Loading scheduled captures…"
-msgstr ""
-
 #: src/settings/general/index.tsx
 #: src/settings/hydration-boundary.tsx
 msgid "Loading settings"
@@ -2477,10 +2241,6 @@ msgstr ""
 
 #: src/settings/sync/index.tsx
 msgid "Loading sync settings"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Loading teams…"
 msgstr ""
 
 #: src/changelog/index.tsx
@@ -2536,7 +2296,7 @@ msgstr ""
 msgid "Manual sync"
 msgstr ""
 
-#: src/settings/automations/workflow-builder.tsx
+#: src/settings/general/markdown-export.tsx
 msgid "Markdown export"
 msgstr ""
 
@@ -2578,10 +2338,6 @@ msgstr ""
 
 #: src/onboarding/permissions.tsx
 msgid "Meeting details access turned on"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Meeting ends"
 msgstr ""
 
 #: src/imports/screen.tsx
@@ -2714,10 +2470,6 @@ msgstr ""
 msgid "Move up"
 msgstr ""
 
-#: src/sidebar/automations.tsx
-msgid "My automations"
-msgstr ""
-
 #: src/sidebar/note-filter-menu.tsx
 msgid "My notes"
 msgstr ""
@@ -2725,14 +2477,6 @@ msgstr ""
 #: src/contacts/details.tsx
 #: src/contacts/organization-details.tsx
 msgid "Name"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Needs setup"
-msgstr ""
-
-#: src/sidebar/automations.tsx
-msgid "New automation"
 msgstr ""
 
 #: src/chat/components/toolbar-controls.tsx
@@ -2770,18 +2514,6 @@ msgstr ""
 msgid "No apps found."
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "No automation draft yet"
-msgstr ""
-
-#: src/sidebar/automations.tsx
-msgid "No automations found"
-msgstr ""
-
-#: src/sidebar/automations.tsx
-msgid "No automations yet"
-msgstr ""
-
 #: src/calendar/components/calendar-selection.tsx
 msgid "No calendars found"
 msgstr ""
@@ -2792,10 +2524,6 @@ msgstr ""
 
 #: src/settings/sync/index.tsx
 msgid "No changes to sync"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "No channel selected yet."
 msgstr ""
 
 #: src/templates/details.tsx
@@ -2820,10 +2548,6 @@ msgstr ""
 
 #: src/session/components/folder-picker.tsx
 msgid "No folder"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "No folder selected yet."
 msgstr ""
 
 #: src/session/components/folder-picker.tsx
@@ -2867,14 +2591,6 @@ msgstr ""
 msgid "No notes found."
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "No page selected yet."
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "No pages found. Share the page with the Anarlog integration in Notion first."
-msgstr ""
-
 #: src/session/components/note-input/transcript/renderer/speaker-assign.tsx
 msgid "No people"
 msgstr ""
@@ -2915,20 +2631,12 @@ msgstr ""
 msgid "No sync activity yet."
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "No team selected yet."
-msgstr ""
-
 #: src/templates/details.tsx
 msgid "No templates yet"
 msgstr ""
 
 #: src/session/components/note-input/transcript/screens/empty.tsx
 msgid "No transcript available"
-msgstr ""
-
-#: src/settings/team/index.tsx
-msgid "No upcoming bots."
 msgstr ""
 
 #: src/settings/developers/cli.tsx
@@ -2977,14 +2685,6 @@ msgstr ""
 #: src/sidebar/settings.tsx
 msgid "Notifications"
 msgstr "Kabar"
-
-#: src/settings/automations/starter-config.tsx
-msgid "Notion page"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Notion update"
-msgstr ""
 
 #: src/sidebar/timeline/index.tsx
 #: src/sidebar/timeline/upcoming-meeting.ts
@@ -3244,24 +2944,12 @@ msgstr ""
 msgid "Policies"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Post a meeting recap to a Slack channel."
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Post a recap to Slack"
-msgstr ""
-
 #: src/settings/general/meeting-settings.tsx
 msgid "Post recording disclosure in meeting chat"
 msgstr ""
 
 #: src/session-sharing/delivery-panel.tsx
 msgid "Post the meeting summary to a channel you can access."
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Post to a channel"
 msgstr ""
 
 #: src/settings/general/notification.tsx
@@ -3274,10 +2962,6 @@ msgstr ""
 
 #: src/settings/general/notification.tsx
 msgid "Prevent selected apps from triggering meeting detection."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Preview"
 msgstr ""
 
 #: src/settings/developers/devtools.tsx
@@ -3374,14 +3058,6 @@ msgstr ""
 msgid "Reconnect"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "Reconnect Linear"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Reconnect Notion"
-msgstr ""
-
 #: src/calendar/components/oauth/status.tsx
 #: src/settings/todo/provider-content.tsx
 msgid "Reconnect required"
@@ -3393,7 +3069,6 @@ msgid "Reconnect required for {0} Calendar"
 msgstr ""
 
 #: src/session-sharing/delivery-panel.tsx
-#: src/settings/automations/starter-config.tsx
 msgid "Reconnect Slack"
 msgstr ""
 
@@ -3458,16 +3133,11 @@ msgid "Remote MCP URL copied"
 msgstr ""
 
 #: src/session-sharing/access-management.tsx
-#: src/sidebar/automations.tsx
 msgid "Remove"
 msgstr ""
 
 #: src/settings/dictionary/index.tsx
 msgid "Remove {term}"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Remove automation"
 msgstr ""
 
 #. placeholder {0}: index + 1
@@ -3485,10 +3155,6 @@ msgstr ""
 
 #: src/settings/team/index.tsx
 msgid "Rename workspace"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Render canonical Markdown"
 msgstr ""
 
 #: src/instruction/index.tsx
@@ -3642,28 +3308,16 @@ msgstr ""
 msgid "Runs after the recording finishes, not during the meeting."
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Runs once the AI summary for the meeting is ready."
-msgstr ""
-
 #: src/templates/auto-form.tsx
 msgid "Save"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Save & enable"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Save completed meetings as local Markdown files."
 msgstr ""
 
 #: src/session/components/outer-header/metadata/date.tsx
 msgid "Save date"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-msgid "Save draft"
+#: src/settings/general/markdown-export.tsx
+msgid "Save each completed meeting as a local Markdown file."
 msgstr ""
 
 #: src/settings/team/index.tsx
@@ -3703,14 +3357,6 @@ msgstr ""
 msgid "Scroll to top"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "Search"
-msgstr ""
-
-#: src/sidebar/automations.tsx
-msgid "Search automations..."
-msgstr ""
-
 #: src/contacts/shared.tsx
 msgid "Search contacts..."
 msgstr ""
@@ -3745,10 +3391,6 @@ msgstr ""
 
 #: src/settings/todo/github.tsx
 msgid "Search or type owner/repo"
-msgstr ""
-
-#: src/settings/automations/starter-config.tsx
-msgid "Search pages shared with Anarlog…"
 msgstr ""
 
 #: src/settings/ai/shared/provider-search.tsx
@@ -3860,10 +3502,6 @@ msgstr ""
 msgid "Send sanitized crash and error reports to help improve Anarlog."
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Send the recap to the selected Slack channel."
-msgstr ""
-
 #: src/session-sharing/delivery-panel.tsx
 msgid "Send the summary in the email. Replies go directly to you."
 msgstr ""
@@ -3935,10 +3573,6 @@ msgstr ""
 #: src/session-sharing/draft-panel.tsx
 #: src/session-sharing/management-panel.tsx
 msgid "Share"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Share a meeting recap in Slack"
 msgstr ""
 
 #: src/session-sharing/attachment-controls.tsx
@@ -4215,14 +3849,6 @@ msgstr ""
 msgid "Slack"
 msgstr ""
 
-#: src/settings/automations/starter-config.tsx
-msgid "Slack channel"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Slack recap"
-msgstr ""
-
 #: src/templates/template-icon-picker.tsx
 msgid "Smileys & People"
 msgstr ""
@@ -4246,10 +3872,6 @@ msgstr ""
 
 #: src/settings/general/storage/legacy-cleanup.tsx
 msgid "SQLite migration verification is incomplete"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Stack another destination. Steps run top to bottom."
 msgstr ""
 
 #: src/session/components/note-input/enhanced/config-error.tsx
@@ -4318,10 +3940,6 @@ msgstr ""
 
 #: src/settings/general/app-settings.tsx
 msgid "Stay current with updates installed the next time Anarlog opens."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Steps run from top to bottom."
 msgstr ""
 
 #: src/settings/appearance/app-icon.tsx
@@ -4495,14 +4113,6 @@ msgstr ""
 msgid "System audio enabled"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Take the enhanced note with decisions and action items."
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Take the enhanced note with decisions and follow-ups."
-msgstr ""
-
 #: src/settings/developers/skills.tsx
 msgid "Teach coding agents when and how to use the Anarlog CLI and MCP"
 msgstr ""
@@ -4534,7 +4144,6 @@ msgstr ""
 msgid "Templates"
 msgstr ""
 
-#: src/settings/automations/index.tsx
 #: src/settings/developers/webhooks.tsx
 msgid "Test"
 msgstr ""
@@ -4547,10 +4156,6 @@ msgstr ""
 #. placeholder {0}: delivery.status
 #: src/settings/developers/webhooks.tsx
 msgid "Test failed ({0})"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Test runs are not available yet."
 msgstr ""
 
 #: src/onboarding/folder-location.tsx
@@ -4579,10 +4184,6 @@ msgstr ""
 
 #: src/settings/appearance/theme.tsx
 msgid "Theme"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Then"
 msgstr ""
 
 #: src/settings/team/index.tsx
@@ -4701,11 +4302,6 @@ msgstr ""
 msgid "Trial activated - {trialDays} days of Pro"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-#: src/settings/automations/workflow-builder.tsx
-msgid "Trigger"
-msgstr ""
-
 #: src/contacts/details.tsx
 #: src/onboarding/permissions.tsx
 #: src/session-sharing/management-panel.tsx
@@ -4719,14 +4315,6 @@ msgstr ""
 
 #: src/session/components/outer-header/index.tsx
 msgid "Try the demo"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Turn action items into Linear issues"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Turn assigned follow-ups into Linear issue drafts."
 msgstr ""
 
 #: src/calendar/components/apple/permission.tsx
@@ -4802,25 +4390,12 @@ msgstr ""
 msgid "Untitled"
 msgstr ""
 
-#: src/settings/automations/index.tsx
-#: src/sidebar/automations.tsx
-msgid "Untitled automation"
-msgstr ""
-
 #: src/contacts/related-notes.tsx
 msgid "Untitled Note"
 msgstr ""
 
-#: src/settings/team/index.tsx
-msgid "Upcoming bot attendance"
-msgstr ""
-
 #: src/services/event-notification/index.ts
 msgid "Upcoming Event"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Update project notes in Notion"
 msgstr ""
 
 #: src/session-sharing/access-management.tsx
@@ -4846,10 +4421,6 @@ msgstr ""
 
 #: src/templates/auto-form.tsx
 msgid "Upgrade to customize"
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Upgrade to enable"
 msgstr ""
 
 #: src/billing/trial-ended-dialog.tsx
@@ -4880,10 +4451,6 @@ msgstr ""
 #: src/settings/ai/llm/select.tsx
 #: src/settings/ai/stt/select.tsx
 msgid "Upgrade to Pro to use this provider."
-msgstr ""
-
-#: src/settings/automations/index.tsx
-msgid "Upgrade to save"
 msgstr ""
 
 #: src/settings/ai/stt/select.tsx
@@ -4922,10 +4489,6 @@ msgstr ""
 msgid "Usage"
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Use a stable filename in the configured export directory."
-msgstr ""
-
 #: src/settings/general/e2ee-setup.tsx
 msgid "Use an existing key"
 msgstr ""
@@ -4940,14 +4503,6 @@ msgstr ""
 
 #: src/onboarding/permissions.tsx
 msgid "Use system audio to capture other speakers"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Use the AI meeting summary"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Use the meeting's action items and summary tasks."
 msgstr ""
 
 #: src/settings/team/index.tsx
@@ -5010,10 +4565,6 @@ msgstr ""
 msgid "Wait before treating microphone activity as a meeting."
 msgstr ""
 
-#: src/automations/starters.tsx
-msgid "Wait until the transcript and note are complete."
-msgstr ""
-
 #: src/settings/sync/index.tsx
 msgid "Waiting for approval"
 msgstr ""
@@ -5055,20 +4606,12 @@ msgstr ""
 msgid "What's new in {version}?"
 msgstr ""
 
-#: src/settings/automations/workflow-builder.tsx
-msgid "When this happens"
-msgstr ""
-
 #: src/onboarding/index.tsx
 msgid "Where your notes and recordings are stored"
 msgstr ""
 
 #: src/task/tab-content.tsx
 msgid "Work on this task"
-msgstr ""
-
-#: src/settings/automations/workflow-builder.tsx
-msgid "Workflow"
 msgstr ""
 
 #: src/sidebar/settings.tsx
@@ -5085,10 +4628,6 @@ msgstr ""
 
 #: src/settings/team/index.tsx
 msgid "Workspace subdomain"
-msgstr ""
-
-#: src/automations/starters.tsx
-msgid "Write to a folder"
 msgstr ""
 
 #: src/sidebar/timeline/utils/index.ts
